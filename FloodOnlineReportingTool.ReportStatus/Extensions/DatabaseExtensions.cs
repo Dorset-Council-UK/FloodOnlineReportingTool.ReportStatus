@@ -24,6 +24,10 @@ internal static class DatabaseExtensions
         {
             throw new ConfigurationMissingException("Missing configuration setting: The connection string for the database needs a schema set in the Search Path parameter.");
         }
+        if (!builder.SearchPath.Equals(SchemaNames.ReportStatus))
+        {
+            throw new ConfigurationMissingException($"Invalid configuration setting: The connection string for the database has an invalid schema set in the Search Path parameter. Expected '{SchemaNames.ReportStatus}', but found '{builder.SearchPath}'.");
+        }
 
         // Add the database context
         services.AddDbContextPool<ApplicationDbContext>(
