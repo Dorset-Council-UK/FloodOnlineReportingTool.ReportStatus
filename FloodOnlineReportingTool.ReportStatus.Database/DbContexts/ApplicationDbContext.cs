@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
@@ -6,12 +7,13 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Report> Reports { get; set; }
+    public DbSet<ReportDuplicate> ReportDuplicatess { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.HasDefaultSchema("fortreportstatus");
+        modelBuilder.HasDefaultSchema(SchemaNames.ReportStatus);
 
         // Add the inbox and outbox pattern messaging tables
         modelBuilder.AddInboxStateEntity();

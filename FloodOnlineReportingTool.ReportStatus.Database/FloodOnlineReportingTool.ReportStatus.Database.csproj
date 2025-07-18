@@ -8,14 +8,13 @@
 
   <ItemGroup>
     <Folder Include="EntitiesConfiguration\" />
-    <Folder Include="Extensions\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.AzureServiceBus" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.5.1" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.5.1" />
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.205">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -1,10 +1,10 @@
 ﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
-internal record Report
+public record Report
 {
-    public Guid Id { get; init; } = Guid.CreateVersion7();
+    public required Guid Id { get; init; }
     public required Guid EligibilityCheckId { get; init; }
-    public DateTimeOffset CreatedUtc { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset CreatedUtc { get; init; }
     public DateTimeOffset? UpdatedUtc { get; init; }
     public required long Uprn { get; init; }
     public required double Easting { get; init; }
