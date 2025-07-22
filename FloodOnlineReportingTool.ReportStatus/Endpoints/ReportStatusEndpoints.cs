@@ -53,6 +53,12 @@ internal static class ReportStatusEndpoints
         return TypedResults.Ok(duplicates);
     }
 
+    internal static async Task<Results<Ok<IReadOnlyList<ReportDuplicate>>, BadRequest>> GetReportDuplicates(IReportDuplicateService reportDuplicateService, Guid reportId, CancellationToken ct)
+    {
+        var duplicates = await reportDuplicateService.GetReportDuplicates(reportId, ct).ConfigureAwait(false);
+        return TypedResults.Ok(duplicates);
+    }
+
     internal static async Task<Results<Ok<ReportDuplicate>, NotFound>> GetDuplicateReportById(IReportDuplicateService reportDuplicateService, Guid id, CancellationToken ct)
     {
         var duplicate = await reportDuplicateService.GetDuplicateReportById(id, ct).ConfigureAwait(false);
@@ -62,7 +68,7 @@ internal static class ReportStatusEndpoints
     internal static async Task<Results<Created<ReportDuplicate>, BadRequest>> CreateDuplicateReport(IReportDuplicateService reportDuplicateService, ReportDuplicateDto dto, CancellationToken ct)
     {
         var duplicate = await reportDuplicateService.CreateDuplicateReport(dto, ct).ConfigureAwait(false);
-        return TypedResults.Created($"/api/reports/duplicate/{duplicate.Id}", duplicate);
+        return TypedResults.Created($"/api/reports/duplicates/{duplicate.Id}", duplicate);
     }
 
     internal static async Task<Results<Ok<ReportDuplicate>, NotFound, BadRequest>> UpdateDuplicateReport(IReportDuplicateService reportDuplicateService, Guid id, ReportDuplicateDto dto, CancellationToken ct)

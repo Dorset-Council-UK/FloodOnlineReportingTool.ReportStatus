@@ -8,43 +8,44 @@ internal static class EndpointExtensions
 {
     internal static WebApplication MapReportStatusEndpoints(this WebApplication app)
     {
-        MapReportEndpoints(app);
-        MapDuplicateEndpoints(app);
-
-        return app;
-    }
-
-    private static void MapReportEndpoints(WebApplication app)
-    {
         var group = app
             .NewVersionedApi()
             .MapGroup("/api/reports")
             .RequireAuthorization(PolicyNames.Admin)
+            //.AllowAnonymous()
             .HasApiVersion(Versions.V1.Version);
 
+        MapReportEndpoints(group);
+        MapDuplicateEndpoints(group);
+
+        return app;
+    }
+
+    private static void MapReportEndpoints(RouteGroupBuilder group)
+    {
         group
             .MapGet(pattern: "/", ReportStatusEndpoints.GetReports)
-            .WithSummary("Get all reports")
+            .WithSummary("Reports - All")
             .WithDescription("Gets all reports from the database");
 
         group
             .MapGet(pattern: "/{id}", ReportStatusEndpoints.GetReportById)
-            .WithSummary("Get report")
+            .WithSummary("Reports - Get")
             .WithDescription("Gets a report by id from the database");
 
         group
             .MapPost(pattern: "/", ReportStatusEndpoints.CreateReport)
-            .WithSummary("Create report")
+            .WithSummary("Reports - Create")
             .WithDescription("Creates a new report in the database");
 
         group
             .MapPut(pattern: "/{id}", ReportStatusEndpoints.UpdateReport)
-            .WithSummary("Update report")
+            .WithSummary("Reports - Update")
             .WithDescription("Updates a report by id in the database");
 
         group
             .MapDelete(pattern: "/{id}", ReportStatusEndpoints.DeleteReport)
-            .WithSummary("Delete report")
+            .WithSummary("Reports - Delete")
             .WithDescription("Deletes a report by id from the database");
 
         group
@@ -53,37 +54,36 @@ internal static class EndpointExtensions
             .AllowAnonymous();
     }
 
-    private static void MapDuplicateEndpoints(WebApplication app)
+    private static void MapDuplicateEndpoints(RouteGroupBuilder group)
     {
-        var group = app
-            .NewVersionedApi()
-            .MapGroup("/api/reports/duplicates")
-            .RequireAuthorization(PolicyNames.Admin)
-            .HasApiVersion(Versions.V1.Version);
-
         group
-            .MapGet(pattern: "/", ReportStatusEndpoints.GetDuplicateReports)
-            .WithSummary("Get all duplicate reports")
+            .MapGet(pattern: "/duplicates", ReportStatusEndpoints.GetDuplicateReports)
+            .WithSummary("Duplicates - All")
             .WithDescription("Gets all duplicate reports from the database");
 
         group
-            .MapGet(pattern: "/{id}", ReportStatusEndpoints.GetDuplicateReportById)
-            .WithSummary("Get duplicate report")
+            .MapGet(pattern: "/duplicates/{id}", ReportStatusEndpoints.GetDuplicateReportById)
+            .WithSummary("Duplicates - Get")
             .WithDescription("Gets a duplicate report by id from the database");
 
         group
-            .MapPost(pattern: "/", ReportStatusEndpoints.CreateDuplicateReport)
-            .WithSummary("Create duplicate report")
+            .MapGet(pattern: "/{reportId}/duplicates", ReportStatusEndpoints.GetReportDuplicates)
+            .WithSummary("Reports - Duplicates")
+            .WithDescription("Gets all duplicates for a report from the database");
+
+        group
+            .MapPost(pattern: "/duplicates", ReportStatusEndpoints.CreateDuplicateReport)
+            .WithSummary("Duplicates - Create")
             .WithDescription("Creates a new duplicate report in the database");
 
         group
-            .MapPut(pattern: "/{id}", ReportStatusEndpoints.UpdateDuplicateReport)
-            .WithSummary("Update duplicate report")
+            .MapPut(pattern: "/duplicates/{id}", ReportStatusEndpoints.UpdateDuplicateReport)
+            .WithSummary("Duplicates - Update")
             .WithDescription("Updates a duplicate report by id in the database");
 
         group
-            .MapDelete(pattern: "/{id}", ReportStatusEndpoints.DeleteDuplicateReport)
-            .WithSummary("Delete duplicate report")
+            .MapDelete(pattern: "/duplicates/{id}", ReportStatusEndpoints.DeleteDuplicateReport)
+            .WithSummary("Duplicates - Delete")
             .WithDescription("Deletes a duplicate report by id from the database");
     }
 }

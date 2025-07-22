@@ -17,6 +17,17 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<ReportDuplicate>> GetReportDuplicates(Guid reportId, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving all duplicates for a report from the database.");
+
+        return await context.ReportDuplicates
+            .AsNoTracking()
+            .Where(d => d.ReportId == reportId)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
     public async Task<ReportDuplicate?> GetDuplicateReportById(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving duplicate report with ID {ReportDuplicateId} from the database.", id);

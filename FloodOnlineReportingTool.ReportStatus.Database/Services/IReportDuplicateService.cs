@@ -10,6 +10,11 @@ public interface IReportDuplicateService
     Task<IReadOnlyList<ReportDuplicate>> GetDuplicateReports(CancellationToken ct);
 
     /// <summary>
+    /// Gets all duplicates for a report from the database.
+    /// </summary>
+    Task<IReadOnlyList<ReportDuplicate>> GetReportDuplicates(Guid reportId, CancellationToken ct);
+
+    /// <summary>
     /// Gets a duplicate report by its ID from the database.
     /// </summary>
     Task<ReportDuplicate?> GetDuplicateReportById(Guid id, CancellationToken ct);
