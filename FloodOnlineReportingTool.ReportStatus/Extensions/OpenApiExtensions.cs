@@ -47,7 +47,7 @@ internal static class OpenApiExtensions
                 .WithOperationSorter(OperationSorter.Method)
                 .AddDocuments(documentNames)
                 .AddPreferredSecuritySchemes(SecuritySchemesName)
-                .WithPersistentAuthentication();
+                .WithOperationSorter(OperationSorter.Alpha);
         });
 
         return app;
