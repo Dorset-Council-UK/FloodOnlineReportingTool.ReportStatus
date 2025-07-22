@@ -1,13 +1,15 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 
-internal sealed class DocumentTransformer(ApiVersion version) : IOpenApiDocumentTransformer
+internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityOptions identityOptions) : IOpenApiDocumentTransformer
 {
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
+        // Document information
         document.Info = new()
         {
             Version = version.ToString("VVVV", ApiVersionFormatProvider.CurrentCulture),
@@ -22,9 +24,41 @@ internal sealed class DocumentTransformer(ApiVersion version) : IOpenApiDocument
             License = new()
             {
                 Name = "MIT",
-                Url = new("https://opensource.org/license/mit"),
+                Url = new("https://github.com/Dorset-Council-UK/FloodOnlineReportingTool.ReportStatus/blob/main/LICENSE"),
             },
         };
+
+        // Security requirements
+        var baseEndpoint = new Uri(new Uri(identityOptions.Instance), $"{identityOptions.TenantId}/oauth2/v2.0");
+
+        document.Components ??= new();
+        document.Components.SecuritySchemes.Add(OpenApiExtensions.SecuritySchemesName, new()
+        {
+            Type = SecuritySchemeType.OAuth2,
+            Flows = new()
+            {
+                AuthorizationCode = new()
+                {
+                    AuthorizationUrl = new Uri(baseEndpoint, "authorize"),
+                    TokenUrl = new Uri(baseEndpoint, "token"),
+                },
+            },
+        });
+
+        document.SecurityRequirements.Add(new()
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new()
+                    {
+                        Type= ReferenceType.SecurityScheme,
+                        Id = OpenApiExtensions.SecuritySchemesName,
+                    },
+                },
+                Array.Empty<string>()
+            },
+        });
 
         return Task.CompletedTask;
     }

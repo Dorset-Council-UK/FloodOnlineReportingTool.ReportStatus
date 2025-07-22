@@ -1,34 +1,19 @@
-using FloodOnlineReportingTool.ReportStatus.Authorization;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var messagingSettings = builder.Services.AddReportStatusSettings(builder.Configuration);
 
-// Add authentication
-builder.Services
-    .AddAuthentication()
-    .AddBearerToken();
-
-// Add authorization
-builder.Services
-    .AddAuthorizationBuilder()
-    .AddDefaultPolicy(PolicyNames.Admin, policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.RequireRole(RoleNames.Admin);
-        //policy.AddAuthenticationSchemes(BearerTokenDefaults.AuthenticationScheme);
-    });
-
+builder.Services.AddReportStatusAuthentication(builder.Configuration);
 builder.Services.AddProblemDetails();
 builder.Services.AddReportStatusHealthChecks(messagingSettings);
 builder.Services.AddReportStatusVersioning();
-builder.Services.AddReportStatusOpenApi();
+builder.Services.AddReportStatusOpenApi(builder.Configuration);
 builder.Services.AddReportStatusDatabase(builder.Configuration.GetConnectionString("FloodReportingReportStatus"), builder.Environment.IsDevelopment());
 builder.Services.AddMessageSystem(messagingSettings);
 
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IReportDuplicateService, ReportDuplicateService>();
 
 var app = builder.Build();
 
@@ -40,6 +25,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapReportStatusHealthChecks();
 app.MapReportStatusEndpoints();
 
