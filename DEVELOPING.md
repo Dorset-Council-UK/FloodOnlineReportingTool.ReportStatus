@@ -9,7 +9,7 @@ To run this project with minimal modification, you will need the following:
 
 - **PostgreSQL 13+ with PostGIS extension**: This is the default database provider. The project uses Entity Framework, making it adaptable to other providers with minimal effort.
 - **.NET 9**: Ensure you have the .NET 9 SDK installed.
-- **Message system (optional)**: The project includes a messaging system using RabbitMQ. You can enable or disable this system through the `RabbitMQ:Enabled` setting in your configuration.
+- **Message system (optional)**: The project includes a messaging system using Azure Service Bus. You can enable or disable this system through the `Messaging:Enabled` setting in your configuration.
 
 ## Getting Started
 
@@ -33,7 +33,7 @@ To run this project with minimal modification, you will need the following:
    The database schema and seed data are handled by the data project.
    Navigate to the solution folder and run the following command:
    ```shell
-   dotnet ef database update --project "Flood Reporting Tool - Public Data\FORT_Public_Data.csproj" --startup-project "FloodOnlineReportingTool.Public\FloodOnlineReportingTool.Public.csproj" --context FORTDbContext
+   dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database\FloodOnlineReportingTool.ReportStatus.Database.csproj" --startup-project "FloodOnlineReportingTool.ReportStatus\FloodOnlineReportingTool.ReportStatus.csproj" --context ApplicationDbContext
    ```
 
 ## Database Setup
@@ -42,14 +42,14 @@ This project uses PostgreSQL as its default database. Migrations and data seedin
 
 ### User
 Create a default user with the following credentials:
-- **Username**: `fort`
+- **Username**: `fortreportstatus`
 - **Password**: Any password you choose
 - **Permissions**: can log in, can create databases
 
-The username and password is then used in the connection string FloodReportingPublic.
+The username and password is then used in the connection string FloodReportingReportStatus.
 
 ### Connection Strings
-The project requires a `ConnectionStrings` section in your user secrets. And a connection string named `FloodReportingPublic`. Ensure the connection string contains `;Search Path=fortpublic` for proper functionality. See `Example secrets file` below for a more an example.
+The project requires a `ConnectionStrings` section in your user secrets. And a connection string named `FloodReportingReportStatus`. Ensure the connection string contains `;Search Path=fortreportstatus` for proper functionality. See `Example secrets file` below for a more an example.
 
 ## User Secrets and Configuration
 
@@ -63,41 +63,39 @@ You must set up user secrets for development. Run the following command in the t
   ```
 Then add your configuration:
 
-- **GIS**: Used to configure the Dorset Council Address API (customizable).
-- **RabbitMQ**: Used for the optional messaging system.
+- **Messaging**: Used for the optional messaging system.
 - **ConnectionStrings**: Required for database access.
 
 Example secrets file:
 ```json
 {
   "ConnectionStrings": {
-    "FloodReportingPublic": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortpublic"
+    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus"
   },
-  "GIS": {
-    "ApiKey": "YourApiKey",
-    "AddressSearchUrl": "YourAddressUrl",
-    "NearestAddressesUrl": "YourNearestAddressUrl",
-    "AccessTokenIssueDurationMonths": 6
-  },
-  "RabbitMQ": {
+  "Messaging": {
     "Enabled": "false",
-    "Host": "amqp://localhost:5672",
-    "HostContainer": "amqp://fort-queue:5672",
-    "Username": "YourMessagingUserName",
-    "Password": "YourMessagingPassword"
+    "ConnectionString": "sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=your-key-here",
+    "QueueName": "fortmessaging-queue",
+    "TopicName": "fortmessaging-topic",
+    "SubscriptionName": "fortmessaging-subscription"
+  },
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "Domain": "SomeDomain",
+    "TenantId": "SomeTenantId",
+    "ClientId": "SomeClientId",
+    "CallbackPath": "/signin-oidc"
   }
 }
 ```
 
 ## Authentication
 
-Authentication is required after creating a flood report. The project uses standard .NET cookie authentication for handling user sessions. Some parts of the application, such as form creation, are accessible without authentication.
+Authentication is required after creating a report or duplicate report. The project uses standard .NET Identity authentication.
 
 ## Other Customizations
 
-The project integrates with the Dorset Council Address API. This is customizable via the `GIS` section in your configuration.
-
-For messaging, the `RabbitMQ` section allows you to enable or disable the MassTransit messaging system. By default, messaging is disabled (`RabbitMQ:Enabled = false`).
+For messaging, the `Messaging` section allows you to enable or disable the MassTransit messaging system. By default, messaging is disabled (`Messaging:Enabled = false`).
 
 ## Further Help
 
