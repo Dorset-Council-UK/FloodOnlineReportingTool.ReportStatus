@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Report> Reports { get; set; }
-    public DbSet<ReportDuplicate> ReportDuplicatess { get; set; }
+    public DbSet<ReportDuplicate> ReportDuplicates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
