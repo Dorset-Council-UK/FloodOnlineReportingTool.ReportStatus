@@ -9,10 +9,10 @@ namespace Microsoft.AspNetCore.Builder;
 internal static class HealthCheckExtensions
 {
     private static readonly IEnumerable<string> tagsDatabase = ["database"];
-    private static readonly IEnumerable<string> tagsServiceBusQueue = ["azure", "service bus", "queue"];
-    private static readonly IEnumerable<string> tagsServiceBusThreshold = ["azure", "service bus", "threshold"];
-    private static readonly IEnumerable<string> tagsServiceBusSubscription = ["azure", "service bus", "subscription"];
-    private static readonly IEnumerable<string> tagsServiceBusTopic = ["azure", "service bus", "topic"];
+    private static readonly IEnumerable<string> tagsServiceBusQueue = ["messaging", "azure", "service bus", "queue"];
+    private static readonly IEnumerable<string> tagsServiceBusThreshold = ["messaging", "azure", "service bus", "threshold"];
+    private static readonly IEnumerable<string> tagsServiceBusSubscription = ["messaging", "azure", "service bus", "subscription"];
+    private static readonly IEnumerable<string> tagsServiceBusTopic = ["messaging", "azure", "service bus", "topic"];
     private static readonly IEnumerable<string> tagsLive = ["live"];
 
     public static IServiceCollection AddReportStatusHealthChecks(this IServiceCollection services, MessagingSettings messagingSettings)
