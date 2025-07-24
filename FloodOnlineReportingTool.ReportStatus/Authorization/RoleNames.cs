@@ -2,5 +2,7 @@
 
 internal static class RoleNames
 {
-    internal const string Admin = "Admin";
+    internal const string Reader = "Report.Reader";
+    internal const string Writer = "Report.Writer";
+    internal const string Admin = "Report.Admin";
 }

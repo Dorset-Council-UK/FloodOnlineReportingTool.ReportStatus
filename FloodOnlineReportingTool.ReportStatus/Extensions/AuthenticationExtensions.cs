@@ -1,5 +1,4 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Authorization;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
 
@@ -21,7 +20,7 @@ internal static class AuthenticationExtensions
 
         // Add authentication
         services
-            .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+            .AddAuthentication(Constants.Bearer)
             .AddMicrosoftIdentityWebApi(configuration);
 
         // Add authorization

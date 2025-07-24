@@ -11,9 +11,9 @@ internal static class EndpointExtensions
         var group = app
             .NewVersionedApi()
             .MapGroup("/api/reports")
-            .RequireAuthorization(PolicyNames.Admin)
-            //.AllowAnonymous()
-            .HasApiVersion(Versions.V1.Version);
+            .HasApiVersion(Versions.V1.Version)
+            .AllowAnonymous();
+            //.RequireAuthorization(PolicyNames.Admin);
 
         MapReportEndpoints(group);
         MapDuplicateEndpoints(group);
