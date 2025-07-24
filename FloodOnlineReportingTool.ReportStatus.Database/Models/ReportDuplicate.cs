@@ -1,10 +1,13 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 public record ReportDuplicate
 {
     public required Guid Id { get; init; }
     public required Guid ReportId { get; init; }
-    public virtual Report? Report { get; init; }
+    [JsonIgnore]
+    public Report Report { get; init; } = default!;
     public required Guid EligibilityCheckId { get; init; }
     public DateTimeOffset CreatedUtc { get; init; }
     public DateTimeOffset? UpdatedUtc { get; init; }

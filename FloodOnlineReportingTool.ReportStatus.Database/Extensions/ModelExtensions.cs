@@ -19,7 +19,6 @@ public static class ModelExtensions
     {
         return new()
         {
-            ReportId = duplicate.ReportId,
             EligibilityCheckId = duplicate.EligibilityCheckId,
             Easting = duplicate.Easting,
             Northing = duplicate.Northing,

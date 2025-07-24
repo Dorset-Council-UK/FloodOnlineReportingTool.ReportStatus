@@ -7,30 +7,45 @@ public interface IReportDuplicateService
     /// <summary>
     /// Gets all duplicate reports from the database.
     /// </summary>
-    Task<IReadOnlyList<ReportDuplicate>> GetDuplicateReports(CancellationToken ct);
+    Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(CancellationToken ct);
 
     /// <summary>
-    /// Gets all duplicates for a report from the database.
+    /// Gets all duplicates associated with a report from the database.
     /// </summary>
-    Task<IReadOnlyList<ReportDuplicate>> GetReportDuplicates(Guid reportId, CancellationToken ct);
+    Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(Guid reportId, CancellationToken ct);
 
     /// <summary>
     /// Gets a duplicate report by its ID from the database.
     /// </summary>
-    Task<ReportDuplicate?> GetDuplicateReportById(Guid id, CancellationToken ct);
+    Task<ReportDuplicate?> GetDuplicate(Guid duplicateId, CancellationToken ct);
 
     /// <summary>
-    /// Creates a new duplicate report in the database.
+    /// Gets a duplicate associated with a report by its ID from the database.
     /// </summary>
-    Task<ReportDuplicate> CreateDuplicateReport(ReportDuplicateDto dto, CancellationToken ct);
+    Task<ReportDuplicate?> GetDuplicate(Guid reportId, Guid duplicateId, CancellationToken ct);
+
+    /// <summary>
+    /// Creates a new duplicate associated with a report in the database.
+    /// </summary>
+    Task<ReportDuplicate?> CreateDuplicate(Guid reportId, ReportDuplicateDto dto, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing duplicate report in the database.
     /// </summary>
-    Task<ReportDuplicate?> UpdateDuplicateReport(Guid id, ReportDuplicateDto dto, CancellationToken ct);
+    Task<ReportDuplicate?> UpdateDuplicate(Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// Updates an existing duplicate associated with a report in the database.
+    /// </summary>
+    Task<ReportDuplicate?> UpdateDuplicate(Guid reportId, Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct);
 
     /// <summary>
     /// Deletes an existing duplicate report in the database.
     /// </summary>
-    Task<bool> DeleteDuplicateReport(Guid id, CancellationToken ct);
+    Task<bool> DeleteDuplicate(Guid duplicateId, CancellationToken ct);
+
+    /// <summary>
+    /// Deletes an existing duplicate associated with a report in the database.
+    /// </summary>
+    Task<bool> DeleteDuplicate(Guid reportId, Guid duplicateId, CancellationToken ct);
 }
