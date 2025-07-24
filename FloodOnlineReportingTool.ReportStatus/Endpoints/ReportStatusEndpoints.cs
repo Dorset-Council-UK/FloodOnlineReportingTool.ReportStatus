@@ -85,7 +85,6 @@ internal static class ReportStatusEndpoints
         return duplicate == null ? TypedResults.NotFound() : TypedResults.Ok(duplicate);
     }
 
-
     internal static async Task<Results<Ok<ReportDuplicate>, NotFound, BadRequest>> UpdateReportDuplicate(IReportDuplicateService reportDuplicateService, Guid reportId, Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct)
     {
         var duplicate = await reportDuplicateService.UpdateDuplicate(reportId, duplicateId, dto, ct).ConfigureAwait(false);
