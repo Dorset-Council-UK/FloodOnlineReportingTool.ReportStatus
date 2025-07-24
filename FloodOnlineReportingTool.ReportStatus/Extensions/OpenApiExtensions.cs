@@ -6,16 +6,16 @@ namespace Microsoft.AspNetCore.Builder;
 
 internal static class OpenApiExtensions
 {
+    internal const string SecuritySchemesName = "Entra";
+
     /// <summary>
     /// Add OpenApi using the versions
     /// </summary>
     /// <remarks>
     ///     <para>See: <see href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/openapi/customize-openapi?view=aspnetcore-9.0#use-document-transformers">Use document transformers</see></para>
     /// </remarks>
-    internal static IServiceCollection AddReportStatusOpenApi(this IServiceCollection services, IConfiguration configuration)
+    internal static IServiceCollection AddReportStatusOpenApi(this IServiceCollection services, MicrosoftIdentityOptions identityOptions)
     {
-        var identityOptions = configuration.GetSection(Constants.AzureAd).Get<MicrosoftIdentityOptions>();
-        
         foreach (var versionInfo in Versions.All)
         {
             services.AddOpenApi(versionInfo.DocumentName, options =>
@@ -36,7 +36,7 @@ internal static class OpenApiExtensions
     /// <summary>
     /// Add the Scalar UI <see href="https://localhost:7065/scalar" />
     /// </summary>
-    internal static WebApplication UseScalarUI(this WebApplication app)
+    internal static WebApplication UseScalarUI(this WebApplication app, MicrosoftIdentityOptions identityOptions, bool isDevelopment = false)
     {
         var documentNames = Versions.All.Select(o => o.DocumentName);
 
@@ -44,14 +44,45 @@ internal static class OpenApiExtensions
         {
             options
                 .WithTitle("Report Status API")
-                .WithOperationSorter(OperationSorter.Method)
+                .WithOperationSorter(OperationSorter.Alpha)
                 .AddDocuments(documentNames)
                 .AddPreferredSecuritySchemes(SecuritySchemesName)
-                .WithOperationSorter(OperationSorter.Alpha);
+                .AddOAuth2Flows(SecuritySchemesName, flows =>
+                {
+                    flows.WithAuthorizationCode(options =>
+                    {
+                        if (isDevelopment)
+                        {
+                            options.ClientId = identityOptions.ClientId;
+                        }
+                        options.Pkce = Pkce.Sha256;
+                    });
+                });
         });
 
         return app;
     }
 
-    internal const string SecuritySchemesName = "Entra ID";
+    /// <summary>
+    /// Add the Swagger UI <see href="https://localhost:7065/swagger" />
+    /// </summary>
+    internal static WebApplication UseSwagger(this WebApplication app, MicrosoftIdentityOptions identityOptions, bool isDevelopment = false)
+    {
+        app.UseSwaggerUI(options =>
+        {
+            options.DocumentTitle = "Report Status API";
+            options.EnableTryItOutByDefault();
+            foreach (var versionInfo in Versions.All)
+            {
+                options.SwaggerEndpoint($"/openapi/{versionInfo.DocumentName}.json", $"Report Status API | {versionInfo.DocumentName}");
+            }
+            if (isDevelopment)
+            {
+                options.OAuthClientId(identityOptions.ClientId);
+            }
+            options.OAuthUsePkce();
+        });
+
+        return app;
+    }
 }

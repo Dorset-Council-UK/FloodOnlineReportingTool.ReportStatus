@@ -10,10 +10,10 @@ internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityO
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
         // Document information
-        document.Info = new()
+        document.Info = new(document.Info)
         {
             Version = version.ToString("VVVV", ApiVersionFormatProvider.CurrentCulture),
-            Title = "Flood Online Reporting Tool - Report Status",
+            Title = $"Flood Online Reporting Tool - Report Status | {version.ToString("VV", ApiVersionFormatProvider.CurrentCulture)}",
             Description = "Administration and status reporting for the flood online reporting tool. Built for professional flood risk colleagues, tracking reports from both the public and lead authorities.",
             TermsOfService = new("https://github.com/Dorset-Council-UK/FloodOnlineReportingTool.ReportStatus"),
             Contact = new()
@@ -35,6 +35,8 @@ internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityO
         document.Components.SecuritySchemes.Add(OpenApiExtensions.SecuritySchemesName, new()
         {
             Type = SecuritySchemeType.OAuth2,
+            BearerFormat = "JWT",
+            Scheme = Constants.Bearer,
             Flows = new()
             {
                 AuthorizationCode = new()
