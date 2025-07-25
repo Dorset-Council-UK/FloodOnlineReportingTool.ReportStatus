@@ -93,7 +93,7 @@ internal static class EndpointExtensions
 
         // Create
         group
-            .MapPost(pattern: "/duplicates", ReportStatusEndpoints.CreateReportDuplicate)
+            .MapPost(pattern: "/", ReportStatusEndpoints.CreateReportDuplicate)
             .WithSummary("Reports - Create Duplicate")
             .WithDescription("Creates a new duplicate associated with a report in the database")
             .WithTags(tagReportDuplicate);

@@ -32,7 +32,7 @@ internal static class ReportStatusEndpoints
 
     internal static async Task<Results<NoContent, NotFound, BadRequest>> DeleteReport(IReportService reportService, Guid id, CancellationToken ct)
     {
-        var deleted = await reportService.DeleteReport(id, ct) .ConfigureAwait(false);
+        var deleted = await reportService.DeleteReport(id, ct).ConfigureAwait(false);
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 

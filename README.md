@@ -26,6 +26,6 @@ Security issues should be reported privately, to the project team via email at [
 
 The Flood Online Reporting tool is a Dorset Council Open Source project. The core developers are currently Dorset Council staff. If you want to become a core developer, Please see our guide on [contributing](https://github.com/Dorset-Council-UK/FloodOnlineReportingTool.ReportStatus/blob/main/CONTRIBUTING.md).
 
-## Licence
+## License
 
 Unless stated otherwise, the codebase is released under the MIT License. This covers both the codebase and any sample code in the documentation.
