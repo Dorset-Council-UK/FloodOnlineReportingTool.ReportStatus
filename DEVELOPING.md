@@ -84,14 +84,14 @@ Example secrets file:
     "Domain": "SomeDomain",
     "TenantId": "SomeTenantId",
     "ClientId": "SomeClientId",
-    "CallbackPath": "/signin-oidc"
+    "ResponseType": "code"
   }
 }
 ```
 
 ## Authentication
 
-Authentication is required after creating a report or duplicate report. The project uses standard .NET Identity authentication.
+Authentication is required to create a report or duplicate report. The project uses standard .NET Identity authentication.
 
 ## Other Customizations
 
