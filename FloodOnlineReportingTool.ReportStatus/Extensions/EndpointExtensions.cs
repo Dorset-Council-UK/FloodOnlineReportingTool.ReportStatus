@@ -16,31 +16,23 @@ internal static class EndpointExtensions
             .NewVersionedApi()
             .MapGroup("/api/reports")
             .HasApiVersion(Versions.V1.Version)
-            .AllowAnonymous();
-        //.RequireAuthorization(PolicyNames.Admin);
+            .RequireAuthorization(PolicyNames.Admin);
 
         var reportDuplicatesGroup = app
             .NewVersionedApi()
             .MapGroup("/api/reports/{reportId}/duplicates")
             .HasApiVersion(Versions.V1.Version)
-            .AllowAnonymous();
+            .RequireAuthorization(PolicyNames.Admin);
 
         var duplicateGroup = app
             .NewVersionedApi()
             .MapGroup("/api/duplicates")
             .HasApiVersion(Versions.V1.Version)
-            .AllowAnonymous();
+            .RequireAuthorization(PolicyNames.Admin);
 
         MapReportEndpoints(reportsGroup);
         MapReportDuplicateEndpoints(reportDuplicatesGroup);
         MapDuplicateEndpoints(duplicateGroup);
-
-        app
-            .MapGroup("/api/reports")
-            .MapGet(pattern: "/test", ReportStatusEndpoints.Test)
-            .WithSummary("Test")
-            .AllowAnonymous()
-            .WithTags("Tests");
 
         return app;
     }

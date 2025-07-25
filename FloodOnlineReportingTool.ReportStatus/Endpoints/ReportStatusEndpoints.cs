@@ -36,17 +36,6 @@ internal static class ReportStatusEndpoints
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
-    internal static Results<Ok, BadRequest> Test(HttpContext context, CancellationToken ct)
-    {
-        // get the users roles
-        var user = context.User;
-        var hasUser = user != null;
-        var isAuthenticated = user?.Identity?.IsAuthenticated ?? false;
-        var roles = user?.Claims.ToList() ?? [];
-
-        return TypedResults.Ok();
-    }
-
     internal static async Task<Results<Ok<IReadOnlyList<ReportDuplicate>>, BadRequest>> GetDuplicates(IReportDuplicateService reportDuplicateService, CancellationToken ct)
     {
         var duplicates = await reportDuplicateService.GetDuplicates(ct).ConfigureAwait(false);
