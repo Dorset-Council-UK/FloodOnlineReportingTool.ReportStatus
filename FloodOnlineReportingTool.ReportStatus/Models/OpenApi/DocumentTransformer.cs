@@ -10,10 +10,11 @@ internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityO
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
         // Document information
+        var versionString = version.ToString("VVVV", ApiVersionFormatProvider.CurrentCulture);
         document.Info = new(document.Info)
         {
-            Version = version.ToString("VVVV", ApiVersionFormatProvider.CurrentCulture),
-            Title = $"Flood Online Reporting Tool - Report Status | v{version.ToString("VV", ApiVersionFormatProvider.CurrentCulture)}",
+            Version = versionString,
+            Title = $"Flood Online Reporting Tool - Report Status | v{versionString}",
             Description = "Administration and status reporting for the flood online reporting tool. Built for professional flood risk colleagues, tracking reports from both the public and lead authorities.",
             TermsOfService = new("https://github.com/Dorset-Council-UK/FloodOnlineReportingTool.ReportStatus"),
             Contact = new()
@@ -32,11 +33,12 @@ internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityO
         var baseEndpoint = new Uri(new Uri(identityOptions.Instance), $"{identityOptions.TenantId}/oauth2/v2.0");
 
         document.Components ??= new();
-        document.Components.SecuritySchemes.Add(OpenApiExtensions.SecuritySchemesName, new()
+        document.Components.SecuritySchemes.Add(Constants.Bearer, new()
         {
-            Type = SecuritySchemeType.OAuth2,
-            BearerFormat = "JWT",
+            Name = "Authorization",
             Scheme = Constants.Bearer,
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.OAuth2,
             Flows = new()
             {
                 AuthorizationCode = new()
@@ -54,8 +56,8 @@ internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityO
                 {
                     Reference = new()
                     {
-                        Type= ReferenceType.SecurityScheme,
-                        Id = OpenApiExtensions.SecuritySchemesName,
+                        Id = Constants.Bearer,
+                        Type = ReferenceType.SecurityScheme,
                     },
                 },
                 Array.Empty<string>()

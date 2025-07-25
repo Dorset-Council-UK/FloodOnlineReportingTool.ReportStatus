@@ -6,8 +6,6 @@ namespace Microsoft.AspNetCore.Builder;
 
 internal static class OpenApiExtensions
 {
-    internal const string SecuritySchemesName = "Entra";
-
     /// <summary>
     /// Add OpenApi using the versions
     /// </summary>
@@ -20,8 +18,11 @@ internal static class OpenApiExtensions
         {
             services.AddOpenApi(versionInfo.DocumentName, options =>
             {
-                // Set the OpenAPI document info
+                // Set the OpenAPI document info, security schemes, and security requirements
                 options.AddDocumentTransformer(new DocumentTransformer(versionInfo.Version, identityOptions));
+
+                // Add default responses for 400 bad request and 401 not authorised
+                options.AddOperationTransformer(new AuthOperationTransformer());
 
                 // Add API methods to the correct versions by using the group name
                 options.ShouldInclude = (description) =>
@@ -46,8 +47,8 @@ internal static class OpenApiExtensions
                 .WithTitle("Report Status API")
                 .WithOperationSorter(OperationSorter.Alpha)
                 .AddDocuments(documentNames)
-                .AddPreferredSecuritySchemes(SecuritySchemesName)
-                .AddOAuth2Flows(SecuritySchemesName, flows =>
+                .AddPreferredSecuritySchemes(Constants.Bearer)
+                .AddOAuth2Flows(Constants.Bearer, flows =>
                 {
                     flows.WithAuthorizationCode(options =>
                     {

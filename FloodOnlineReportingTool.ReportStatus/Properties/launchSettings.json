@@ -19,7 +19,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "OpenAPI": {
+    "Scalar - OpenAPI": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
@@ -29,7 +29,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Swagger": {
+    "Swagger - OpenAPI": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
