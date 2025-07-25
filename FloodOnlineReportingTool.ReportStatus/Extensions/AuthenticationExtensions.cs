@@ -12,6 +12,18 @@ internal static class AuthenticationExtensions
     /// </summary>
     internal static IServiceCollection AddReportStatusAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
+        // Build the reader policy
+        var readerPolicy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .RequireRole(RoleNames.Reader)
+            .Build();
+
+        // Build the writer policy
+        var writerPolicy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .RequireRole(RoleNames.Writer)
+            .Build();
+
         // Build the admin policy
         var adminPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
@@ -26,7 +38,9 @@ internal static class AuthenticationExtensions
         // Add authorization
         services
             .AddAuthorizationBuilder()
-            .AddDefaultPolicy(PolicyNames.Admin, adminPolicy);
+            .AddPolicy(PolicyNames.Reader, readerPolicy)
+            .AddPolicy(PolicyNames.Writer, writerPolicy)
+            .AddPolicy(PolicyNames.Admin, adminPolicy);
 
         return services;
     }
