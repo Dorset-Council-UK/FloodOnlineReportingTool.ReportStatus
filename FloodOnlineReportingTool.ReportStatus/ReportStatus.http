@@ -1,0 +1,124 @@
+@HttpsAddress = https://localhost:7065
+@ReportId = {{$guid}}
+@DuplicateId = {{$guid}}
+
+# --- Reports ---
+
+# Get all
+GET {{HttpsAddress}}/api/reports
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# Get one
+GET {{HttpsAddress}}/api/reports/{{ReportId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# Create
+POST {{HttpsAddress}}/api/reports
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+{
+  "eligibilityCheckId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "uprn": 0,
+  "easting": 0,
+  "northing": 0,
+  "impactStartUtc": "2025-07-25T10:51:19.374Z",
+  "impactDurationHours": 0
+}
+###
+
+# Update
+PUT {{HttpsAddress}}/api/reports/{{ReportId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+{
+  "eligibilityCheckId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "uprn": 0,
+  "easting": 0,
+  "northing": 0,
+  "impactStartUtc": "2025-07-25T10:52:41.303Z",
+  "impactDurationHours": 0
+}
+###
+
+# Delete
+DELETE {{HttpsAddress}}/api/reports/{{ReportId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# --- Report Duplicates ---
+
+# Get all
+GET {{HttpsAddress}}/api/reports/{{ReportId}}/duplicates
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# Get one
+GET {{HttpsAddress}}/api/reports/{{ReportId}}/duplicates/{{DuplicateId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# Create
+POST {{HttpsAddress}}/api/reports/{{ReportId}}/duplicates
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+{
+  "eligibilityCheckId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "easting": 0,
+  "northing": 0
+}
+###
+
+# Update
+PUT {{HttpsAddress}}/api/reports/{{ReportId}}/duplicates/{{DuplicateId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+{
+  "eligibilityCheckId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "easting": 0,
+  "northing": 0
+}
+###
+
+# Delete
+DELETE {{HttpsAddress}}/api/reports/{{ReportId}}/duplicates/{{DuplicateId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# --- Duplicates ---
+
+# Get all
+GET {{HttpsAddress}}/api/duplicates
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# Get one
+GET {{HttpsAddress}}/api/duplicates/{{DuplicateId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
+
+# Update
+PUT {{HttpsAddress}}/api/duplicates/{{DuplicateId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+{
+  "eligibilityCheckId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "easting": 0,
+  "northing": 0
+}
+###
+
+# Delete
+DELETE {{HttpsAddress}}/api/duplicates/{{DuplicateId}}
+Accept: application/json
+Authorization: Bearer {{$bearerToken}}
+###
