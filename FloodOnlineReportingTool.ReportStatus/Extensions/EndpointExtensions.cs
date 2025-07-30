@@ -42,7 +42,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - All")
             .WithDescription("Gets all reports from the database")
             .WithTags(tagReport)
-            .RequireAuthorization([PolicyNames.Reader, PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Reader);
 
         // Get one
         group
@@ -50,7 +50,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Get")
             .WithDescription("Gets a report by id from the database")
             .WithTags(tagReport)
-            .RequireAuthorization([PolicyNames.Reader, PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Reader);
 
         // Create
         group
@@ -58,7 +58,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Create")
             .WithDescription("Creates a new report in the database")
             .WithTags(tagReport)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
 
         // Update
         group
@@ -66,7 +66,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Update")
             .WithDescription("Updates a report by id in the database")
             .WithTags(tagReport)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
 
         // Delete
         group
@@ -74,7 +74,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Delete")
             .WithDescription("Deletes a report by id from the database")
             .WithTags(tagReport)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
     }
 
     private static void MapReportDuplicateEndpoints(RouteGroupBuilder group)
@@ -85,7 +85,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Duplicates")
             .WithDescription("Gets all duplicates associated with a report from the database")
             .WithTags(tagReportDuplicate)
-            .RequireAuthorization([PolicyNames.Reader, PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Reader);
 
         // Get one
         group
@@ -93,7 +93,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Get Duplicate")
             .WithDescription("Gets a duplicate associated with a report by id from the database")
             .WithTags(tagReportDuplicate)
-            .RequireAuthorization([PolicyNames.Reader, PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Reader);
 
         // Create
         group
@@ -101,7 +101,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Create Duplicate")
             .WithDescription("Creates a new duplicate associated with a report in the database")
             .WithTags(tagReportDuplicate)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
 
         // Update
         group
@@ -109,7 +109,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Update Duplicate")
             .WithDescription("Updates a duplicate associated with a report by id in the database")
             .WithTags(tagReportDuplicate)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
 
         // Delete
         group
@@ -117,7 +117,7 @@ internal static class EndpointExtensions
             .WithSummary("Reports - Delete Duplicate")
             .WithDescription("Deletes a duplicate associated with a report by id from the database")
             .WithTags(tagReportDuplicate)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
     }
 
     private static void MapDuplicateEndpoints(RouteGroupBuilder group)
@@ -128,7 +128,7 @@ internal static class EndpointExtensions
             .WithSummary("Duplicates - All")
             .WithDescription("Gets all duplicate reports from the database")
             .WithTags(tagDuplicate)
-            .RequireAuthorization([PolicyNames.Reader, PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Reader);
 
         // Get one
         group
@@ -136,7 +136,7 @@ internal static class EndpointExtensions
             .WithSummary("Duplicates - Get")
             .WithDescription("Gets a duplicate report by id from the database")
             .WithTags(tagDuplicate)
-            .RequireAuthorization([PolicyNames.Reader, PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Reader);
 
         // Update
         group
@@ -144,7 +144,7 @@ internal static class EndpointExtensions
             .WithSummary("Duplicates - Update")
             .WithDescription("Updates a duplicate report by id in the database")
             .WithTags(tagDuplicate)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
 
         // Delete
         group
@@ -152,6 +152,6 @@ internal static class EndpointExtensions
             .WithSummary("Duplicates - Delete")
             .WithDescription("Deletes a duplicate report by id from the database")
             .WithTags(tagDuplicate)
-            .RequireAuthorization([PolicyNames.Writer, PolicyNames.Admin]);
+            .RequireAuthorization(PolicyNames.Writer);
     }
 }

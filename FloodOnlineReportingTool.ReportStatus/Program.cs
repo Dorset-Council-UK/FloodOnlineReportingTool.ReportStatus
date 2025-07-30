@@ -22,13 +22,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseScalarUI(identityOptions, isDevelopment: true);
-    app.UseSwagger(identityOptions, isDevelopment: true);
+    app.UseScalarUI(identityOptions);
+    app.UseSwagger(identityOptions);
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapReportStatusHealthChecks();
 app.MapReportStatusEndpoints();
 
