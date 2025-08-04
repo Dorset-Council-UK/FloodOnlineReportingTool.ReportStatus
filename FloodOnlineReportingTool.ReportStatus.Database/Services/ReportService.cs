@@ -56,7 +56,8 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
         logger.LogDebug("Updating report with ID {ReportId} in the database.", id);
 
         var existing = await context.Reports
-            .FindAsync([id], ct)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == id, ct)
             .ConfigureAwait(false);
 
         if (existing == null)

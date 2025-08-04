@@ -1,4 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
+﻿using Asp.Versioning;
+using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Identity.Web;
 using Scalar.AspNetCore;
 
@@ -6,8 +8,6 @@ namespace Microsoft.AspNetCore.Builder;
 
 internal static class OpenApiExtensions
 {
-    internal const string SecuritySchemesName = "Entra";
-
     /// <summary>
     /// Add OpenApi using the versions
     /// </summary>
@@ -20,13 +20,13 @@ internal static class OpenApiExtensions
         {
             services.AddOpenApi(versionInfo.DocumentName, options =>
             {
-                // Set the OpenAPI document info
+                // Set the OpenAPI document info, security schemes, and security requirements
                 options.AddDocumentTransformer(new DocumentTransformer(versionInfo.Version, identityOptions));
 
-                // Add API methods to the correct versions by using the group name
-                options.ShouldInclude = (description) =>
-                    description.GroupName == null ||
-                    description.GroupName.Equals(options.DocumentName, StringComparison.OrdinalIgnoreCase);
+                // Add default responses for 401 not authorised
+                options.AddOperationTransformer(new AuthOperationTransformer());
+
+                options.ShouldInclude = description => ShouldIncludeVersion(description, versionInfo);
             });
         }
 
@@ -34,9 +34,30 @@ internal static class OpenApiExtensions
     }
 
     /// <summary>
+    /// Add API methods to the correct version documentation
+    /// </summary>
+    private static bool ShouldIncludeVersion(ApiDescription description, VersionInfo versionInfo)
+    {
+        if (description.GroupName != null && description.GroupName.Equals(versionInfo.DocumentName, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var versionMetadata = description.ActionDescriptor.EndpointMetadata
+            .OfType<ApiVersionMetadata>()
+            .FirstOrDefault();
+        if (versionMetadata != null && versionMetadata.IsMappedTo(versionInfo.Version))
+        {
+            return true;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Add the Scalar UI <see href="https://localhost:7065/scalar" />
     /// </summary>
-    internal static WebApplication UseScalarUI(this WebApplication app, MicrosoftIdentityOptions identityOptions, bool isDevelopment = false)
+    internal static WebApplication UseScalarUI(this WebApplication app, MicrosoftIdentityOptions identityOptions)
     {
         var documentNames = Versions.All.Select(o => o.DocumentName);
 
@@ -46,16 +67,14 @@ internal static class OpenApiExtensions
                 .WithTitle("Report Status API")
                 .WithOperationSorter(OperationSorter.Alpha)
                 .AddDocuments(documentNames)
-                .AddPreferredSecuritySchemes(SecuritySchemesName)
-                .AddOAuth2Flows(SecuritySchemesName, flows =>
+                .AddPreferredSecuritySchemes(Constants.Bearer)
+                .AddOAuth2Flows(Constants.Bearer, flows =>
                 {
                     flows.WithAuthorizationCode(options =>
                     {
-                        if (isDevelopment)
-                        {
-                            options.ClientId = identityOptions.ClientId;
-                        }
+                        options.ClientId = identityOptions.ClientId;
                         options.Pkce = Pkce.Sha256;
+                        options.SelectedScopes = [ $"api://{identityOptions.ClientId}/access_as_user" ];
                     });
                 });
         });
@@ -66,7 +85,7 @@ internal static class OpenApiExtensions
     /// <summary>
     /// Add the Swagger UI <see href="https://localhost:7065/swagger" />
     /// </summary>
-    internal static WebApplication UseSwagger(this WebApplication app, MicrosoftIdentityOptions identityOptions, bool isDevelopment = false)
+    internal static WebApplication UseSwagger(this WebApplication app, MicrosoftIdentityOptions identityOptions)
     {
         app.UseSwaggerUI(options =>
         {
@@ -76,11 +95,9 @@ internal static class OpenApiExtensions
             {
                 options.SwaggerEndpoint($"/openapi/{versionInfo.DocumentName}.json", $"Report Status API | {versionInfo.DocumentName}");
             }
-            if (isDevelopment)
-            {
-                options.OAuthClientId(identityOptions.ClientId);
-            }
+            options.OAuthClientId(identityOptions.ClientId);
             options.OAuthUsePkce();
+            options.OAuthScopes($"api://{identityOptions.ClientId}/access_as_user");
         });
 
         return app;

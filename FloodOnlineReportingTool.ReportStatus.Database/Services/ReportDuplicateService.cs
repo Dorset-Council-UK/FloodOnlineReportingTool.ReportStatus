@@ -85,7 +85,8 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         logger.LogDebug("Updating duplicate report with ID {ReportDuplicateId} in the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FindAsync([duplicateId], ct)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == duplicateId, ct)
             .ConfigureAwait(false);
 
         if (existing == null)
