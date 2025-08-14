@@ -38,7 +38,7 @@ internal static class EndpointExtensions
     {
         // Get all
         group
-            .MapGet(pattern: "/", ReportStatusEndpoints.GetReports)
+            .MapGet(pattern: "/", ReportEndpoints.GetReports)
             .WithSummary("Reports - All")
             .WithDescription("Gets all reports from the database")
             .WithTags(tagReport)
@@ -46,7 +46,7 @@ internal static class EndpointExtensions
 
         // Get one
         group
-            .MapGet(pattern: "/{id}", ReportStatusEndpoints.GetReportById)
+            .MapGet(pattern: "/{id}", ReportEndpoints.GetReportById)
             .WithSummary("Reports - Get")
             .WithDescription("Gets a report by id from the database")
             .WithTags(tagReport)
@@ -54,7 +54,7 @@ internal static class EndpointExtensions
 
         // Create
         group
-            .MapPost(pattern: "/", ReportStatusEndpoints.CreateReport)
+            .MapPost(pattern: "/", ReportEndpoints.CreateReport)
             .WithSummary("Reports - Create")
             .WithDescription("Creates a new report in the database")
             .WithTags(tagReport)
@@ -62,7 +62,7 @@ internal static class EndpointExtensions
 
         // Update
         group
-            .MapPut(pattern: "/{id}", ReportStatusEndpoints.UpdateReport)
+            .MapPut(pattern: "/{id}", ReportEndpoints.UpdateReport)
             .WithSummary("Reports - Update")
             .WithDescription("Updates a report by id in the database")
             .WithTags(tagReport)
@@ -70,7 +70,7 @@ internal static class EndpointExtensions
 
         // Delete
         group
-            .MapDelete(pattern: "/{id}", ReportStatusEndpoints.DeleteReport)
+            .MapDelete(pattern: "/{id}", ReportEndpoints.DeleteReport)
             .WithSummary("Reports - Delete")
             .WithDescription("Deletes a report by id from the database")
             .WithTags(tagReport)
@@ -81,7 +81,7 @@ internal static class EndpointExtensions
     {
         // Get all
         group
-            .MapGet(pattern: "/", ReportStatusEndpoints.GetReportDuplicates)
+            .MapGet(pattern: "/", ReportDuplicateEndpoints.GetReportDuplicates)
             .WithSummary("Reports - Duplicates")
             .WithDescription("Gets all duplicates associated with a report from the database")
             .WithTags(tagReportDuplicate)
@@ -89,7 +89,7 @@ internal static class EndpointExtensions
 
         // Get one
         group
-            .MapGet(pattern: "/{duplicateId}", ReportStatusEndpoints.GetReportDuplicate)
+            .MapGet(pattern: "/{duplicateId}", ReportDuplicateEndpoints.GetReportDuplicate)
             .WithSummary("Reports - Get Duplicate")
             .WithDescription("Gets a duplicate associated with a report by id from the database")
             .WithTags(tagReportDuplicate)
@@ -97,7 +97,7 @@ internal static class EndpointExtensions
 
         // Create
         group
-            .MapPost(pattern: "/", ReportStatusEndpoints.CreateReportDuplicate)
+            .MapPost(pattern: "/", ReportDuplicateEndpoints.CreateReportDuplicate)
             .WithSummary("Reports - Create Duplicate")
             .WithDescription("Creates a new duplicate associated with a report in the database")
             .WithTags(tagReportDuplicate)
@@ -105,7 +105,7 @@ internal static class EndpointExtensions
 
         // Update
         group
-            .MapPut(pattern: "/{duplicateId}", ReportStatusEndpoints.UpdateReportDuplicate)
+            .MapPut(pattern: "/{duplicateId}", ReportDuplicateEndpoints.UpdateReportDuplicate)
             .WithSummary("Reports - Update Duplicate")
             .WithDescription("Updates a duplicate associated with a report by id in the database")
             .WithTags(tagReportDuplicate)
@@ -113,7 +113,7 @@ internal static class EndpointExtensions
 
         // Delete
         group
-            .MapDelete(pattern: "/{duplicateId}", ReportStatusEndpoints.DeleteReportDuplicate)
+            .MapDelete(pattern: "/{duplicateId}", ReportDuplicateEndpoints.DeleteReportDuplicate)
             .WithSummary("Reports - Delete Duplicate")
             .WithDescription("Deletes a duplicate associated with a report by id from the database")
             .WithTags(tagReportDuplicate)
@@ -124,7 +124,7 @@ internal static class EndpointExtensions
     {
         // Get all
         group
-            .MapGet(pattern: "/", ReportStatusEndpoints.GetDuplicates)
+            .MapGet(pattern: "/", ReportDuplicateEndpoints.GetDuplicates)
             .WithSummary("Duplicates - All")
             .WithDescription("Gets all duplicate reports from the database")
             .WithTags(tagDuplicate)
@@ -132,7 +132,7 @@ internal static class EndpointExtensions
 
         // Get one
         group
-            .MapGet(pattern: "/{duplicateId}", ReportStatusEndpoints.GetDuplicate)
+            .MapGet(pattern: "/{duplicateId}", ReportDuplicateEndpoints.GetDuplicate)
             .WithSummary("Duplicates - Get")
             .WithDescription("Gets a duplicate report by id from the database")
             .WithTags(tagDuplicate)
@@ -140,7 +140,7 @@ internal static class EndpointExtensions
 
         // Update
         group
-            .MapPut(pattern: "/{duplicateId}", ReportStatusEndpoints.UpdateDuplicate)
+            .MapPut(pattern: "/{duplicateId}", ReportDuplicateEndpoints.UpdateDuplicate)
             .WithSummary("Duplicates - Update")
             .WithDescription("Updates a duplicate report by id in the database")
             .WithTags(tagDuplicate)
@@ -148,7 +148,7 @@ internal static class EndpointExtensions
 
         // Delete
         group
-            .MapDelete(pattern: "/{duplicateId}", ReportStatusEndpoints.DeleteDuplicate)
+            .MapDelete(pattern: "/{duplicateId}", ReportDuplicateEndpoints.DeleteDuplicate)
             .WithSummary("Duplicates - Delete")
             .WithDescription("Deletes a duplicate report by id from the database")
             .WithTags(tagDuplicate)
