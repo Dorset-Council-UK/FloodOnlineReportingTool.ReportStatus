@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 
 namespace Microsoft.AspNetCore.Builder;
@@ -11,25 +12,12 @@ internal static class AuthenticationExtensions
     /// </summary>
     internal static IServiceCollection AddReportStatusAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        // Resilient HTTP client for authentication purposes. For example: retrying when .well-known fails to read.
-        const string clientName = "OAuthResilient";
-        services
-            .AddHttpClient(clientName)
-            .AddStandardResilienceHandler();
-
         // Add authentication
         services
             .AddAuthentication(Constants.Bearer)
-            .AddMicrosoftIdentityWebApi(jwtBearerOptions =>
-            {
-                configuration.Bind(Constants.AzureAd, jwtBearerOptions);
-                var httpClientFactory = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
-                jwtBearerOptions.Backchannel = httpClientFactory.CreateClient(clientName);
-            },
-            microsoftIdentityOptions =>
-            {
-                configuration.Bind(Constants.AzureAd, microsoftIdentityOptions);
-            });
+            .AddMicrosoftIdentityWebApi(configuration);
+
+        ConfigureResilientJwtBearerOptions(services);
 
         // Add authorization
         services
@@ -50,5 +38,25 @@ internal static class AuthenticationExtensions
                 .RequireRole(RoleNames.Admin));
 
         return services;
+    }
+
+    /// <summary>
+    /// Configure a resilient JWT Bearer Options authentication handler.
+    /// </summary>
+    /// <remarks>For example, retrying when .well-known fails to read.</remarks>
+    private static void ConfigureResilientJwtBearerOptions(IServiceCollection services)
+    {
+        const string clientName = "OAuthResilient";
+
+        services
+            .AddHttpClient(clientName)
+            .AddStandardResilienceHandler();
+
+        services
+            .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IHttpClientFactory>((options, httpClientFactory) =>
+            {
+                options.Backchannel = httpClientFactory.CreateClient(clientName);
+            });
     }
 }
