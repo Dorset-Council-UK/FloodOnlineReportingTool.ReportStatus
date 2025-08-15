@@ -166,7 +166,7 @@ internal static class EndpointExtensions
     {
         // Search reports by UPRN
         group
-            .MapPost(pattern: "/uprn", SearchEndpoints.GetReportsByUPRN)
+            .MapGet(pattern: "/uprn", SearchEndpoints.GetReportsByUPRN)
             .WithSummary("Search - Reports by UPRN")
             .WithDescription("Searches for reports based on the provided UPRN")
             .WithTags(tagSearch)
@@ -174,7 +174,7 @@ internal static class EndpointExtensions
 
         // Search reports by coordinates
         group
-            .MapPost(pattern: "/coordinates", SearchEndpoints.GetReportsByCoordinates)
+            .MapGet(pattern: "/coordinates", SearchEndpoints.GetReportsByCoordinates)
             .WithSummary("Search - Reports by Coordinates")
             .WithDescription("Searches for reports based on the provided Easting and Northing coordinates")
             .WithTags(tagSearch)
@@ -182,7 +182,7 @@ internal static class EndpointExtensions
 
         // Search reports by start date
         group
-            .MapPost(pattern: "/startdate", SearchEndpoints.GetReportsByStartDate)
+            .MapGet(pattern: "/startdate", SearchEndpoints.GetReportsByStartDate)
             .WithSummary("Search - Reports by Start Date")
             .WithDescription("Searches for reports based on the date the flood started")
             .WithTags(tagSearch)
