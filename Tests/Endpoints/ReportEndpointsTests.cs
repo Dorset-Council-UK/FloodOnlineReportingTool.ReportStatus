@@ -50,12 +50,12 @@ public class ReportEndpointsTests
     }
 
     [Fact]
-    public async Task GetReportsById_ReturnsReport_WhenFound()
+    public async Task GetReport_ById_ReturnsReport_WhenFound()
     {
         // Arrange
         var reportId = Guid.CreateVersion7();
         var report = CreateTestReport(reportId);
-        _reportServiceMock.GetReportById(reportId, Arg.Any<CancellationToken>()).Returns(report);
+        _reportServiceMock.GetReport(reportId, Arg.Any<CancellationToken>()).Returns(report);
 
         // Act
         var result = await ReportEndpoints.GetReportById(_reportServiceMock, reportId, CancellationToken.None);
@@ -67,11 +67,11 @@ public class ReportEndpointsTests
     }
 
     [Fact]
-    public async Task GetReportsById_ReturnsNotFound_WhenNotFound()
+    public async Task GetReport_ById_ReturnsNotFound_WhenNotFound()
     {
         // Arrange
         var reportId = Guid.CreateVersion7();
-        _reportServiceMock.GetReportById(reportId, Arg.Any<CancellationToken>()).Returns((Report?)null);
+        _reportServiceMock.GetReport(reportId, Arg.Any<CancellationToken>()).Returns((Report?)null);
 
         // Act
         var result = await ReportEndpoints.GetReportById(_reportServiceMock, reportId, CancellationToken.None);

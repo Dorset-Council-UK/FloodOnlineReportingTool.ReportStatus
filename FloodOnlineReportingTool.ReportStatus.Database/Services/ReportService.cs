@@ -1,11 +1,18 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using MassTransit;
+using MassTransit.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class ReportService(ILogger<ReportService> logger, ApplicationDbContext context) : IReportService
+public class ReportService(
+    ILogger<ReportService> logger,
+    ApplicationDbContext context,
+    IPublishEndpoint publishEndpoint
+) : IReportService
 {
     public async Task<IReadOnlyList<Report>> GetReports(CancellationToken ct)
     {
@@ -17,7 +24,7 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
             .ConfigureAwait(false);
     }
 
-    public async Task<Report?> GetReportById(Guid id, CancellationToken ct)
+    public async Task<Report?> GetReport(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving report with ID {ReportId} from the database.", id);
 
@@ -26,6 +33,48 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
             .ConfigureAwait(false);
 
         return report;
+    }
+
+    public async Task<Guid?> GetReport(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
+    {
+        //logger.LogDebug("Retrieving report with ID {ReportId} from the database.", id);
+
+        // Matching UPRN
+        var reportId = await context.Reports
+            .Where(o => o.Uprn == eligibilityCheckCreated.Uprn)
+            .Select(o => (Guid?)o.Id)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+        if (reportId != null)
+        {
+            return reportId;
+        }
+
+        // Within 50 metre buffer
+        reportId = await context.Reports
+            .Where(o =>
+                Math.Sqrt(
+                    Math.Pow(o.Easting - eligibilityCheckCreated.Easting, 2) +
+                    Math.Pow(o.Northing - eligibilityCheckCreated.Northing, 2)
+                ) <= 50.0
+            )
+            .Select(o => (Guid?)o.Id)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+        if (reportId != null)
+        {
+            return reportId;
+        }
+
+        // Flood source is groundwater
+        // Flood date is within 14 days
+        // return null;
+
+        // Flood source is other
+        // Flood date is within 7 days
+        // return null;
+
+        return reportId;
     }
 
     public async Task<Report> CreateReport(ReportDto dto, CancellationToken ct)
@@ -46,9 +95,15 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
         };
 
         context.Reports.Add(newReport);
+        await publishEndpoint.Publish(newReport.ToMessageCreated(), ct).ConfigureAwait(false);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newReport;
+    }
+
+    public async Task<Report> CreateReport(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
+    {
+        return await CreateReport(eligibilityCheckCreated.ToReportDto(), ct);
     }
 
     public async Task<Report?> UpdateReport(Guid id, ReportDto dto, CancellationToken ct)
