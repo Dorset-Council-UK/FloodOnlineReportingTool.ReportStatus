@@ -9,6 +9,7 @@ internal static class EndpointExtensions
     internal const string tagReport = "Reports";
     internal const string tagReportDuplicate = "Report Duplicates";
     internal const string tagDuplicate = "Duplicates";
+    internal const string tagSearch = "Search";
 
     internal static WebApplication MapReportStatusEndpoints(this WebApplication app)
     {
@@ -27,9 +28,15 @@ internal static class EndpointExtensions
             .MapGroup("/api/duplicates")
             .HasApiVersion(Versions.V1.Version);
 
+        var searchGroup = app
+            .NewVersionedApi()
+            .MapGroup("/api/search")
+            .HasApiVersion(Versions.V1.Version);
+
         MapReportEndpoints(reportsGroup);
         MapReportDuplicateEndpoints(reportDuplicatesGroup);
         MapDuplicateEndpoints(duplicateGroup);
+        MapSearchEndpoints(searchGroup);
 
         return app;
     }
@@ -153,5 +160,32 @@ internal static class EndpointExtensions
             .WithDescription("Deletes a duplicate report by id from the database")
             .WithTags(tagDuplicate)
             .RequireAuthorization(PolicyNames.Writer);
+    }
+
+    private static void MapSearchEndpoints(RouteGroupBuilder group)
+    {
+        // Search reports by UPRN
+        group
+            .MapGet(pattern: "/uprn", SearchEndpoints.GetReportsByUPRN)
+            .WithSummary("Search - Reports by UPRN")
+            .WithDescription("Searches for reports based on the provided UPRN")
+            .WithTags(tagSearch)
+            .RequireAuthorization(PolicyNames.Reader);
+
+        // Search reports by coordinates
+        group
+            .MapGet(pattern: "/coordinates", SearchEndpoints.GetReportsByCoordinates)
+            .WithSummary("Search - Reports by Coordinates")
+            .WithDescription("Searches for reports based on the provided Easting and Northing coordinates")
+            .WithTags(tagSearch)
+            .RequireAuthorization(PolicyNames.Reader);
+
+        // Search reports by start date
+        group
+            .MapGet(pattern: "/startdate", SearchEndpoints.GetReportsByStartDate)
+            .WithSummary("Search - Reports by Start Date")
+            .WithDescription("Searches for reports based on the date the flood started")
+            .WithTags(tagSearch)
+            .RequireAuthorization(PolicyNames.Reader);
     }
 }
