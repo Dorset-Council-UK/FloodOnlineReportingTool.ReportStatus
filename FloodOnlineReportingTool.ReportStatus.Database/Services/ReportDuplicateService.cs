@@ -1,5 +1,4 @@
-﻿using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -85,11 +84,6 @@ public class ReportDuplicateService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newDuplicate;
-    }
-
-    public async Task<ReportDuplicate?> CreateDuplicate(Guid reportId, EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
-    {
-        return await CreateDuplicate(reportId, eligibilityCheckCreated.ToReportDuplicateDto(), ct);
     }
 
     public async Task<ReportDuplicate?> UpdateDuplicate(Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct)

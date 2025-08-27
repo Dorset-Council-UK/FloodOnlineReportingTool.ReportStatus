@@ -1,5 +1,4 @@
-﻿using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -29,11 +28,6 @@ public interface IReportDuplicateService
     /// Creates a new duplicate associated with a report in the database.
     /// </summary>
     Task<ReportDuplicate?> CreateDuplicate(Guid reportId, ReportDuplicateDto dto, CancellationToken ct);
-
-    /// <summary>
-    /// Creates a new duplicate associated with a report in the database.
-    /// </summary>
-    Task<ReportDuplicate?> CreateDuplicate(Guid reportId, EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing duplicate report in the database.
