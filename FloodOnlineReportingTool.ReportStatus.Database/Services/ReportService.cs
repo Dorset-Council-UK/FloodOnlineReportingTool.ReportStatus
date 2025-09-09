@@ -1,8 +1,6 @@
-﻿using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using MassTransit;
-using MassTransit.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -35,46 +33,40 @@ public class ReportService(
         return report;
     }
 
-    public async Task<Guid?> GetReport(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
+    public async Task<Report?> GetReportByUprn(long uprn, CancellationToken ct)
     {
-        //logger.LogDebug("Retrieving report with ID {ReportId} from the database.", id);
+        logger.LogDebug("Retrieving report with UPRN {Uprn} from the database.", uprn);
 
-        // Matching UPRN
-        var reportId = await context.Reports
-            .Where(o => o.Uprn == eligibilityCheckCreated.Uprn)
-            .Select(o => (Guid?)o.Id)
+        return await context.Reports
+            .AsNoTracking()
+            .Where(o => o.Uprn == uprn)
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
-        if (reportId != null)
-        {
-            return reportId;
-        }
+    }
 
-        // Within 50 metre buffer
-        reportId = await context.Reports
+    public async Task<Report?> GetReportWithinMetres(double easting, double northing, double metres, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving report within {Metres} metres of Easting {Easting} and Northing {Northing}.", metres, easting, northing);
+
+        //var metresSquared = metres * metres;
+        //return await context.Reports
+        //    .AsNoTracking()
+        //    .Where(o =>
+        //        Math.Pow(o.Easting - easting, 2) + Math.Pow(o.Northing - northing, 2) <= metresSquared
+        //    )
+        //    .FirstOrDefaultAsync(ct)
+        //    .ConfigureAwait(false);
+
+        return await context.Reports
+            .AsNoTracking()
             .Where(o =>
                 Math.Sqrt(
-                    Math.Pow(o.Easting - eligibilityCheckCreated.Easting, 2) +
-                    Math.Pow(o.Northing - eligibilityCheckCreated.Northing, 2)
-                ) <= 50.0
+                    Math.Pow(o.Easting - easting, 2) +
+                    Math.Pow(o.Northing - northing, 2)
+                ) <= metres
             )
-            .Select(o => (Guid?)o.Id)
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
-        if (reportId != null)
-        {
-            return reportId;
-        }
-
-        // Flood source is groundwater
-        // Flood date is within 14 days
-        // return null;
-
-        // Flood source is other
-        // Flood date is within 7 days
-        // return null;
-
-        return reportId;
     }
 
     public async Task<Report> CreateReport(ReportDto dto, CancellationToken ct)
@@ -99,11 +91,6 @@ public class ReportService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newReport;
-    }
-
-    public async Task<Report> CreateReport(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
-    {
-        return await CreateReport(eligibilityCheckCreated.ToReportDto(), ct);
     }
 
     public async Task<Report?> UpdateReport(Guid id, ReportDto dto, CancellationToken ct)

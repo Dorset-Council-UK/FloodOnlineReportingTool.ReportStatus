@@ -1,5 +1,4 @@
-﻿using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -16,20 +15,21 @@ public interface IReportService
     Task<Report?> GetReport(Guid id, CancellationToken ct);
 
     /// <summary>
-    /// Try to find a report using the information reported in an eligibility check created message.
+    /// Gets a report by it's UPRN from the database.
     /// </summary>
-    /// <remarks>Returning the ID not the full report</remarks>
-    Task<Guid?> GetReport(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct);
+    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
+    Task<Report?> GetReportByUprn(long uprn, CancellationToken ct);
+
+    /// <summary>
+    /// Gets a report that is within a specified buffer distance.
+    /// </summary>
+    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
+    Task<Report?> GetReportWithinMetres(double easting, double northing, double metres, CancellationToken ct);
 
     /// <summary>
     /// Creates a new report in the database.
     /// </summary>
     Task<Report> CreateReport(ReportDto dto, CancellationToken ct);
-
-    /// <summary>
-    /// Creates a new report in the database.
-    /// </summary>
-    Task<Report> CreateReport(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing report in the database.
