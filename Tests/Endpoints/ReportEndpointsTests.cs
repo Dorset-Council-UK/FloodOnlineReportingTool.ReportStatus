@@ -24,6 +24,7 @@ public class ReportEndpointsTests
             CreatedUtc = DateTimeOffset.UtcNow,
             UpdatedUtc = DateTimeOffset.UtcNow,
             Uprn = 1234567890L,
+            Usrn = 9876543210L,
             Easting = 123456.78,
             Northing = 987654.32,
             ImpactStartUtc = DateTimeOffset.UtcNow.AddHours(-1),

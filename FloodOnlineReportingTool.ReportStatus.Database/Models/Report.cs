@@ -7,8 +7,12 @@ public record Report
     public DateTimeOffset CreatedUtc { get; init; }
     public DateTimeOffset? UpdatedUtc { get; init; }
     public long? Uprn { get; init; }
+    public long? Usrn { get; init; }
     public required double Easting { get; init; }
     public required double Northing { get; init; }
     public DateTimeOffset? ImpactStartUtc { get; init; }
     public int ImpactDurationHours { get; init; }
+
+    public virtual IReadOnlyCollection<ReportDuplicate> Duplicates { get; init; } = [];
+    public virtual IReadOnlyCollection<ReportSource> Sources { get; init; } = [];
 }

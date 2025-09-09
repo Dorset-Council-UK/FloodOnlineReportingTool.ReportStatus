@@ -10,6 +10,7 @@ public static class ModelExtensions
         {
             EligibilityCheckId = report.EligibilityCheckId,
             Uprn = report.Uprn,
+            Usrn = report.Usrn,
             Easting = report.Easting,
             Northing = report.Northing,
             ImpactStartUtc = report.ImpactStartUtc,

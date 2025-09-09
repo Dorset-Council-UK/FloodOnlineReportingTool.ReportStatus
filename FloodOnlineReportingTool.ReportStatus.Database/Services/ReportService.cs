@@ -39,7 +39,18 @@ public class ReportService(
 
         return await context.Reports
             .AsNoTracking()
-            .Where(o => o.Uprn == uprn)
+            .Where(o => o.Uprn.Equals(uprn))
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<Report?> GetReportByUsrn(long usrn, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving report with USRN {Usrn} from the database.", usrn);
+
+        return await context.Reports
+            .AsNoTracking()
+            .Where(o => o.Usrn.Equals(usrn))
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
     }
@@ -80,6 +91,7 @@ public class ReportService(
 
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
+            Usrn = dto.Usrn,
             Easting = dto.Easting,
             Northing = dto.Northing,
             ImpactStartUtc = dto.ImpactStartUtc,
@@ -113,6 +125,7 @@ public class ReportService(
 
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
+            Usrn = dto.Usrn,
             Easting = dto.Easting,
             Northing = dto.Northing,
             ImpactStartUtc = dto.ImpactStartUtc,

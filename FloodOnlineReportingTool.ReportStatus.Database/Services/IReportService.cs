@@ -21,6 +21,12 @@ public interface IReportService
     Task<Report?> GetReportByUprn(long uprn, CancellationToken ct);
 
     /// <summary>
+    /// Gets a report by it's USRN from the database.
+    /// </summary>
+    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
+    Task<Report?> GetReportByUsrn(long usrn, CancellationToken ct);
+
+    /// <summary>
     /// Gets a report that is within a specified buffer distance.
     /// </summary>
     /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
