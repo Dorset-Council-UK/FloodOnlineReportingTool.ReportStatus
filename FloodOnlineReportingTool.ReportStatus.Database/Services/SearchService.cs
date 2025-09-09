@@ -13,7 +13,7 @@ public class SearchService(ILogger<ReportService> logger, ApplicationDbContext c
 
         return await context.Reports
             .AsNoTracking()
-            .Where(r => r.Uprn == uprn)
+            .Where(r => r.Uprn.Equals(uprn))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
