@@ -55,7 +55,7 @@ public class ReportEndpointsTests
         // Arrange
         var reportId = Guid.CreateVersion7();
         var report = CreateTestReport(reportId);
-        _reportServiceMock.GetReport(reportId, Arg.Any<CancellationToken>()).Returns(report);
+        _reportServiceMock.GetReportById(reportId, Arg.Any<CancellationToken>()).Returns(report);
 
         // Act
         var result = await ReportEndpoints.GetReportById(_reportServiceMock, reportId, CancellationToken.None);
@@ -71,7 +71,7 @@ public class ReportEndpointsTests
     {
         // Arrange
         var reportId = Guid.CreateVersion7();
-        _reportServiceMock.GetReport(reportId, Arg.Any<CancellationToken>()).Returns((Report?)null);
+        _reportServiceMock.GetReportById(reportId, Arg.Any<CancellationToken>()).Returns((Report?)null);
 
         // Act
         var result = await ReportEndpoints.GetReportById(_reportServiceMock, reportId, CancellationToken.None);

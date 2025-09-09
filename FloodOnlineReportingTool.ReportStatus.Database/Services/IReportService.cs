@@ -12,7 +12,7 @@ public interface IReportService
     /// <summary>
     /// Gets a report by its ID from the database.
     /// </summary>
-    Task<Report?> GetReport(Guid id, CancellationToken ct);
+    Task<Report?> GetReportById(Guid id, CancellationToken ct);
 
     /// <summary>
     /// Gets a report by it's UPRN from the database.

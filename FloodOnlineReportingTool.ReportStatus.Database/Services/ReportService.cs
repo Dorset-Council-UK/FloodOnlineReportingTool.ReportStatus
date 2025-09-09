@@ -22,7 +22,7 @@ public class ReportService(
             .ConfigureAwait(false);
     }
 
-    public async Task<Report?> GetReport(Guid id, CancellationToken ct)
+    public async Task<Report?> GetReportById(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving report with ID {ReportId} from the database.", id);
 
