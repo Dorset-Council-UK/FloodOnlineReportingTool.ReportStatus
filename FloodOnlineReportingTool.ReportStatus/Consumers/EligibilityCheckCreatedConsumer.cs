@@ -1,7 +1,9 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using MassTransit;
+using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Consumers;
 
@@ -59,23 +61,26 @@ internal class EligibilityCheckCreatedConsumer(
     /// <summary>
     /// Check if the report is a duplicate.
     /// </summary>
-    /// <remarks>Existing reports are found by UPRN or within metres of a recent flood</remarks>
+    /// <remarks>Existing reports are found by UPRN, by USRN, or within metres of a recent flood</remarks>
     /// <returns><see langword="true"/> if a duplicate report is found, otherwise <see langword="false"/>.</returns>"
     private async Task<bool> CheckDuplicate(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
     {
         var report = await CheckUprn(eligibilityCheckCreated.Uprn, ct).ConfigureAwait(false);
         if (report != null)
         {
+            if (CheckSources(report, eligibilityCheckCreated))
+            {
+                var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
+                return (duplicate != null);
+            }
+        }
+
+        report = await CheckUsrn(eligibilityCheckCreated.Usrn, ct).ConfigureAwait(false);
+        if (report != null)
+        {
             var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
             return (duplicate != null);
         }
-
-        //report = await CheckRecentlyFlooded(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing, ct).ConfigureAwait(false);
-        //if (report != null)
-        //{
-        //    var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
-        //    return (duplicate != null);
-        //}
 
         report = await CheckNearbyFlood(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing, ct).ConfigureAwait(false);
         if (report != null)
@@ -112,29 +117,48 @@ internal class EligibilityCheckCreatedConsumer(
     }
 
     /// <summary>
-    /// Is the eligibility check within a specified distance of an existing report.
+    /// Check if there is an existing report with a matching USRN.
     /// </summary>
     /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    private async Task<Report?> CheckRecentlyFlooded(DateTimeOffset? startDateUtc, CancellationToken ct)
+    private async Task<Report?> CheckUsrn(long? usrn, CancellationToken ct)
     {
-        var days = IsGroundWaterSource() ? 14 : 7;
-
-        if (IsRecentFlood2(startDateUtc, days))
+        if (usrn == null)
         {
-            logger.LogInformation("Creating duplicate report of report ID {ReportId}", report.Id);
-            await reportDuplicateService.CreateDuplicate(report.Id, message.ToReportDuplicateDto(), context.CancellationToken).ConfigureAwait(false);
-            return;
+            logger.LogInformation("Message does not have a USRN");
+            return null;
         }
 
-        if (report != null)
+        var report = await reportService.GetReportByUsrn(usrn.Value, ct).ConfigureAwait(false);
+
+        if (report == null)
         {
-            logger.LogInformation("Eligibility check is within {Metres} metres of an existing report.", _metres);
-            return report;
+            logger.LogInformation("Not able to find an existing report with matching USRN: {Usrn}", usrn);
+            return null;
         }
 
-        logger.LogInformation("Not able to find an existing report within {Metres} metres.", _metres);
-
+        logger.LogInformation("Found an existing report with matching USRN: {Usrn}", usrn);
         return report;
+    }
+
+    /// <summary>
+    /// Check if any of the sources match, or if the report is recent enough to be considered a duplicate.
+    /// </summary>
+    private static bool CheckSources(Report report, EligibilityCheckCreated eligibilityCheckCreated)
+    {
+        // if any of the message Ids match on any of the report Ids, return true for a match
+        ImmutableHashSet<Guid> reportSourceIds = [.. report.Sources.Select(s => s.Id)];
+        ImmutableHashSet<Guid> messageSourceIds = [.. eligibilityCheckCreated.FloodSources.Select(s => s.Id)];
+
+        if (messageSourceIds.Overlaps(reportSourceIds))
+        {
+            return true;
+        }
+
+        // is ground water source?
+        var isGroundWaterSource = messageSourceIds.Contains(FloodSourceIds.WaterRisingOutOfTheGround);
+        var days = isGroundWaterSource ? 14 : 7;
+
+        return IsWithinDays(report, eligibilityCheckCreated, days);
     }
 
     /// <summary>
@@ -157,34 +181,27 @@ internal class EligibilityCheckCreatedConsumer(
         return null;
     }
 
-    private bool IsGroundWaterSource()
-    {
-        // TODO Sources is missing at the moment.
-        // Assuming eligibilityCheckCreated.Sources is an IReadOnlyCollection<EligibilityCheckSource>
-        // And its the FloodProblemId I have to compare, which might mean FloodProblemIds needs moving to contracts?
-        //return eligibilityCheckCreated.Sources.Any(source => source.FloodProblemId == FloodProblemIds.WaterRisingOutOfTheGround);
-        return false;
-    }
-
     /// <summary>
     /// When a nearby flood is found, check if it is recent enough to be considered a duplicate.
     /// </summary>
-    private static bool IsRecentFlood(EligibilityCheckCreated eligibilityCheckCreated, Report report, int days)
+    /// <remarks>Use TimeSpan to check if the message is within the specified number of days from the report.</remarks>
+    private static bool IsWithinDays(Report report, EligibilityCheckCreated eligibilityCheckCreated, int days)
     {
-        DateTimeOffset? startDateUtc = eligibilityCheckCreated.ImpactStartUTC;
-        DateTimeOffset? reportStartDateUtc = report.ImpactStartUtc;
-        
-        if (startDateUtc == null || reportStartDateUtc == null)
+        if (eligibilityCheckCreated.IsOnGoing)
         {
-            // TODO Decide if no dates should be considered recent (possibly an ongoing flood?)
-            return false;
+            var todayDaysDifference = (DateTimeOffset.UtcNow - report.CreatedUtc).TotalDays;
+            return eligibilityCheckCreated.IsOnGoing && todayDaysDifference <= days;
         }
 
-        // Using a TimeSpan, check if the message is within the specified number of days from the report
-        var daysDifference = (startDateUtc.Value - reportStartDateUtc.Value).TotalDays;
+        if (eligibilityCheckCreated.ImpactStartUTC == null || report.ImpactStartUtc == null)
+        {
+            // TODO Decide if no dates should be considered recent
+            return true;
+        }
+
+        var daysDifference = (eligibilityCheckCreated.ImpactStartUTC.Value - report.ImpactStartUtc.Value).TotalDays;
         return daysDifference <= days;
     }
-
 
     private async Task<ReportDuplicate?> CreateDuplicateReport(Guid reportId, EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
     {
