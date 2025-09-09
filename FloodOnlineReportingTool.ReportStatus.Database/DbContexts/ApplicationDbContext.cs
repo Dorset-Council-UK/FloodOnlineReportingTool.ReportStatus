@@ -8,6 +8,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Report> Reports { get; set; }
     public DbSet<ReportDuplicate> ReportDuplicates { get; set; }
+    public DbSet<ReportSource> ReportSources { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

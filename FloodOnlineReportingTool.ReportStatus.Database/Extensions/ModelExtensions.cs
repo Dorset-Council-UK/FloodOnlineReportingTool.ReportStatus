@@ -46,4 +46,12 @@ public static class ModelExtensions
             duplicate.CreatedUtc
         );
     }
+
+    public static ReportSourceDto ToDto(this ReportSource reportSource)
+    {
+        return new()
+        {
+            Name = reportSource.Name,
+        };
+    }
 }
