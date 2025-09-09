@@ -8,6 +8,12 @@ internal class ReportDuplicateConfiguration : IEntityTypeConfiguration<ReportDup
 {
     public void Configure(EntityTypeBuilder<ReportDuplicate> builder)
     {
+        builder.HasKey(o => new { o.ReportId, o.Id });
+
+        builder
+            .Property(o => o.ReportId)
+            .ValueGeneratedNever();
+
         builder
             .Property(o => o.Id)
             .ValueGeneratedNever();

@@ -49,7 +49,7 @@ public class ReportDuplicateService(
         logger.LogDebug("Retrieving duplicate report with ID {ReportDuplicateId} from the database.", duplicateId);
 
         var duplicate = await context.ReportDuplicates
-            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.Id == duplicateId, ct)
+            .FindAsync([reportId, duplicateId], ct)
             .ConfigureAwait(false);
 
         return duplicate;
@@ -70,10 +70,9 @@ public class ReportDuplicateService(
 
         var newDuplicate = new ReportDuplicate()
         {
+            ReportId = reportId,
             Id = Guid.CreateVersion7(),
             CreatedUtc = DateTimeOffset.UtcNow,
-
-            ReportId = reportId,
             EligibilityCheckId = dto.EligibilityCheckId,
             Easting = dto.Easting,
             Northing = dto.Northing,
@@ -103,7 +102,6 @@ public class ReportDuplicateService(
         var updated = existing with
         {
             UpdatedUtc = DateTimeOffset.UtcNow,
-
             EligibilityCheckId = dto.EligibilityCheckId,
             Easting = dto.Easting,
             Northing = dto.Northing,
@@ -120,7 +118,7 @@ public class ReportDuplicateService(
         logger.LogDebug("Updating duplicate report with ID {ReportDuplicateId} in the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.Id == duplicateId, ct)
+            .FindAsync([reportId, duplicateId], ct)
             .ConfigureAwait(false);
 
         if (existing == null)
@@ -131,7 +129,6 @@ public class ReportDuplicateService(
         var updated = existing with
         {
             UpdatedUtc = DateTimeOffset.UtcNow,
-
             EligibilityCheckId = dto.EligibilityCheckId,
             Easting = dto.Easting,
             Northing = dto.Northing,
@@ -148,7 +145,7 @@ public class ReportDuplicateService(
         logger.LogDebug("Delete duplicate report with ID {ReportDuplicateId} from the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FindAsync([duplicateId], ct)
+            .FirstOrDefaultAsync(o => o.Id == duplicateId, ct)
             .ConfigureAwait(false);
 
         if (existing == null)
@@ -167,7 +164,7 @@ public class ReportDuplicateService(
         logger.LogDebug("Delete duplicate report with ID {ReportDuplicateId} from the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.Id == duplicateId, ct)
+            .FindAsync([reportId, duplicateId], ct)
             .ConfigureAwait(false);
 
         if (existing == null)
