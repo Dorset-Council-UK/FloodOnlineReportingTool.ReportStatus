@@ -78,15 +78,21 @@ internal class EligibilityCheckCreatedConsumer(
         report = await CheckUsrn(eligibilityCheckCreated.Usrn, ct).ConfigureAwait(false);
         if (report != null)
         {
-            var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
-            return (duplicate != null);
+            if (CheckSources(report, eligibilityCheckCreated))
+            {
+                var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
+                return (duplicate != null);
+            }
         }
 
         report = await CheckNearbyFlood(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing, ct).ConfigureAwait(false);
         if (report != null)
         {
-            var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
-            return (duplicate != null);
+            if (CheckSources(report, eligibilityCheckCreated))
+            {
+                var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
+                return (duplicate != null);
+            }
         }
 
         return false;
@@ -141,7 +147,8 @@ internal class EligibilityCheckCreatedConsumer(
     }
 
     /// <summary>
-    /// Check if any of the sources match, or if the report is recent enough to be considered a duplicate.
+    ///     <para>Check if any of the new sources match those in the existing report.</para>
+    ///     <para>Or if the report is recent enough to be considered a duplicate.</para>
     /// </summary>
     private static bool CheckSources(Report report, EligibilityCheckCreated eligibilityCheckCreated)
     {
@@ -182,7 +189,7 @@ internal class EligibilityCheckCreatedConsumer(
     }
 
     /// <summary>
-    /// When a nearby flood is found, check if it is recent enough to be considered a duplicate.
+    /// Check if the report is within the specified number of days from the report.
     /// </summary>
     /// <remarks>Use TimeSpan to check if the message is within the specified number of days from the report.</remarks>
     private static bool IsWithinDays(Report report, EligibilityCheckCreated eligibilityCheckCreated, int days)
