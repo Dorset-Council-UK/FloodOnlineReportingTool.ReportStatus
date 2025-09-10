@@ -1,16 +1,11 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class ReportDuplicateService(
-    ILogger<ReportDuplicateService> logger,
-    ApplicationDbContext context,
-    IPublishEndpoint publishEndpoint
-) : IReportDuplicateService
+public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, ApplicationDbContext context) : IReportDuplicateService
 {
     public async Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(CancellationToken ct)
     {
@@ -79,7 +74,6 @@ public class ReportDuplicateService(
         };
 
         context.ReportDuplicates.Add(newDuplicate);
-        await publishEndpoint.Publish(newDuplicate.ToMessageCreated(), ct).ConfigureAwait(false);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newDuplicate;

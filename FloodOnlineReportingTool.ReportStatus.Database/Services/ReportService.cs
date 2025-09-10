@@ -1,16 +1,11 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class ReportService(
-    ILogger<ReportService> logger,
-    ApplicationDbContext context,
-    IPublishEndpoint publishEndpoint
-) : IReportService
+public class ReportService(ILogger<ReportService> logger, ApplicationDbContext context) : IReportService
 {
     public async Task<IReadOnlyList<Report>> GetReports(CancellationToken ct)
     {
@@ -99,7 +94,6 @@ public class ReportService(
         };
 
         context.Reports.Add(newReport);
-        await publishEndpoint.Publish(newReport.ToMessageCreated(), ct).ConfigureAwait(false);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newReport;

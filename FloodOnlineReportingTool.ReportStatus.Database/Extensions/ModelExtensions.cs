@@ -18,15 +18,6 @@ public static class ModelExtensions
         };
     }
 
-    internal static ReportCreated ToMessageCreated(this Report report)
-    {
-        return new(
-            report.Id,
-            report.EligibilityCheckId,
-            report.CreatedUtc
-        );
-    }
-
     public static ReportDuplicateDto ToDto(this ReportDuplicate duplicate)
     {
         return new()
@@ -34,24 +25,6 @@ public static class ModelExtensions
             EligibilityCheckId = duplicate.EligibilityCheckId,
             Easting = duplicate.Easting,
             Northing = duplicate.Northing,
-        };
-    }
-
-    internal static ReportDuplicateCreated ToMessageCreated(this ReportDuplicate duplicate)
-    {
-        return new(
-            duplicate.Id,
-            duplicate.ReportId,
-            duplicate.EligibilityCheckId,
-            duplicate.CreatedUtc
-        );
-    }
-
-    public static ReportSourceDto ToDto(this ReportSource reportSource)
-    {
-        return new()
-        {
-            Name = reportSource.Name,
         };
     }
 }
