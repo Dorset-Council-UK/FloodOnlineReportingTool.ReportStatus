@@ -8,14 +8,14 @@ internal class ReportSourceConfiguration : IEntityTypeConfiguration<ReportSource
 {
     public void Configure(EntityTypeBuilder<ReportSource> builder)
     {
-        builder.HasKey(o => new { o.ReportId, o.Id });
+        builder.HasKey(o => new { o.ReportId, o.SourceId });
 
         builder
             .Property(o => o.ReportId)
             .ValueGeneratedNever();
 
         builder
-            .Property(o => o.Id)
+            .Property(o => o.SourceId)
             .ValueGeneratedNever();
     }
 }

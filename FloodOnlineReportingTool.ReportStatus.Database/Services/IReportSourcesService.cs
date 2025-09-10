@@ -17,7 +17,7 @@ public interface IReportSourceService
     /// <summary>
     /// Creates a new report source in the database.
     /// </summary>
-    Task<ReportSource> CreateReportSource(Guid reportId, ReportSourceDto dto, CancellationToken ct);
+    Task<ReportSource> CreateReportSource(Guid reportId, Guid sourceId, ReportSourceDto dto, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing report source in the database.

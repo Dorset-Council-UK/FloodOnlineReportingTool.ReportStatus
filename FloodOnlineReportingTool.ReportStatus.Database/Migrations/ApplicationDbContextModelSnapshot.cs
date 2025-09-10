@@ -93,7 +93,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("ReportId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("SourceId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedUtc")
@@ -106,7 +106,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("ReportId", "Id");
+                    b.HasKey("ReportId", "SourceId");
 
                     b.ToTable("ReportSources", "fortreportstatus");
                 });

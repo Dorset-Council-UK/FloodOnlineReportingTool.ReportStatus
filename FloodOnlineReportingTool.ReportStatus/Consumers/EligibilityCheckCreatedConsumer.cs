@@ -152,8 +152,8 @@ internal class EligibilityCheckCreatedConsumer(
     /// </summary>
     private static bool CheckSources(Report report, EligibilityCheckCreated eligibilityCheckCreated)
     {
-        // if any of the message Ids match on any of the report Ids, return true for a match
-        ImmutableHashSet<Guid> reportSourceIds = [.. report.Sources.Select(s => s.Id)];
+        // do any of the message Ids match on any of the report Ids
+        ImmutableHashSet<Guid> reportSourceIds = [.. report.Sources.Select(s => s.SourceId)];
         ImmutableHashSet<Guid> messageSourceIds = [.. eligibilityCheckCreated.FloodSources.Select(s => s.Id)];
 
         if (messageSourceIds.Overlaps(reportSourceIds))

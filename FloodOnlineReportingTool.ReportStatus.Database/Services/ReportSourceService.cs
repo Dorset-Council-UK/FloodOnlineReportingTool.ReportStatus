@@ -29,14 +29,14 @@ public class ReportSourceService(ILogger<ReportSourceService> logger, Applicatio
         return reportSource;
     }
 
-    public async Task<ReportSource> CreateReportSource(Guid reportId, ReportSourceDto dto, CancellationToken ct)
+    public async Task<ReportSource> CreateReportSource(Guid reportId, Guid sourceId, ReportSourceDto dto, CancellationToken ct)
     {
         logger.LogDebug("Creating a new report source.");
 
         var newReportSource = new ReportSource()
         {
             ReportId = reportId,
-            Id = Guid.CreateVersion7(),
+            SourceId = sourceId,
             CreatedUtc = DateTimeOffset.UtcNow,
             Name = dto.Name,
         };
@@ -97,7 +97,7 @@ public class ReportSourceService(ILogger<ReportSourceService> logger, Applicatio
 
         return await context.ReportSources
             .AsNoTracking()
-            .AnyAsync(o => o.ReportId == reportId && o.Id == sourceId, ct)
+            .AnyAsync(o => o.ReportId == reportId && o.SourceId == sourceId, ct)
             .ConfigureAwait(false);
     }
 }
