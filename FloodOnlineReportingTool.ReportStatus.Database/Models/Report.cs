@@ -1,4 +1,6 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 public record Report
 {
@@ -13,6 +15,8 @@ public record Report
     public DateTimeOffset? ImpactStartUtc { get; init; }
     public int ImpactDurationHours { get; init; }
 
+    [JsonIgnore]
     public virtual IReadOnlyCollection<ReportDuplicate> Duplicates { get; init; } = [];
+    [JsonIgnore]
     public virtual IReadOnlyCollection<ReportSource> Sources { get; init; } = [];
 }

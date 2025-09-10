@@ -1,4 +1,6 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 public record ReportSource
 {
@@ -8,5 +10,6 @@ public record ReportSource
     public DateTimeOffset? UpdatedUtc { get; init; }
     public required string Name { get; init; }
 
+    [JsonIgnore]
     public virtual Report Report { get; init; } = default!;
 }

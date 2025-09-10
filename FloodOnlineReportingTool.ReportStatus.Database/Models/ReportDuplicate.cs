@@ -12,6 +12,6 @@ public record ReportDuplicate
     public required double Easting { get; init; }
     public required double Northing { get; init; }
 
-    //[JsonIgnore]
+    [JsonIgnore]
     public virtual Report Report { get; init; } = default!;
 }
