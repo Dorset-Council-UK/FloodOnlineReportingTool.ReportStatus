@@ -70,7 +70,9 @@ internal class EligibilityCheckCreatedConsumer(
         {
             if (CheckSources(report, eligibilityCheckCreated))
             {
-                var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
+                logger.LogInformation("Creating duplicate report of report ID {ReportId} - Reason: UPRN and flood Sources", report.Id);
+                var duplicateDto = eligibilityCheckCreated.ToReportDuplicateDto();
+                var duplicate = await reportDuplicateService.CreateDuplicate(report.Id, duplicateDto, ct).ConfigureAwait(false);
                 return (duplicate != null);
             }
         }
@@ -80,7 +82,9 @@ internal class EligibilityCheckCreatedConsumer(
         {
             if (CheckSources(report, eligibilityCheckCreated))
             {
-                var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
+                logger.LogInformation("Creating duplicate report of report ID {ReportId} - Reason: USRN and flood Sources", report.Id);
+                var duplicateDto = eligibilityCheckCreated.ToReportDuplicateDto();
+                var duplicate = await reportDuplicateService.CreateDuplicate(report.Id, duplicateDto, ct).ConfigureAwait(false);
                 return (duplicate != null);
             }
         }
@@ -90,7 +94,9 @@ internal class EligibilityCheckCreatedConsumer(
         {
             if (CheckSources(report, eligibilityCheckCreated))
             {
-                var duplicate = await CreateDuplicateReport(report.Id, eligibilityCheckCreated, ct).ConfigureAwait(false);
+                logger.LogInformation("Creating duplicate report of report ID {ReportId} - Reason: Within {Metres} and flood Sources", report.Id, _metres);
+                var duplicateDto = eligibilityCheckCreated.ToReportDuplicateDto();
+                var duplicate = await reportDuplicateService.CreateDuplicate(report.Id, duplicateDto, ct).ConfigureAwait(false);
                 return (duplicate != null);
             }
         }
@@ -202,11 +208,5 @@ internal class EligibilityCheckCreatedConsumer(
 
         var daysDifference = (eligibilityCheckCreated.ImpactStartUTC.Value - report.ImpactStartUtc.Value).TotalDays;
         return daysDifference <= days;
-    }
-
-    private async Task<ReportDuplicate?> CreateDuplicateReport(Guid reportId, EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
-    {
-        logger.LogInformation("Creating duplicate report of report ID {ReportId}", reportId);
-        return await reportDuplicateService.CreateDuplicate(reportId, eligibilityCheckCreated.ToReportDuplicateDto(), ct).ConfigureAwait(false);
     }
 }
