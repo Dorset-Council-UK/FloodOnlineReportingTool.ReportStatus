@@ -52,7 +52,8 @@ public class ReportSourceService(ILogger<ReportSourceService> logger, Applicatio
         logger.LogDebug("Updating report source with ID {ReportId}/{SourceId} in the database.", reportId, sourceId);
 
         var existing = await context.ReportSources
-            .FindAsync([reportId, sourceId], ct)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.SourceId == sourceId, ct)
             .ConfigureAwait(false);
 
         if (existing == null)
