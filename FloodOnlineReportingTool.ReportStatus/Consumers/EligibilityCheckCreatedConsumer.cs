@@ -148,7 +148,7 @@ internal class EligibilityCheckCreatedConsumer(
 
     /// <summary>
     ///     <para>Check if any of the new sources match those in the existing report.</para>
-    ///     <para>Or if the report is recent enough to be considered a duplicate.</para>
+    ///     <para>If so, then check if the report is recent enough to be considered a duplicate.</para>
     /// </summary>
     private static bool CheckSources(Report report, EligibilityCheckCreated eligibilityCheckCreated)
     {
@@ -156,12 +156,11 @@ internal class EligibilityCheckCreatedConsumer(
         ImmutableHashSet<Guid> reportSourceIds = [.. report.Sources.Select(s => s.SourceId)];
         ImmutableHashSet<Guid> messageSourceIds = [.. eligibilityCheckCreated.FloodSources.Select(s => s.Id)];
 
-        if (messageSourceIds.Overlaps(reportSourceIds))
+        if (!messageSourceIds.Overlaps(reportSourceIds))
         {
-            return true;
+            return false;
         }
 
-        // is ground water source?
         var isGroundWaterSource = messageSourceIds.Contains(FloodSourceIds.WaterRisingOutOfTheGround);
         var days = isGroundWaterSource ? 14 : 7;
 
@@ -194,16 +193,11 @@ internal class EligibilityCheckCreatedConsumer(
     /// <remarks>Use TimeSpan to check if the message is within the specified number of days from the report.</remarks>
     private static bool IsWithinDays(Report report, EligibilityCheckCreated eligibilityCheckCreated, int days)
     {
-        if (eligibilityCheckCreated.IsOnGoing)
-        {
-            var todayDaysDifference = (DateTimeOffset.UtcNow - report.CreatedUtc).TotalDays;
-            return eligibilityCheckCreated.IsOnGoing && todayDaysDifference <= days;
-        }
-
         if (eligibilityCheckCreated.ImpactStartUTC == null || report.ImpactStartUtc == null)
         {
             // TODO Decide if no dates should be considered recent
-            return true;
+            var createdDateDifference = (eligibilityCheckCreated.CreatedUtc - report.CreatedUtc).TotalDays;
+            return createdDateDifference <= days;
         }
 
         var daysDifference = (eligibilityCheckCreated.ImpactStartUTC.Value - report.ImpactStartUtc.Value).TotalDays;
