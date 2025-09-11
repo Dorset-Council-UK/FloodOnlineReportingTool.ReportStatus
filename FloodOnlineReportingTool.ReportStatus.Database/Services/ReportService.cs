@@ -77,7 +77,7 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
 
     public async Task<Report> CreateReport(ReportDto dto, CancellationToken ct)
     {
-        logger.LogDebug("Creating a new report with EligibilityCheckId {EligibilityCheckId} and Uprn {Uprn}.", dto.EligibilityCheckId, dto.Uprn);
+        logger.LogDebug("Creating a new report with EligibilityCheckId {EligibilityCheckId}.", dto.EligibilityCheckId);
 
         var newReport = new Report()
         {

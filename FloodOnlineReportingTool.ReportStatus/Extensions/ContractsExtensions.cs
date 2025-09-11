@@ -22,6 +22,7 @@ internal static class ContractsExtensions
         {
             EligibilityCheckId = eligibilityCheckCreated.Id,
             Uprn = eligibilityCheckCreated.Uprn,
+            Usrn = eligibilityCheckCreated.Usrn,
             Easting = eligibilityCheckCreated.Easting,
             Northing = eligibilityCheckCreated.Northing,
             ImpactStartUtc = eligibilityCheckCreated.ImpactStartUTC,
