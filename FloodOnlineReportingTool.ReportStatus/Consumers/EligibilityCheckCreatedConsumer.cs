@@ -2,19 +2,21 @@
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Consumers;
 
 internal class EligibilityCheckCreatedConsumer(
     ILogger<EligibilityCheckCreatedConsumer> logger,
+    IOptions<ReportStatusSettings> settings,
     IReportService reportService,
     IReportDuplicateService reportDuplicateService
 ) : IConsumer<EligibilityCheckCreated>
 {
-    private readonly double _metres = 50;
-    private readonly int _vulnerableThreshold = 9999;
+    private readonly ReportStatusSettings _settings = settings.Value;
 
     public async Task Consume(ConsumeContext<EligibilityCheckCreated> context)
     {
@@ -22,145 +24,95 @@ internal class EligibilityCheckCreatedConsumer(
 
         var message = context.Message;
 
-        CheckUninhabitable(message);
-        CheckVulnerableCount(message);
+        CheckVulnerability(message);
         
-        var isDuplicate = await CheckDuplicate(message, context.CancellationToken).ConfigureAwait(false);
+        var isPotentialDuplicate = await IsPotentialDuplicate(message, context.CancellationToken).ConfigureAwait(false);
 
-        if (!isDuplicate)
+        if (!isPotentialDuplicate)
         {
             logger.LogInformation("Creating a new report");
             await reportService.CreateReport(message.ToReportDto(), context.CancellationToken).ConfigureAwait(false);
         }
     }
 
-    /// <summary>
-    /// Check if the area is uninhabitable. Sending a danger alert if it is.
-    /// </summary>
-    private void CheckUninhabitable(EligibilityCheckCreated eligibilityCheckCreated)
+    private void CheckVulnerability(EligibilityCheckCreated message)
     {
-        if (eligibilityCheckCreated.IsUninhabitable)
+        // TODO Implement vulnerability check logic
+        if (message.IsUninhabitable && message.IsOnGoing && message.VulnerableCount > 1)
         {
-            // TODO Create a danger alert notification
-            logger.LogInformation("Area is uninhabitable");
+            logger.LogInformation("There are {VulnerableCount} vulnerable people in an uninhabitable and ongoing flood area", message.VulnerableCount);
         }
     }
 
     /// <summary>
-    /// Check if the vulnerable count exceeds the threshold.
+    /// Check if the report is potentially a duplicate, this will then be checked by the team.
     /// </summary>
-    private void CheckVulnerableCount(EligibilityCheckCreated eligibilityCheckCreated)
-    {
-        if (eligibilityCheckCreated.VulnerableCount > _vulnerableThreshold)
-        {
-            // TODO Create vulnerable alert logic
-            logger.LogInformation("There are {VulnerableCount} vulnerable people in the area", eligibilityCheckCreated.VulnerableCount);
-        }
-    }
-
-    /// <summary>
-    /// Check if the report is a duplicate.
-    /// </summary>
-    /// <remarks>Existing reports are found by UPRN, by USRN, or within metres of a recent flood</remarks>
     /// <returns><see langword="true"/> if a duplicate report is found, otherwise <see langword="false"/>.</returns>"
-    private async Task<bool> CheckDuplicate(EligibilityCheckCreated eligibilityCheckCreated, CancellationToken ct)
+    private async Task<bool> IsPotentialDuplicate(EligibilityCheckCreated message, CancellationToken ct)
     {
-        var report = await CheckUprn(eligibilityCheckCreated.Uprn, ct).ConfigureAwait(false);
-        if (report != null)
+        // check by UPRN first
+        if (message.Uprn != null)
         {
-            if (CheckSources(report, eligibilityCheckCreated))
+            // find existing reports by UPRN
+            var reports = await reportService.GetReportsByUprn(message.Uprn.Value, ct).ConfigureAwait(false);
+
+            // filter reports that match the sources logic
+            IReadOnlyCollection<Report> matchedReports = [.. reports.Where(report => HasMatchingSources(report, message))];
+
+            if (matchedReports.Count > 0)
             {
-                logger.LogInformation("Creating duplicate report of report ID {ReportId} - Reason: UPRN and flood Sources", report.Id);
-                var duplicateDto = eligibilityCheckCreated.ToReportDuplicateDto();
-                var duplicate = await reportDuplicateService.CreateDuplicate(report.Id, duplicateDto, ct).ConfigureAwait(false);
-                return (duplicate != null);
+                logger.LogInformation("Found {Count} matching reports by UPRN", matchedReports.Count);
+                return await reportDuplicateService.CreateDuplicates(matchedReports, ct).ConfigureAwait(false);
             }
+
+            return false;
         }
 
-        report = await CheckUsrn(eligibilityCheckCreated.Usrn, ct).ConfigureAwait(false);
-        if (report != null)
+        // no UPRN, check by USRN
+        if (message.Usrn != null)
         {
-            if (CheckSources(report, eligibilityCheckCreated))
+            // find existing reports by USRN
+            var reports = await reportService.GetReportsByUsrn(message.Usrn.Value, ct).ConfigureAwait(false);
+
+            // filter reports that match the sources logic
+            IReadOnlyCollection<Report> matchedReports = [.. reports.Where(report => HasMatchingSources(report, message))];
+
+            if (matchedReports.Count > 0)
             {
-                logger.LogInformation("Creating duplicate report of report ID {ReportId} - Reason: USRN and flood Sources", report.Id);
-                var duplicateDto = eligibilityCheckCreated.ToReportDuplicateDto();
-                var duplicate = await reportDuplicateService.CreateDuplicate(report.Id, duplicateDto, ct).ConfigureAwait(false);
-                return (duplicate != null);
+                logger.LogInformation("Found {Count} matching reports by USRN", matchedReports.Count);
+                await reportDuplicateService.CreateDuplicates(matchedReports, ct).ConfigureAwait(false);
+                return true;
             }
+
+            return false;
         }
 
-        report = await CheckNearbyFlood(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing, ct).ConfigureAwait(false);
-        if (report != null)
+        // no UPRN or USRN, check by buffer of location
+        var withinBufferReports = await reportService.GetReportsWithinMetres(message.Easting, message.Northing, _settings.LocationBufferMetres, ct).ConfigureAwait(false);
+        if (withinBufferReports.Count > 0)
         {
-            if (CheckSources(report, eligibilityCheckCreated))
+            // filter reports that match the sources logic
+            IReadOnlyCollection<Report> matchedReports = [.. withinBufferReports.Where(report => HasMatchingSources(report, message))];
+
+            if (matchedReports.Count > 0)
             {
-                logger.LogInformation("Creating duplicate report of report ID {ReportId} - Reason: Within {Metres} and flood Sources", report.Id, _metres);
-                var duplicateDto = eligibilityCheckCreated.ToReportDuplicateDto();
-                var duplicate = await reportDuplicateService.CreateDuplicate(report.Id, duplicateDto, ct).ConfigureAwait(false);
-                return (duplicate != null);
+                logger.LogInformation("Found {Count} matching reports within {Metres} metres", matchedReports.Count, _settings.LocationBufferMetres);
+                await reportDuplicateService.CreateDuplicates(matchedReports, ct).ConfigureAwait(false);
+                return true;
             }
+
+            return false;
         }
 
+        // no matches
         return false;
     }
 
-    /// <summary>
-    /// Check if there is an existing report with a matching UPRN.
-    /// </summary>
-    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    private async Task<Report?> CheckUprn(long? uprn, CancellationToken ct)
-    {
-        if (uprn == null)
-        {
-            logger.LogInformation("Message does not have a UPRN");
-            return null;
-        }
-
-        var report = await reportService.GetReportByUprn(uprn.Value, ct).ConfigureAwait(false);
-
-        if (report == null)
-        {
-            logger.LogInformation("Not able to find an existing report with matching UPRN: {Uprn}", uprn);
-            return null;
-        }
-
-        logger.LogInformation("Found an existing report with matching UPRN: {Uprn}", uprn);
-        return report;
-    }
-
-    /// <summary>
-    /// Check if there is an existing report with a matching USRN.
-    /// </summary>
-    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    private async Task<Report?> CheckUsrn(long? usrn, CancellationToken ct)
-    {
-        if (usrn == null)
-        {
-            logger.LogInformation("Message does not have a USRN");
-            return null;
-        }
-
-        var report = await reportService.GetReportByUsrn(usrn.Value, ct).ConfigureAwait(false);
-
-        if (report == null)
-        {
-            logger.LogInformation("Not able to find an existing report with matching USRN: {Usrn}", usrn);
-            return null;
-        }
-
-        logger.LogInformation("Found an existing report with matching USRN: {Usrn}", usrn);
-        return report;
-    }
-
-    /// <summary>
-    ///     <para>Check if any of the new sources match those in the existing report.</para>
-    ///     <para>If so, then check if the report is recent enough to be considered a duplicate.</para>
-    /// </summary>
-    private static bool CheckSources(Report report, EligibilityCheckCreated eligibilityCheckCreated)
+    private bool HasMatchingSources(Report report, EligibilityCheckCreated message)
     {
         // do any of the message Ids match on any of the report Ids
         ImmutableHashSet<Guid> reportSourceIds = [.. report.Sources.Select(s => s.SourceId)];
-        ImmutableHashSet<Guid> messageSourceIds = [.. eligibilityCheckCreated.FloodSources.Select(s => s.Id)];
+        ImmutableHashSet<Guid> messageSourceIds = [.. message.FloodSources.Select(s => s.Id)];
 
         if (!messageSourceIds.Overlaps(reportSourceIds))
         {
@@ -168,45 +120,32 @@ internal class EligibilityCheckCreatedConsumer(
         }
 
         var isGroundWaterSource = messageSourceIds.Contains(FloodSourceIds.WaterRisingOutOfTheGround);
-        var days = isGroundWaterSource ? 14 : 7;
+        var bufferDays = isGroundWaterSource ? 14 : 7;
 
-        return IsWithinDays(report, eligibilityCheckCreated, days);
+        return WasReportedWithinDays(report, message, bufferDays);
     }
 
-    /// <summary>
-    /// Is the eligibility check within a specified distance of an existing report.
-    /// </summary>
-    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    private async Task<Report?> CheckNearbyFlood(double easting, double northing, CancellationToken ct)
+    private bool WasReportedWithinDays(Report report, EligibilityCheckCreated message, int bufferDays)
     {
-        var report = await reportService
-            .GetReportWithinMetres(easting, northing, _metres, ct)
-            .ConfigureAwait(false);
-
-        if (report != null)
+        if (report.ImpactStartUtc == null)
         {
-            logger.LogInformation("Eligibility check is within {Metres} metres of an existing report.", _metres);
-            return report;
+            logger.LogError("Existing report does not have an ImpactStartUtc date, please investigate.");
+            return false;
+        }
+        if (message.ImpactStartUTC == null)
+        {
+            logger.LogError("Incoming message does not have an ImpactStartUTC date, please investigate.");
+            return false;
         }
 
-        logger.LogInformation("Not able to find an existing report within {Metres} metres.", _metres);
-        return null;
-    }
+        DateTimeOffset existingStartDate = report.ImpactStartUtc.Value;
+        DateTimeOffset existingEndDate = report.ImpactStartUtc.Value.AddHours(report.ImpactDurationHours);
 
-    /// <summary>
-    /// Check if the report is within the specified number of days from the report.
-    /// </summary>
-    /// <remarks>Use TimeSpan to check if the message is within the specified number of days from the report.</remarks>
-    private static bool IsWithinDays(Report report, EligibilityCheckCreated eligibilityCheckCreated, int days)
-    {
-        if (eligibilityCheckCreated.ImpactStartUTC == null || report.ImpactStartUtc == null)
-        {
-            // TODO Decide if no dates should be considered recent
-            var createdDateDifference = (eligibilityCheckCreated.CreatedUtc - report.CreatedUtc).TotalDays;
-            return createdDateDifference <= days;
-        }
+        DateTimeOffset incomingStartDate = (message.ImpactStartUTC.Value).AddDays(-bufferDays);
+        DateTimeOffset incomingEndDate = message.IsOnGoing ? DateTimeOffset.UtcNow : message.ImpactStartUTC.Value.AddHours(message.ImpactDurationHours);
 
-        var daysDifference = (eligibilityCheckCreated.ImpactStartUTC.Value - report.ImpactStartUtc.Value).TotalDays;
-        return daysDifference <= days;
+        // check if the ranges overlap
+        bool rangesOverlap = existingStartDate <= incomingEndDate && incomingStartDate <= existingEndDate;
+        return rangesOverlap;
     }
 }
