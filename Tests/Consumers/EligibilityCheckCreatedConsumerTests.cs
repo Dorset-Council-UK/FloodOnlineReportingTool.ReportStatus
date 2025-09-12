@@ -3,8 +3,10 @@ using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.ReportStatus.Consumers;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Tests.Consumers;
@@ -60,10 +62,11 @@ public class EligibilityCheckCreatedConsumerTests
     {
         // Arrange
         var logger = Substitute.For<ILogger<EligibilityCheckCreatedConsumer>>();
+        var settings = Substitute.For<IOptions<ReportStatusSettings>>();
         var reportService = Substitute.For<IReportService>();
         var reportDuplicateService = Substitute.For<IReportDuplicateService>();
 
-        var consumer = new EligibilityCheckCreatedConsumer(logger, reportService, reportDuplicateService);
+        var consumer = new EligibilityCheckCreatedConsumer(logger, settings, reportService, reportDuplicateService);
         var consumeContext = Substitute.For<ConsumeContext<EligibilityCheckCreated>>();
         consumeContext.Message.Returns(message);
         consumeContext.CancellationToken.Returns(CancellationToken.None);
