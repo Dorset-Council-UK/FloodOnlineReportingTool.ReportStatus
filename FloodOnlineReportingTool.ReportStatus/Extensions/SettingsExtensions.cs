@@ -11,19 +11,23 @@ internal static class SettingsExtensions
     internal static (MicrosoftIdentityOptions, MessagingSettings) AddReportStatusSettings(this IServiceCollection services, IConfigurationManager configuration)
     {
         // Sections
-        var messagingSection = configuration.GetSection(MessagingSettings.SectionName)
-            ?? throw new ConfigurationMissingException($"Configuration section '{MessagingSettings.SectionName}' is missing.");
-        var identitySection = configuration.GetSection(Constants.AzureAd)
-            ?? throw new ConfigurationMissingException($"Configuration section '{Constants.AzureAd}' is missing.");
+        var messagingSection = configuration.GetRequiredSection(MessagingSettings.SectionName);
+        var identitySection = configuration.GetRequiredSection(Constants.AzureAd);
+        var reportStatusSection = configuration.GetRequiredSection(ReportStatusSettings.SectionName);
 
         // Configure settings
         services.Configure<MessagingSettings>(messagingSection);
+        services.Configure<ReportStatusSettings>(reportStatusSection);
 
         // Settings
         var messagingSettings = messagingSection.Get<MessagingSettings>()
             ?? throw new ConfigurationMissingException($"Configuration section '{MessagingSettings.SectionName}' is not properly defined.");
         var identityOptions = identitySection.Get<MicrosoftIdentityOptions>()
             ?? throw new ConfigurationMissingException($"Configuration section '{Constants.AzureAd}' is not properly defined.");
+        if (reportStatusSection.Get<ReportStatusSettings>() is null)
+        {
+            throw new ConfigurationMissingException($"Configuration section '{ReportStatusSettings.SectionName}' is not properly defined.");
+        }
 
         return (identityOptions, messagingSettings);
     }
