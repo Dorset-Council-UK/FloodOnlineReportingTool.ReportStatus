@@ -30,6 +30,11 @@ public interface IReportDuplicateService
     Task<ReportDuplicate?> CreateDuplicate(Guid reportId, ReportDuplicateDto dto, CancellationToken ct);
 
     /// <summary>
+    /// Create multiple duplicates associated with a report in the database.
+    /// </summary>
+    Task<bool> CreateDuplicates(IReadOnlyCollection<Report> reports, CancellationToken ct);
+
+    /// <summary>
     /// Updates an existing duplicate report in the database.
     /// </summary>
     Task<ReportDuplicate?> UpdateDuplicate(Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct);

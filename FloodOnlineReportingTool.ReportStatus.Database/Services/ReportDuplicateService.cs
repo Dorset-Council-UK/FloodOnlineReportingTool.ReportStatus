@@ -79,6 +79,33 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         return newDuplicate;
     }
 
+    public async Task<bool> CreateDuplicates(IReadOnlyCollection<Report> reports, CancellationToken ct)
+    {
+        if (reports.Count == 0)
+        {
+            return false;
+        }
+
+        logger.LogDebug("Creating new duplicate reports.");
+
+        foreach (var report in reports)
+        {
+            var newDuplicate = new ReportDuplicate()
+            {
+                ReportId = report.Id,
+                Id = Guid.CreateVersion7(),
+                CreatedUtc = DateTimeOffset.UtcNow,
+                EligibilityCheckId = report.EligibilityCheckId,
+                Easting = report.Easting,
+                Northing = report.Northing,
+            };
+            context.ReportDuplicates.Add(newDuplicate);
+        }
+
+        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return changes > 0;
+    }
+
     public async Task<ReportDuplicate?> UpdateDuplicate(Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct)
     {
         logger.LogDebug("Updating duplicate report with ID {ReportDuplicateId} in the database.", duplicateId);
