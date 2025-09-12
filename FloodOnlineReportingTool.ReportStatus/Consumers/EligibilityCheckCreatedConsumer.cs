@@ -62,7 +62,8 @@ internal class EligibilityCheckCreatedConsumer(
             if (matchedReports.Count > 0)
             {
                 logger.LogInformation("Found {Count} matching reports by UPRN", matchedReports.Count);
-                return await reportDuplicateService.CreateDuplicates(matchedReports, ct).ConfigureAwait(false);
+                await reportDuplicateService.CreateDuplicates(matchedReports, ct).ConfigureAwait(false);
+                return true;
             }
 
             return false;
