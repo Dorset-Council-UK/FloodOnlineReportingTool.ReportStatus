@@ -69,9 +69,9 @@ public class EligibilityCheckCreatedConsumerTests
         consumeContext.CancellationToken.Returns(CancellationToken.None);
 
         // All duplicate checks will return null, so it's not a duplicate
-        reportService.GetReportByUprn(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns((Report?)null);
-        reportService.GetReportByUsrn(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns((Report?)null);
-        reportService.GetReportWithinMetres(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>(), Arg.Any<CancellationToken>()).Returns((Report?)null);
+        reportService.GetReportsByUprn(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns([]);
+        reportService.GetReportsByUsrn(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns([]);
+        reportService.GetReportsWithinMetres(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
         await consumer.Consume(consumeContext);
