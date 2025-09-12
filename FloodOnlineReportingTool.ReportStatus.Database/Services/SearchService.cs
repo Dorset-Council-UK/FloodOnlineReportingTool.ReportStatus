@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class SearchService(ILogger<ReportService> logger, ApplicationDbContext context) : ISearchService
 {
-    public async Task<IReadOnlyList<Report>> GetReportsByUPRN(double uprn, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Report>> GetReportsByUPRN(double uprn, CancellationToken ct)
     {
         logger.LogDebug("Retrieving search results by UPRN");
 
@@ -18,7 +18,7 @@ public class SearchService(ILogger<ReportService> logger, ApplicationDbContext c
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<Report>> GetReportsByCoordinates(double easting, double northing, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Report>> GetReportsByCoordinates(double easting, double northing, CancellationToken ct)
     {
         logger.LogDebug("Retrieving search results by coordinates");
 
@@ -29,7 +29,7 @@ public class SearchService(ILogger<ReportService> logger, ApplicationDbContext c
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<Report>> GetReportsByStartDate(DateTimeOffset startDateUtc, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Report>> GetReportsByStartDate(DateTimeOffset startDateUtc, CancellationToken ct)
     {
         logger.LogDebug("Retrieving search results by flood start date");
 

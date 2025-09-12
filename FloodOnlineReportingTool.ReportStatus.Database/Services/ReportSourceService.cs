@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class ReportSourceService(ILogger<ReportSourceService> logger, ApplicationDbContext context) : IReportSourceService
 {
-    public async Task<IReadOnlyList<ReportSource>> GetReportSources(Guid reportId, CancellationToken ct)
+    public async Task<IReadOnlyCollection<ReportSource>> GetReportSources(Guid reportId, CancellationToken ct)
     {
         logger.LogDebug("Retrieving all report sources from the database.");
 

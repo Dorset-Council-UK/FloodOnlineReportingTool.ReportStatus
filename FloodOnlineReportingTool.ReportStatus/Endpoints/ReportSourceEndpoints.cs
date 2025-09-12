@@ -6,7 +6,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class ReportSourceEndpoints
 {
-    internal static async Task<Results<Ok<IReadOnlyList<ReportSource>>, BadRequest>> GetReportSources(IReportSourceService reportSourceService, Guid reportId, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<ReportSource>>, BadRequest>> GetReportSources(IReportSourceService reportSourceService, Guid reportId, CancellationToken ct)
     {
         var reportSources = await reportSourceService.GetReportSources(reportId, ct).ConfigureAwait(false);
         return TypedResults.Ok(reportSources);

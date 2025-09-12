@@ -7,7 +7,7 @@ public interface IReportSourceService
     /// <summary>
     /// Gets all reports sources from the database.
     /// </summary>
-    Task<IReadOnlyList<ReportSource>> GetReportSources(Guid reportId, CancellationToken ct);
+    Task<IReadOnlyCollection<ReportSource>> GetReportSources(Guid reportId, CancellationToken ct);
 
     /// <summary>
     /// Gets a report source by its ID from the database.

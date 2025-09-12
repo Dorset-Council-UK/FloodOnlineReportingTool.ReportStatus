@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, ApplicationDbContext context) : IReportDuplicateService
 {
-    public async Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(CancellationToken ct)
+    public async Task<IReadOnlyCollection<ReportDuplicate>> GetDuplicates(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all duplicate reports from the database.");
 
@@ -17,7 +17,7 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(Guid reportId, CancellationToken ct)
+    public async Task<IReadOnlyCollection<ReportDuplicate>> GetDuplicates(Guid reportId, CancellationToken ct)
     {
         logger.LogDebug("Retrieving all duplicates for a report from the database.");
 

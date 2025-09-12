@@ -7,7 +7,7 @@ public interface IReportService
     /// <summary>
     /// Gets all reports from the database.
     /// </summary>
-    Task<IReadOnlyList<Report>> GetReports(CancellationToken ct);
+    Task<IReadOnlyCollection<Report>> GetReports(CancellationToken ct);
 
     /// <summary>
     /// Gets a report by its ID from the database.
@@ -15,22 +15,19 @@ public interface IReportService
     Task<Report?> GetReportById(Guid id, CancellationToken ct);
 
     /// <summary>
-    /// Gets a report by it's UPRN from the database.
+    /// Get reports by there matching UPRN's from the database.
     /// </summary>
-    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    Task<Report?> GetReportByUprn(long uprn, CancellationToken ct);
+    Task<IReadOnlyCollection<Report>> GetReportsByUprn(long uprn, CancellationToken ct);
 
     /// <summary>
-    /// Gets a report by it's USRN from the database.
+    /// Get reports by there matching USRN's from the database.
     /// </summary>
-    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    Task<Report?> GetReportByUsrn(long usrn, CancellationToken ct);
+    Task<IReadOnlyCollection<Report>> GetReportsByUsrn(long usrn, CancellationToken ct);
 
     /// <summary>
-    /// Gets a report that is within a specified buffer distance.
+    /// Get reports that are within a specified buffer distance.
     /// </summary>
-    /// <returns>The <see cref="Report"/> if found, otherwise <see langword="null"/>.</returns>
-    Task<Report?> GetReportWithinMetres(double easting, double northing, double metres, CancellationToken ct);
+    Task<IReadOnlyCollection<Report>> GetReportsWithinMetres(double easting, double northing, double metres, CancellationToken ct);
 
     /// <summary>
     /// Creates a new report in the database.

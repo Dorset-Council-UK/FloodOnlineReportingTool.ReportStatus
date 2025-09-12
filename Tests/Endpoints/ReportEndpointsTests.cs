@@ -36,7 +36,7 @@ public class ReportEndpointsTests
     internal async Task GetReports_ReturnsList_WhenSuccessful()
     {
         // Arrange
-        IReadOnlyList<Report> reports = [
+        IReadOnlyCollection<Report> reports = [
             CreateTestReport(),
             CreateTestReport(),
         ];
@@ -46,7 +46,7 @@ public class ReportEndpointsTests
         var result = await ReportEndpoints.GetReports(_reportServiceMock, CancellationToken.None);
 
         // Assert
-        var okResult = Assert.IsType<Ok<IReadOnlyList<Report>>>(result.Result);
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<Report>>>(result.Result);
         Assert.Equal(reports, okResult.Value);
     }
 

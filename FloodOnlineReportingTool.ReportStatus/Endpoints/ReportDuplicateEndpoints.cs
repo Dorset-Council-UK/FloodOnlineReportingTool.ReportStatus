@@ -6,13 +6,13 @@ namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class ReportDuplicateEndpoints
 {
-    internal static async Task<Results<Ok<IReadOnlyList<ReportDuplicate>>, BadRequest>> GetDuplicates(IReportDuplicateService reportDuplicateService, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<ReportDuplicate>>, BadRequest>> GetDuplicates(IReportDuplicateService reportDuplicateService, CancellationToken ct)
     {
         var duplicates = await reportDuplicateService.GetDuplicates(ct).ConfigureAwait(false);
         return TypedResults.Ok(duplicates);
     }
 
-    internal static async Task<Results<Ok<IReadOnlyList<ReportDuplicate>>, BadRequest>> GetReportDuplicates(IReportDuplicateService reportDuplicateService, Guid reportId, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<ReportDuplicate>>, BadRequest>> GetReportDuplicates(IReportDuplicateService reportDuplicateService, Guid reportId, CancellationToken ct)
     {
         var duplicates = await reportDuplicateService.GetDuplicates(reportId, ct).ConfigureAwait(false);
         return TypedResults.Ok(duplicates);
