@@ -12,6 +12,7 @@ builder.Services.AddReportStatusVersioning();
 builder.Services.AddReportStatusOpenApi(identityOptions);
 builder.Services.AddReportStatusDatabase(builder.Configuration.GetConnectionString("FloodReportingReportStatus"), builder.Environment.IsDevelopment());
 builder.Services.AddMessageSystem(messagingSettings);
+builder.AddGovNotify();
 
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IReportDuplicateService, ReportDuplicateService>();
