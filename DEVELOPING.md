@@ -33,7 +33,7 @@ To run this project with minimal modification, you will need the following:
    The database schema and seed data are handled by the data project.
    Navigate to the solution folder and run the following command:
    ```shell
-   dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database\FloodOnlineReportingTool.ReportStatus.Database.csproj" --startup-project "FloodOnlineReportingTool.ReportStatus\FloodOnlineReportingTool.ReportStatus.csproj" --context ApplicationDbContext
+   dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
 
 ## Database Setup

@@ -24,6 +24,7 @@ public class ReportEndpointsTests
             CreatedUtc = DateTimeOffset.UtcNow,
             UpdatedUtc = DateTimeOffset.UtcNow,
             Uprn = 1234567890L,
+            Usrn = 9876543210L,
             Easting = 123456.78,
             Northing = 987654.32,
             ImpactStartUtc = DateTimeOffset.UtcNow.AddHours(-1),
@@ -35,7 +36,7 @@ public class ReportEndpointsTests
     internal async Task GetReports_ReturnsList_WhenSuccessful()
     {
         // Arrange
-        IReadOnlyList<Report> reports = [
+        IReadOnlyCollection<Report> reports = [
             CreateTestReport(),
             CreateTestReport(),
         ];
@@ -45,12 +46,12 @@ public class ReportEndpointsTests
         var result = await ReportEndpoints.GetReports(_reportServiceMock, CancellationToken.None);
 
         // Assert
-        var okResult = Assert.IsType<Ok<IReadOnlyList<Report>>>(result.Result);
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<Report>>>(result.Result);
         Assert.Equal(reports, okResult.Value);
     }
 
     [Fact]
-    public async Task GetReportsById_ReturnsReport_WhenFound()
+    public async Task GetReport_ById_ReturnsReport_WhenFound()
     {
         // Arrange
         var reportId = Guid.CreateVersion7();
@@ -67,7 +68,7 @@ public class ReportEndpointsTests
     }
 
     [Fact]
-    public async Task GetReportsById_ReturnsNotFound_WhenNotFound()
+    public async Task GetReport_ById_ReturnsNotFound_WhenNotFound()
     {
         // Arrange
         var reportId = Guid.CreateVersion7();

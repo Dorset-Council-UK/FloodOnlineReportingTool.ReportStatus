@@ -18,7 +18,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("fortreportstatus")
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -49,7 +49,10 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("Uprn")
+                    b.Property<long?>("Uprn")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("Usrn")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -59,6 +62,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.ReportDuplicate", b =>
                 {
+                    b.Property<Guid>("ReportId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
@@ -74,17 +80,35 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<double>("Northing")
                         .HasColumnType("double precision");
 
+                    b.Property<DateTimeOffset?>("UpdatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ReportId", "Id");
+
+                    b.ToTable("ReportDuplicates", "fortreportstatus");
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.ReportSource", b =>
+                {
                     b.Property<Guid>("ReportId")
                         .HasColumnType("uuid");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                    b.HasKey("ReportId", "SourceId");
 
-                    b.HasIndex("ReportId");
-
-                    b.ToTable("ReportDuplicates", "fortreportstatus");
+                    b.ToTable("ReportSources", "fortreportstatus");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
@@ -258,7 +282,18 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.ReportDuplicate", b =>
                 {
                     b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.Report", "Report")
-                        .WithMany()
+                        .WithMany("Duplicates")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Report");
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.ReportSource", b =>
+                {
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.Report", "Report")
+                        .WithMany("Sources")
                         .HasForeignKey("ReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -276,6 +311,13 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .WithMany()
                         .HasForeignKey("InboxMessageId", "InboxConsumerId")
                         .HasPrincipalKey("MessageId", "ConsumerId");
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.Report", b =>
+                {
+                    b.Navigation("Duplicates");
+
+                    b.Navigation("Sources");
                 });
 #pragma warning restore 612, 618
         }

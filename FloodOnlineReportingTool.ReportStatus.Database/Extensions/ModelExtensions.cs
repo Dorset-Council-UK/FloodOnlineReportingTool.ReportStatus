@@ -1,4 +1,6 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿#pragma warning disable IDE0130 // Namespace does not match folder structure
+namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 public static class ModelExtensions
 {
@@ -8,6 +10,7 @@ public static class ModelExtensions
         {
             EligibilityCheckId = report.EligibilityCheckId,
             Uprn = report.Uprn,
+            Usrn = report.Usrn,
             Easting = report.Easting,
             Northing = report.Northing,
             ImpactStartUtc = report.ImpactStartUtc,

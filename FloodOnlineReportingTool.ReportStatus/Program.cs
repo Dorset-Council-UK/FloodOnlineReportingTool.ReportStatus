@@ -15,6 +15,7 @@ builder.Services.AddMessageSystem(messagingSettings);
 
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IReportDuplicateService, ReportDuplicateService>();
+builder.Services.AddScoped<IReportSourceService, ReportSourceService>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 
 var app = builder.Build();

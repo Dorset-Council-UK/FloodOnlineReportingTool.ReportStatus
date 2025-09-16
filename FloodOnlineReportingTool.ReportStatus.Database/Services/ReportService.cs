@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class ReportService(ILogger<ReportService> logger, ApplicationDbContext context) : IReportService
 {
-    public async Task<IReadOnlyList<Report>> GetReports(CancellationToken ct)
+    public async Task<IReadOnlyCollection<Report>> GetReports(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all reports from the database.");
 
@@ -28,9 +28,56 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
         return report;
     }
 
+    public async Task<IReadOnlyCollection<Report>> GetReportsByUprn(long uprn, CancellationToken ct)
+    {
+        logger.LogDebug("Finding reports with UPRN {Uprn} from the database.", uprn);
+
+        return await context.Reports
+            .AsNoTracking()
+            .Where(o => o.Uprn.Equals(uprn))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyCollection<Report>> GetReportsByUsrn(long usrn, CancellationToken ct)
+    {
+        logger.LogDebug("Finding reports with USRN {Usrn} from the database.", usrn);
+
+        return await context.Reports
+            .AsNoTracking()
+            .Where(o => o.Usrn.Equals(usrn))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyCollection<Report>> GetReportsWithinMetres(double easting, double northing, double metres, CancellationToken ct)
+    {
+        logger.LogDebug("Finding report within {Metres} metres of Easting {Easting} and Northing {Northing}.", metres, easting, northing);
+
+        var metresSquared = metres * metres;
+        return await context.Reports
+            .AsNoTracking()
+            .Where(o =>
+                Math.Pow(o.Easting - easting, 2) + Math.Pow(o.Northing - northing, 2) <= metresSquared
+            )
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        //return await context.Reports
+        //    .AsNoTracking()
+        //    .Where(o =>
+        //        Math.Sqrt(
+        //            Math.Pow(o.Easting - easting, 2) +
+        //            Math.Pow(o.Northing - northing, 2)
+        //        ) <= metres
+        //    )
+        //    .ToListAsync(ct)
+        //    .ConfigureAwait(false);
+    }
+
     public async Task<Report> CreateReport(ReportDto dto, CancellationToken ct)
     {
-        logger.LogDebug("Creating a new report with EligibilityCheckId {EligibilityCheckId} and Uprn {Uprn}.", dto.EligibilityCheckId, dto.Uprn);
+        logger.LogDebug("Creating a new report with EligibilityCheckId {EligibilityCheckId}.", dto.EligibilityCheckId);
 
         var newReport = new Report()
         {
@@ -39,6 +86,7 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
 
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
+            Usrn = dto.Usrn,
             Easting = dto.Easting,
             Northing = dto.Northing,
             ImpactStartUtc = dto.ImpactStartUtc,
@@ -71,6 +119,7 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
 
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
+            Usrn = dto.Usrn,
             Easting = dto.Easting,
             Northing = dto.Northing,
             ImpactStartUtc = dto.ImpactStartUtc,

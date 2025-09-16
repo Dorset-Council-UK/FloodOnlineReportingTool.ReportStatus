@@ -33,7 +33,7 @@ public class ReportDuplicateEndpointsTests
     internal async Task GetDuplicates_ReturnsList_WhenSuccessful()
     {
         // Arrange
-        IReadOnlyList<ReportDuplicate> duplicates = [
+        IReadOnlyCollection<ReportDuplicate> duplicates = [
             CreateTestReportDuplicate(),
             CreateTestReportDuplicate(),
         ];
@@ -43,7 +43,7 @@ public class ReportDuplicateEndpointsTests
         var result = await ReportDuplicateEndpoints.GetDuplicates(_reportDuplicateServiceMock, CancellationToken.None);
 
         // Assert
-        var okResult = Assert.IsType<Ok<IReadOnlyList<ReportDuplicate>>>(result.Result);
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<ReportDuplicate>>>(result.Result);
         Assert.Equal(duplicates, okResult.Value);
     }
 
@@ -53,7 +53,7 @@ public class ReportDuplicateEndpointsTests
     {
         // Arrange
         var reportId = Guid.CreateVersion7();
-        IReadOnlyList<ReportDuplicate> duplicates = [
+        IReadOnlyCollection<ReportDuplicate> duplicates = [
             CreateTestReportDuplicate(reportId: reportId),
             CreateTestReportDuplicate(reportId: reportId),
         ];
@@ -63,7 +63,7 @@ public class ReportDuplicateEndpointsTests
         var result = await ReportDuplicateEndpoints.GetReportDuplicates(_reportDuplicateServiceMock, reportId, CancellationToken.None);
 
         // Assert
-        var okResult = Assert.IsType<Ok<IReadOnlyList<ReportDuplicate>>>(result.Result);
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<ReportDuplicate>>>(result.Result);
         Assert.NotNull(okResult.Value);
         Assert.Equal(duplicates, okResult.Value);
         Assert.All(okResult.Value, duplicate => Assert.Equal(reportId, duplicate.ReportId));

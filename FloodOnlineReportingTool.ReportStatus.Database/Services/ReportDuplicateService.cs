@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, ApplicationDbContext context) : IReportDuplicateService
 {
-    public async Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(CancellationToken ct)
+    public async Task<IReadOnlyCollection<ReportDuplicate>> GetDuplicates(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all duplicate reports from the database.");
 
@@ -17,7 +17,7 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<ReportDuplicate>> GetDuplicates(Guid reportId, CancellationToken ct)
+    public async Task<IReadOnlyCollection<ReportDuplicate>> GetDuplicates(Guid reportId, CancellationToken ct)
     {
         logger.LogDebug("Retrieving all duplicates for a report from the database.");
 
@@ -44,7 +44,7 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         logger.LogDebug("Retrieving duplicate report with ID {ReportDuplicateId} from the database.", duplicateId);
 
         var duplicate = await context.ReportDuplicates
-            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.Id == duplicateId, ct)
+            .FindAsync([reportId, duplicateId], ct)
             .ConfigureAwait(false);
 
         return duplicate;
@@ -65,10 +65,9 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
 
         var newDuplicate = new ReportDuplicate()
         {
+            ReportId = reportId,
             Id = Guid.CreateVersion7(),
             CreatedUtc = DateTimeOffset.UtcNow,
-
-            ReportId = reportId,
             EligibilityCheckId = dto.EligibilityCheckId,
             Easting = dto.Easting,
             Northing = dto.Northing,
@@ -78,6 +77,33 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newDuplicate;
+    }
+
+    public async Task<bool> CreateDuplicates(IReadOnlyCollection<Report> reports, CancellationToken ct)
+    {
+        if (reports.Count == 0)
+        {
+            return false;
+        }
+
+        logger.LogDebug("Creating new duplicate reports.");
+
+        foreach (var report in reports)
+        {
+            var newDuplicate = new ReportDuplicate()
+            {
+                ReportId = report.Id,
+                Id = Guid.CreateVersion7(),
+                CreatedUtc = DateTimeOffset.UtcNow,
+                EligibilityCheckId = report.EligibilityCheckId,
+                Easting = report.Easting,
+                Northing = report.Northing,
+            };
+            context.ReportDuplicates.Add(newDuplicate);
+        }
+
+        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return changes > 0;
     }
 
     public async Task<ReportDuplicate?> UpdateDuplicate(Guid duplicateId, ReportDuplicateDto dto, CancellationToken ct)
@@ -97,7 +123,6 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         var updated = existing with
         {
             UpdatedUtc = DateTimeOffset.UtcNow,
-
             EligibilityCheckId = dto.EligibilityCheckId,
             Easting = dto.Easting,
             Northing = dto.Northing,
@@ -114,7 +139,7 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         logger.LogDebug("Updating duplicate report with ID {ReportDuplicateId} in the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.Id == duplicateId, ct)
+            .FindAsync([reportId, duplicateId], ct)
             .ConfigureAwait(false);
 
         if (existing == null)
@@ -125,7 +150,6 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         var updated = existing with
         {
             UpdatedUtc = DateTimeOffset.UtcNow,
-
             EligibilityCheckId = dto.EligibilityCheckId,
             Easting = dto.Easting,
             Northing = dto.Northing,
@@ -142,7 +166,7 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         logger.LogDebug("Delete duplicate report with ID {ReportDuplicateId} from the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FindAsync([duplicateId], ct)
+            .FirstOrDefaultAsync(o => o.Id == duplicateId, ct)
             .ConfigureAwait(false);
 
         if (existing == null)
@@ -161,7 +185,7 @@ public class ReportDuplicateService(ILogger<ReportDuplicateService> logger, Appl
         logger.LogDebug("Delete duplicate report with ID {ReportDuplicateId} from the database.", duplicateId);
 
         var existing = await context.ReportDuplicates
-            .FirstOrDefaultAsync(o => o.ReportId == reportId && o.Id == duplicateId, ct)
+            .FindAsync([reportId, duplicateId], ct)
             .ConfigureAwait(false);
 
         if (existing == null)
