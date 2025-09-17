@@ -2,5 +2,5 @@
 
 internal interface IGovNotifyEmailSender
 {
-    Task<string> SendVulnerableNotification(Guid reportId, double easting, double northing);
+    Task<string> SendVulnerableNotification(Guid floodEventId, double easting, double northing, int vulnerableCount, DateTimeOffset reportDate);
 }

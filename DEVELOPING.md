@@ -73,18 +73,20 @@ Example secrets file:
     "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus"
   },
   "Messaging": {
-    "Enabled": "false",
-    "ConnectionString": "sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=your-key-here",
-    "QueueName": "fortmessaging-queue",
-    "TopicName": "fortmessaging-topic",
-    "SubscriptionName": "fortmessaging-subscription"
+    "Enabled": "true",
+    "ConnectionString": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
   },
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",
     "Domain": "SomeDomain",
     "TenantId": "SomeTenantId",
-    "ClientId": "SomeClientId",
-    "ResponseType": "code"
+    "ClientId": "SomeClientId"
+  },
+  "GovNotify": {
+    "ApiKey": "YourApiKey",
+    "Templates": {
+      "Vulnerable": "YourTemplateId"
+    }
   }
 }
 ```
