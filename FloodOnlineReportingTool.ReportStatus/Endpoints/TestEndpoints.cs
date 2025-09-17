@@ -8,8 +8,8 @@ internal static class TestEndpoints
     internal static async Task<Results<Ok<string>, BadRequest>> TestVulnerableNotification(IGovNotifyEmailSender govNotifyEmailSender, CancellationToken ct)
     {
         var floodEventId = Guid.CreateVersion7();
-        var easting = 123456.0;
-        var northing = 654321.0;
+        double easting = 368911;
+        double northing = 90272;
         var vulnerableCount = 5;
         var reportDate = DateTimeOffset.UtcNow.AddDays(-2);
 
