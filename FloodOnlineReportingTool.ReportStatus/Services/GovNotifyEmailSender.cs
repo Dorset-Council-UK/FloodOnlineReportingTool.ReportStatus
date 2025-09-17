@@ -49,16 +49,19 @@ internal class GovNotifyEmailSender(
         return "https://gi.dorsetcouncil.gov.uk/floodriskmanagement";
     }
 
+    private string DorsetExplorerUrl(int zoom, double easting, double northing)
+    {
+        var host = environment.IsDevelopment() ? "https://gi-staging.dorsetcouncil.gov.uk/dorsetexplorer" : "https://gi.dorsetcouncil.gov.uk/dorsetexplorer";
+        return string.Create(CultureInfo.InvariantCulture, $"{host}#map={zoom}/{easting}/{northing}/0/27700");
+    }
+
     public async Task<string> SendVulnerableNotification(Guid floodEventId, double easting, double northing, int vulnerableCount, DateTimeOffset reportDate)
     {
-        var zoom = 17;
-        var url = string.Create(CultureInfo.InvariantCulture, $"https://gi.dorsetcouncil.gov.uk/dorsetexplorer#map={zoom}/{easting}/{northing}/0/27700");
-
         var personalisation = new Dictionary<string, dynamic>(StringComparer.CurrentCulture)
         {
             { "from_development", environment.IsDevelopment() },
             { "admin_url", $"[Risk Management]({RiskManagementUrl()}/flood-event/{floodEventId})" },
-            { "flood_location_url", $"[on Dorset Explorer]({url})" },
+            { "flood_location_url", $"[on Dorset Explorer]({DorsetExplorerUrl(17, easting, northing)})" },
             { "vulnerable_count", vulnerableCount },
             { "report_date", reportDate.GdsReadable() },
         };
