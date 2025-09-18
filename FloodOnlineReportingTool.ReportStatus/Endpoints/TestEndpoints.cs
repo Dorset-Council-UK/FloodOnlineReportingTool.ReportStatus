@@ -20,7 +20,7 @@ internal static class TestEndpoints
                 .ConfigureAwait(false);
             return TypedResults.Ok(responseId);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return TypedResults.BadRequest();
         }

@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Builder;
 
 internal static class GovNotifyExtensions
 {
-    private readonly static string GovNotifyClientName = "GovNotifyClient";
+    private const string GovNotifyClientName = "GovNotifyClient";
 
     public static TBuilder AddGovNotify<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
