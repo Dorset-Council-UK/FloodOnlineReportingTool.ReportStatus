@@ -1,6 +1,6 @@
 ﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
-public record ReportSourceDto
+public record FloodReportSourceDto
 {
     public required string Name { get; init; }
 }

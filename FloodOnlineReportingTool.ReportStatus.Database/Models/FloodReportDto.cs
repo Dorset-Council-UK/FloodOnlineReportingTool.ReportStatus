@@ -1,6 +1,6 @@
 ﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
-public record ReportDto
+public record FloodReportDto
 {
     public required Guid EligibilityCheckId { get; init; }
     public long? Uprn { get; init; }
