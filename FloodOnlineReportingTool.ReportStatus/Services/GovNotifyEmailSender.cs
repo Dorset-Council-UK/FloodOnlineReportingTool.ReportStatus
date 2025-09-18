@@ -56,13 +56,14 @@ internal class GovNotifyEmailSender(
         return string.Create(CultureInfo.InvariantCulture, $"{host}#map={zoom}/{easting}/{northing}/0/27700");
     }
 
-    private string GetTestEmailAddress()
+    private string GetVulnerablemailAddress()
     {
         if (environment.IsDevelopment() && currentUserService.IsAuthenticated)
         {
             return currentUserService.Email;
         }
 
+        // TODO Work out the logic of who to send this to in production
         return "";
     }
 
@@ -77,7 +78,7 @@ internal class GovNotifyEmailSender(
             { "report_date", reportDate.GdsReadable() },
         };
 
-        var emailAddress = GetTestEmailAddress();
+        var emailAddress = GetVulnerablemailAddress();
         return await SendEmail(emailAddress, _govNotifySettings.Templates.Vulnerable, personalisation).ConfigureAwait(false);
     }
 }
