@@ -9,6 +9,7 @@ internal class GovNotifyEmailSender(
     ILogger<GovNotifyEmailSender> logger,
     IOptions<GovNotifySettings> options,
     IWebHostEnvironment environment,
+    ICurrentUserService currentUserService,
     NotificationClient notificationClient
 ) : IGovNotifyEmailSender
 {
@@ -55,6 +56,16 @@ internal class GovNotifyEmailSender(
         return string.Create(CultureInfo.InvariantCulture, $"{host}#map={zoom}/{easting}/{northing}/0/27700");
     }
 
+    private string GetTestEmailAddress()
+    {
+        if (environment.IsDevelopment() && currentUserService.IsAuthenticated)
+        {
+            return currentUserService.Email;
+        }
+
+        return "";
+    }
+
     public async Task<string> SendVulnerableNotification(Guid floodEventId, double easting, double northing, int vulnerableCount, DateTimeOffset reportDate)
     {
         var personalisation = new Dictionary<string, dynamic>(StringComparer.CurrentCulture)
@@ -66,9 +77,7 @@ internal class GovNotifyEmailSender(
             { "report_date", reportDate.GdsReadable() },
         };
 
-        // TODO Replace with real email address when ready
-        var emailAddress = environment.IsDevelopment() ? "matthew.vincent@dorsetcouncil.gov.uk" : "";
-
+        var emailAddress = GetTestEmailAddress();
         return await SendEmail(emailAddress, _govNotifySettings.Templates.Vulnerable, personalisation).ConfigureAwait(false);
     }
 }
