@@ -1,5 +1,6 @@
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Services;
+using Microsoft.AspNetCore.Http.Json;
+using NetTopologySuite.IO.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddReportStatusHealthChecks(messagingSettings);
 builder.Services.AddReportStatusVersioning();
 builder.Services.AddReportStatusOpenApi(identityOptions);
-builder.Services.AddReportStatusDatabase(builder.Configuration.GetConnectionString("FloodReportingReportStatus"), builder.Environment.IsDevelopment());
+builder.AddReportStatusDatabase();
 builder.Services.AddMessageSystem(messagingSettings);
 builder.AddGovNotify();
 
@@ -19,10 +20,11 @@ builder.AddGovNotify();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-builder.Services.AddScoped<IReportService, ReportService>();
-builder.Services.AddScoped<IReportDuplicateService, ReportDuplicateService>();
-builder.Services.AddScoped<IReportSourceService, ReportSourceService>();
-builder.Services.AddScoped<ISearchService, SearchService>();
+// json serializer options
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new GeoJsonConverterFactory());
+});
 
 var app = builder.Build();
 
