@@ -4,23 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.EntitiesConfiguration;
 
-internal class ReportConfiguration : IEntityTypeConfiguration<Report>
+internal class FloodPropertyConfiguration : IEntityTypeConfiguration<FloodProperty>
 {
-    public void Configure(EntityTypeBuilder<Report> builder)
+    public void Configure(EntityTypeBuilder<FloodProperty> builder)
     {
         builder.HasKey(o => o.Id);
 
         builder
             .Property(o => o.Id)
             .ValueGeneratedNever();
-
-        // Navigations
-        builder
-            .Navigation(o => o.Duplicates)
-            .AutoInclude();
-
-        builder
-            .Navigation(o =>o.Sources)
-            .AutoInclude();
     }
 }
