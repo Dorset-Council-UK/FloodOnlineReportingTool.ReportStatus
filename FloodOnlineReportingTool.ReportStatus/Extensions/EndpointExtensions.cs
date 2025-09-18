@@ -15,6 +15,7 @@ internal static class EndpointExtensions
         MapReportSourceEndpoints(app);
         MapDuplicateEndpoints(app);
         MapSearchEndpoints(app);
+        MapTestEndpoints(app);
 
         return app;
     }
@@ -216,5 +217,20 @@ internal static class EndpointExtensions
             .WithSummary("Search - Reports by Start Date")
             .WithDescription("Searches for reports based on the date the flood started")
             .RequireAuthorization(PolicyNames.Reader);
+    }
+    
+    private static void MapTestEndpoints(WebApplication app)
+    {
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/test")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Testing");
+
+        group
+            .MapGet(pattern: "/notifications/vulnerable", TestEndpoints.TestVulnerableNotification)
+            .WithSummary("Test the vulnerable notification")
+            .WithDescription("Test the vulnerable notification Gov Notify functionality")
+            .RequireAuthorization(PolicyNames.Admin);
     }
 }
