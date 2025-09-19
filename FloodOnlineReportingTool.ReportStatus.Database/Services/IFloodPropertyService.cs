@@ -12,7 +12,8 @@ public interface IFloodPropertyService
     /// <summary>
     /// Gets all flood properties, including related flood reports.
     /// </summary>
-    Task<FloodProperty?> GetFloodPropertiesWithReports(CancellationToken ct);
+    /// <remarks>Related Flood Reports will be included.</remarks>
+    Task<IReadOnlyCollection<FloodProperty>> GetFloodPropertiesWithReports(CancellationToken ct);
 
     /// <summary>
     /// Gets a flood property by its ID from the database.
@@ -22,6 +23,7 @@ public interface IFloodPropertyService
     /// <summary>
     /// Gets a flood property by its ID, including related flood reports.
     /// </summary>
+    /// <remarks>Related Flood Reports will be included.</remarks>
     Task<FloodProperty?> GetFloodPropertyWithReports(Guid id, CancellationToken ct);
 
     /// <summary>

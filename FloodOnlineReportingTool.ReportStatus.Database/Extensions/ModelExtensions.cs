@@ -34,36 +34,6 @@ public static class ModelExtensions
         };
     }
 
-    public static FloodLocationFloodReportDto ToDto(this FloodLocationFloodReport floodLocationFloodReport)
-    {
-        return new()
-        {
-            ConfirmedUtc = floodLocationFloodReport.ConfirmedUtc,
-            ConfirmedByUserId = floodLocationFloodReport.ConfirmedByUserId,
-            ConfirmedUserName = floodLocationFloodReport.ConfirmedUserName,
-        };
-    }
-
-    public static FloodPropertyFloodReportDto ToDto(this FloodPropertyFloodReport floodPropertyFloodReport)
-    {
-        return new()
-        {
-            ConfirmedUtc = floodPropertyFloodReport.ConfirmedUtc,
-            ConfirmedByUserId = floodPropertyFloodReport.ConfirmedByUserId,
-            ConfirmedUserName = floodPropertyFloodReport.ConfirmedUserName,
-        };
-    }
-
-    public static FloodRoadFloodReportDto ToDto(this FloodRoadFloodReport floodRoadFloodReport)
-    {
-        return new()
-        {
-            ConfirmedUtc = floodRoadFloodReport.ConfirmedUtc,
-            ConfirmedByUserId = floodRoadFloodReport.ConfirmedByUserId,
-            ConfirmedUserName = floodRoadFloodReport.ConfirmedUserName,
-        };
-    }
-
     public static FloodReportDto ToDto(this FloodReport floodReport)
     {
         return new()

@@ -5,32 +5,37 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 public interface IFloodRoadFloodReportService
 {
     /// <summary>
-    /// Gets all flood road flood reports from the database.
+    /// Gets all flood report relationships for the flood road.
     /// </summary>
     Task<IReadOnlyCollection<FloodRoadFloodReport>> GetFloodRoadFloodReports(Guid floodRoadId, CancellationToken ct);
 
     /// <summary>
-    /// Gets a flood road flood report from the database.
+    /// Gets a flood report relationship for a flood road.
     /// </summary>
     Task<FloodRoadFloodReport?> GetFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, CancellationToken ct);
 
     /// <summary>
-    /// Creates a new flood road flood report in the database.
+    /// Creates a new unconfirmed flood report relationship for a flood road.
     /// </summary>
-    Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, FloodRoadFloodReportDto dto, CancellationToken ct);
+    Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, CancellationToken ct);
 
     /// <summary>
-    /// Updates an existing flood road flood report in the database.
+    /// Creates a new confirmed flood report relationship for a flood road.
     /// </summary>
-    Task<FloodRoadFloodReport?> UpdateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, FloodRoadFloodReportDto dto, CancellationToken ct);
+    Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, string userId, string userName, CancellationToken ct);
 
     /// <summary>
-    /// Deletes an existing flood road flood report from the database.
+    /// Confirm the flood report is correctly related to the flood road.
+    /// </summary>
+    Task<FloodRoadFloodReport?> ConfirmFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, string userId, string userName, CancellationToken ct);
+
+    /// <summary>
+    /// Deletes an existing flood report relationship for a flood road.
     /// </summary>
     Task<bool> DeleteFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, CancellationToken ct);
 
     /// <summary>
-    /// Checks if a flood road flood report exists
+    /// Checks if a relationship exists between a flood road and flood report.
     /// </summary>
     Task<bool> FloodRoadFloodReportExists(Guid floodRoadId, Guid floodReportId, CancellationToken ct);
 }

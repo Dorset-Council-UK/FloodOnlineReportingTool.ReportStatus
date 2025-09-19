@@ -12,7 +12,8 @@ public interface IFloodRoadService
     /// <summary>
     /// Gets all flood roads, including related flood reports.
     /// </summary>
-    Task<FloodRoad?> GetFloodRoadsWithReports(CancellationToken ct);
+    /// <remarks>Related Flood Reports will be included.</remarks>
+    Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsWithReports(CancellationToken ct);
 
     /// <summary>
     /// Gets a flood road by its ID from the database.
@@ -22,6 +23,7 @@ public interface IFloodRoadService
     /// <summary>
     /// Gets a flood road by its ID, including related flood reports.
     /// </summary>
+    /// <remarks>Related Flood Reports will be included.</remarks>
     Task<FloodRoad?> GetFloodRoadWithReports(Guid id, CancellationToken ct);
 
     /// <summary>

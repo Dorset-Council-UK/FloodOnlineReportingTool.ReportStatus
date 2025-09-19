@@ -12,7 +12,8 @@ public interface IFloodLocationService
     /// <summary>
     /// Gets all flood locations, including related flood reports.
     /// </summary>
-    Task<FloodLocation?> GetFloodLocationsWithReports(CancellationToken ct);
+    /// <remarks>Related Flood Reports will be included.</remarks>
+    Task<IReadOnlyCollection<FloodLocation>> GetFloodLocationsWithReports(CancellationToken ct);
 
     /// <summary>
     /// Gets a flood location by its ID from the database.
@@ -22,6 +23,7 @@ public interface IFloodLocationService
     /// <summary>
     /// Gets a flood location by its ID, including related flood reports.
     /// </summary>
+    /// <remarks>Related Flood Reports will be included.</remarks>
     Task<FloodLocation?> GetFloodLocationWithReports(Guid id, CancellationToken ct);
 
     /// <summary>

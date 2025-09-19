@@ -5,32 +5,37 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 public interface IFloodLocationFloodReportService
 {
     /// <summary>
-    /// Gets all flood location flood reports from the database.
+    /// Gets all flood report relationships for the flood location.
     /// </summary>
     Task<IReadOnlyCollection<FloodLocationFloodReport>> GetFloodLocationFloodReports(Guid floodLocationId, CancellationToken ct);
 
     /// <summary>
-    /// Gets a flood location flood report from the database.
+    /// Gets a flood report relationship for a flood location.
     /// </summary>
     Task<FloodLocationFloodReport?> GetFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, CancellationToken ct);
 
     /// <summary>
-    /// Creates a new flood location flood report in the database.
+    /// Creates a new unconfirmed flood report relationship for a flood location.
     /// </summary>
-    Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, FloodLocationFloodReportDto dto, CancellationToken ct);
+    Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, CancellationToken ct);
 
     /// <summary>
-    /// Updates an existing flood location flood report in the database.
+    /// Creates a new confirmed flood report relationship for a flood location.
     /// </summary>
-    Task<FloodLocationFloodReport?> UpdateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, FloodLocationFloodReportDto dto, CancellationToken ct);
+    Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, string userId, string userName, CancellationToken ct);
 
     /// <summary>
-    /// Deletes an existing flood location flood report from the database.
+    /// Confirm the flood report is correctly related to the flood location.
+    /// </summary>
+    Task<FloodLocationFloodReport?> ConfirmFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, string userId, string userName, CancellationToken ct);
+
+    /// <summary>
+    /// Deletes an existing flood report relationship for a flood location.
     /// </summary>
     Task<bool> DeleteFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, CancellationToken ct);
 
     /// <summary>
-    /// Checks if a flood location flood report exists
+    /// Checks if a relationship exists between a flood location and flood report.
     /// </summary>
     Task<bool> FloodLocationFloodReportExists(Guid floodLocationId, Guid floodReportId, CancellationToken ct);
 }
