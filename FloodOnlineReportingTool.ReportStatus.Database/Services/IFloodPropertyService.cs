@@ -1,0 +1,46 @@
+﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+
+namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
+
+public interface IFloodPropertyService
+{
+    /// <summary>
+    /// Gets all flood properties from the database.
+    /// </summary>
+    Task<IReadOnlyCollection<FloodProperty>> GetFloodProperties(CancellationToken ct);
+
+    /// <summary>
+    /// Gets all flood properties, including related flood reports.
+    /// </summary>
+    Task<FloodProperty?> GetFloodPropertiesWithReports(CancellationToken ct);
+
+    /// <summary>
+    /// Gets a flood property by its ID from the database.
+    /// </summary>
+    Task<FloodProperty?> GetFloodProperty(Guid id, CancellationToken ct);
+
+    /// <summary>
+    /// Gets a flood property by its ID, including related flood reports.
+    /// </summary>
+    Task<FloodProperty?> GetFloodPropertyWithReports(Guid id, CancellationToken ct);
+
+    /// <summary>
+    /// Creates a new flood property in the database.
+    /// </summary>
+    Task<FloodProperty> CreateFloodProperty(FloodPropertyDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// Updates an existing flood property in the database.
+    /// </summary>
+    Task<FloodProperty?> UpdateFloodProperty(Guid id, FloodPropertyDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// Deletes an existing flood property from the database.
+    /// </summary>
+    Task<bool> DeleteFloodProperty(Guid id, CancellationToken ct);
+
+    /// <summary>
+    /// Checks if a flood property exists
+    /// </summary>
+    Task<bool> FloodPropertyExists(Guid id, CancellationToken ct);
+}
