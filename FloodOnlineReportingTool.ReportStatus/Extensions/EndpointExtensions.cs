@@ -28,7 +28,7 @@ internal static class EndpointExtensions
             .NewVersionedApi()
             .MapGroup("/api/flood/location")
             .HasApiVersion(Versions.V1.Version)
-            .WithTags("Reports");
+            .WithTags("Flood Location");
 
         // Get all
         group
