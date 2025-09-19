@@ -29,9 +29,14 @@ internal static class DatabaseExtensions
 
         // Database services
         builder.Services
-            .AddScoped<IReportService, ReportService>()
-            .AddScoped<IReportDuplicateService, ReportDuplicateService>()
-            .AddScoped<IReportSourceService, ReportSourceService>()
+            .AddScoped<IFloodLocationService, FloodLocationService>()
+            .AddScoped<IFloodLocationFloodReportService, FloodLocationFloodReportService>()
+            .AddScoped<IFloodPropertyService, FloodPropertyService>()
+            .AddScoped<IFloodPropertyFloodReportService, FloodPropertyFloodReportService>()
+            .AddScoped<IFloodRoadService, FloodRoadService>()
+            .AddScoped<IFloodRoadFloodReportService, FloodRoadFloodReportService>()
+            .AddScoped<IFloodReportService, FloodReportService>()
+            .AddScoped<IFloodReportSourceService, FloodReportSourceService>()
             .AddScoped<ISearchService, SearchService>();
 
         return builder;
