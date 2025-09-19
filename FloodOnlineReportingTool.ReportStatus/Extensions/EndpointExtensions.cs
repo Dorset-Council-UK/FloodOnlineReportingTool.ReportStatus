@@ -10,6 +10,8 @@ internal static class EndpointExtensions
 {
     internal static WebApplication MapReportStatusEndpoints(this WebApplication app)
     {
+        MapFloodLocationEndpoints(app);
+
         MapReportEndpoints(app);
         MapReportDuplicateEndpoints(app);
         MapReportSourceEndpoints(app);
@@ -18,6 +20,67 @@ internal static class EndpointExtensions
         MapTestEndpoints(app);
 
         return app;
+    }
+
+    private static void MapFloodLocationEndpoints(WebApplication app)
+    {
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/flood/location")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Reports");
+
+        // Get all
+        group
+            .MapGet(pattern: "/", FloodLocationEndpoints.GetFloodLocations)
+            .WithSummary("Flood location - All")
+            .WithDescription("Gets all flood locations from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
+            .MapGet(pattern: "/with-reports/", FloodLocationEndpoints.GetFloodLocationsWithReports)
+            .WithSummary("Flood location - All with flood reports")
+            .WithDescription("Gets all flood locations and related flood reports from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        // Get one
+        group
+            .MapGet(pattern: "/{id}", FloodLocationEndpoints.GetFloodLocation)
+            .WithSummary("Flood location - Get")
+            .WithDescription("Gets a flood location by id from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
+            .MapGet(pattern: "/{id}/with-reports/", FloodLocationEndpoints.GetFloodLocationWithReports)
+            .WithSummary("Flood location - Get with flood reports")
+            .WithDescription("Gets a flood location by id and related flood reports from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        // Create
+        group
+            .MapPost(pattern: "/", FloodLocationEndpoints.CreateFloodLocation)
+            .WithSummary("Flood location - Create")
+            .WithDescription("Creates a new flood location in the database")
+            .RequireAuthorization(PolicyNames.Writer);
+
+        // Update
+        group
+            .MapPut(pattern: "/{id}", FloodLocationEndpoints.UpdateFloodLocation)
+            .WithSummary("Flood location - Update")
+            .WithDescription("Updates a flood location by id in the database")
+            .RequireAuthorization(PolicyNames.Writer);
+
+        // Delete
+        group
+            .MapDelete(pattern: "/{id}", FloodLocationEndpoints.DeleteFloodLocation)
+            .WithSummary("Flood location - Delete")
+            .WithDescription("Deletes a flood location by id from the database")
+            .RequireAuthorization(PolicyNames.Writer);
+
+        // Exists
+        group
+            .MapDelete(pattern: "/{id}/exists", FloodLocationEndpoints.FloodLocationExists)
+            .WithSummary("Flood location - Exists")
+            .WithDescription("Checks if a flood location exists in the database")
+            .RequireAuthorization(PolicyNames.Reader);
     }
 
     private static void MapReportEndpoints(WebApplication app)
