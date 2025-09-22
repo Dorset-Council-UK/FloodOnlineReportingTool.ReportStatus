@@ -9,134 +9,251 @@ namespace Tests.Endpoints;
 
 public class FloodReportEndpointsTests
 {
-    public static IEnumerable<TheoryDataRow<FloodReport>> GoodFloodReports => FloodReportTestHelpers.CreateFloodReports(1);
+    [Fact]
+    internal async Task GetFloodReports_ReturnsAll_WhenSuccessful()
+    {
+        // Arrange
+        IReadOnlyCollection<FloodReport> expected = FloodReportTestHelpers.Test100FloodReports;
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReports(Arg.Any<CancellationToken>()).Returns(expected);
 
-    //[Fact]
-    //internal async Task GetReports_ReturnsList_WhenSuccessful()
-    //{
-    //    // Arrange
-    //    IReadOnlyCollection<Report> reports = [
-    //        CreateTestReport(),
-    //        CreateTestReport(),
-    //    ];
-    //    _reportServiceMock.GetReports(Arg.Any<CancellationToken>()).Returns(reports);
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReports(floodReportService, TestContext.Current.CancellationToken);
 
-    //    // Act
-    //    var result = await ReportEndpoints.GetReports(_reportServiceMock, CancellationToken.None);
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
+    }
 
-    //    // Assert
-    //    var okResult = Assert.IsType<Ok<IReadOnlyCollection<Report>>>(result.Result);
-    //    Assert.Equal(reports, okResult.Value);
-    //}
+    [Fact]
+    internal async Task GetFloodReports_ReturnsNone_WhenThereAreNoFloodReports()
+    {
+        // Arrange
+        IReadOnlyCollection<FloodReport> expected = [];
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReports(Arg.Any<CancellationToken>()).Returns(expected);
+
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReports(floodReportService, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
+    }
 
     [Theory]
-    [MemberData(nameof(GoodFloodReports))]
-    public async Task GetFloodReport_ById_ReturnsReport_WhenFound(FloodReport floodReport)
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportById_ReturnsFloodReport_WhenFound(FloodReport expected)
     {
         // Arrange
         var floodReportService = Substitute.For<IFloodReportService>();
-        floodReportService.GetFloodReportById(floodReport.Id, Arg.Any<CancellationToken>()).Returns(floodReport);
+        floodReportService.GetFloodReportById(expected.Id, Arg.Any<CancellationToken>()).Returns(expected);
         
         // Act
-        var result = await FloodReportEndpoints.GetFloodReportById(floodReportService, floodReport.Id, TestContext.Current.CancellationToken);
+        var result = await FloodReportEndpoints.GetFloodReportById(floodReportService, expected.Id, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<FloodReport>>(result.Result);
-        Assert.Equal(floodReport, okResult.Value);
-        Assert.Equal(floodReport.Id, okResult.Value?.Id);
+        Assert.Equal(expected, okResult.Value);
     }
 
-    //[Fact]
-    //public async Task GetReport_ById_ReturnsNotFound_WhenNotFound()
-    //{
-    //    // Arrange
-    //    var reportId = Guid.CreateVersion7();
-    //    _reportServiceMock.GetReportById(reportId, Arg.Any<CancellationToken>()).Returns((Report?)null);
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportById_ReturnsNotFound_WhenNotFound(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReportById(expected.Id, Arg.Any<CancellationToken>()).Returns((FloodReport?)null);
 
-    //    // Act
-    //    var result = await ReportEndpoints.GetReportById(_reportServiceMock, reportId, CancellationToken.None);
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReportById(floodReportService, expected.Id, TestContext.Current.CancellationToken);
 
-    //    // Assert
-    //    Assert.IsType<NotFound>(result.Result);
-    //}
+        // Assert
+        Assert.IsType<NotFound>(result.Result);
+    }
 
-    //[Fact]
-    //public async Task CreateReport_ReturnsReport_WhenCreated()
-    //{
-    //    // Arrange
-    //    var createdReport = CreateTestReport();
-    //    var reportDto = createdReport.ToDto();
-    //    _reportServiceMock.CreateReport(reportDto, Arg.Any<CancellationToken>()).Returns(createdReport);
+    [Fact]
+    public async Task GetFloodReportsByUprn_ReturnsFloodReports_WhenFound()
+    {
+        // Arrange
+        IReadOnlyCollection<FloodReport> expected = FloodReportTestHelpers.CreateFloodReports(10, sameUprn: true);
+        var uprn = expected.First().Uprn ?? 0;
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReportsByUprn(uprn, Arg.Any<CancellationToken>()).Returns(expected);
 
-    //    // Act
-    //    var result = await ReportEndpoints.CreateReport(_reportServiceMock, reportDto, CancellationToken.None);
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReportsByUprn(floodReportService, uprn, TestContext.Current.CancellationToken);
 
-    //    // Assert
-    //    var createdResult = Assert.IsType<Created<Report>>(result.Result);
-    //    Assert.Equal($"/api/reports/{createdReport.Id}", createdResult.Location);
-    //    Assert.Equal(createdReport, createdResult.Value);
-    //    Assert.Equal(createdReport.Id, createdResult.Value!.Id);
-    //}
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
+        // all UPRNs are the same
+        Assert.All(okResult.Value, fr => Assert.Equal(uprn, fr.Uprn));
+    }
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test10TheoryUprns), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportsByUprn2_ReturnsFloodReports_WhenFound(long uprn)
+    {
+        // Arrange
+        IReadOnlyCollection<FloodReport> expected = FloodReportTestHelpers.CreateFloodReports(10, uprn: uprn);
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReportsByUprn(uprn, Arg.Any<CancellationToken>()).Returns(expected);
 
-    //[Fact]
-    //public async Task UpdateReport_ReturnsReport_WhenSuccessful()
-    //{
-    //    // Arrange
-    //    var reportId = Guid.CreateVersion7();
-    //    var updatedReport = CreateTestReport(reportId);
-    //    var reportDto = updatedReport.ToDto();
-    //    _reportServiceMock.UpdateReport(reportId, reportDto, Arg.Any<CancellationToken>()).Returns(updatedReport);
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReportsByUprn(floodReportService, uprn, TestContext.Current.CancellationToken);
 
-    //    // Act
-    //    var result = await ReportEndpoints.UpdateReport(_reportServiceMock, reportId, reportDto, CancellationToken.None);
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
+        // all UPRNs are the same
+        Assert.All(okResult.Value, fr => Assert.Equal(uprn, fr.Uprn));
+    }
 
-    //    // Assert
-    //    var okResult = Assert.IsType<Ok<Report>>(result.Result);
-    //    Assert.Equal(updatedReport, okResult.Value);
-    //    Assert.Equal(reportId, okResult.Value!.Id);
-    //}
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportsByUprn_ReturnsNone_WhenNotFound(FloodReport expected)
+    {
+        Assert.Fail("Not implemented");
+    }
 
-    //[Fact]
-    //public async Task UpdateReport_ReturnsNotFound_WhenNotFound()
-    //{
-    //    // Arrange
-    //    var reportId = Guid.CreateVersion7();
-    //    var updatedReport = CreateTestReport(reportId);
-    //    var reportDto = updatedReport.ToDto();
-    //    _reportServiceMock.UpdateReport(reportId, reportDto, Arg.Any<CancellationToken>()).Returns((Report?)null);
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportsByUsrn_ReturnsFloodReports_WhenFound(FloodReport expected)
+    {
+        Assert.Fail("Not implemented");
+    }
 
-    //    // Act
-    //    var result = await ReportEndpoints.UpdateReport(_reportServiceMock, reportId, reportDto, CancellationToken.None);
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportsByUsrn_ReturnsNone_WhenNotFound(FloodReport expected)
+    {
+        Assert.Fail("Not implemented");
+    }
 
-    //    // Assert
-    //    Assert.IsType<NotFound>(result.Result);
-    //}
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportsWithinMetres_ReturnsFloodReports_WhenFound(FloodReport expected)
+    {
+        Assert.Fail("Not implemented");
+    }
 
-    //[Fact]
-    //public async Task DeleteReport_ReturnsNoContent_WhenDeleted()
-    //{
-    //    // Arrange
-    //    var reportId = Guid.CreateVersion7();
-    //    _reportServiceMock.DeleteReport(reportId, Arg.Any<CancellationToken>()).Returns(returnThis: true);
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task GetFloodReportsWithinMetres_ReturnsNone_WhenNotFound(FloodReport expected)
+    {
+        Assert.Fail("Not implemented");
+    }
 
-    //    // Act
-    //    var result = await ReportEndpoints.DeleteReport(_reportServiceMock, reportId, CancellationToken.None);
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task CreateFloodReport_ReturnsFloodReport_WhenCreated(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        var floodReportDto = expected.ToDto();
+        floodReportService.CreateFloodReport(floodReportDto, Arg.Any<CancellationToken>()).Returns(expected);
 
-    //    // Assert
-    //    Assert.IsType<NoContent>(result.Result);
-    //}
+        // Act
+        var result = await FloodReportEndpoints.CreateFloodReport(floodReportService, floodReportDto, TestContext.Current.CancellationToken);
 
-    //[Fact]
-    //public async Task DeleteReport_ReturnsNotFound_WhenNotFound()
-    //{
-    //    // Arrange
-    //    var reportId = Guid.CreateVersion7();
-    //    _reportServiceMock.DeleteReport(reportId, Arg.Any<CancellationToken>()).Returns(returnThis: false);
+        // Assert
+        var createdResult = Assert.IsType<Created<FloodReport>>(result.Result);
+        Assert.Equal($"/api/flood/reports/{expected.Id}", createdResult.Location);
+        Assert.Equal(expected, createdResult.Value);
+    }
 
-    //    // Act
-    //    var result = await ReportEndpoints.DeleteReport(_reportServiceMock, reportId, CancellationToken.None);
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task UpdateFloodReport_ReturnsFloodReport_WhenUpdated(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        var floodReportDto = expected.ToDto();
+        floodReportService.UpdateFloodReport(expected.Id, floodReportDto, Arg.Any<CancellationToken>()).Returns(expected);
 
-    //    // Assert
-    //    Assert.IsType<NotFound>(result.Result);
-    //}
+        // Act
+        var result = await FloodReportEndpoints.UpdateFloodReport(floodReportService, expected.Id, floodReportDto, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<FloodReport>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
+    }
+
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task UpdateFloodReport_ReturnsNotFound_WhenNotFound(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        var floodReportDto = expected.ToDto();
+        floodReportService.UpdateFloodReport(expected.Id, floodReportDto, Arg.Any<CancellationToken>()).Returns((FloodReport?)null);
+
+        // Act
+        var result = await FloodReportEndpoints.UpdateFloodReport(floodReportService, expected.Id, floodReportDto, TestContext.Current.CancellationToken);
+        
+        // Assert
+        Assert.IsType<NotFound>(result.Result);
+    }
+
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task DeleteFloodReport_ReturnsNoContent_WhenDeleted(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.DeleteFloodReport(expected.Id, Arg.Any<CancellationToken>()).Returns(true);
+
+        // Act
+        var result = await FloodReportEndpoints.DeleteFloodReport(floodReportService, expected.Id, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.IsType<NoContent>(result.Result);
+    }
+
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task DeleteFloodReport_ReturnsNotFound_WhenNotFound(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.DeleteFloodReport(expected.Id, Arg.Any<CancellationToken>()).Returns(false);
+
+        // Act
+        var result = await FloodReportEndpoints.DeleteFloodReport(floodReportService, expected.Id, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.IsType<NotFound>(result.Result);
+    }
+
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task FloodReportExists_ReturnsTrue_WhenExists(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.FloodReportExists(expected.Id, Arg.Any<CancellationToken>()).Returns(true);
+
+        // Act
+        var result = await FloodReportEndpoints.FloodReportExists(floodReportService, expected.Id, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<bool>>(result.Result);
+        Assert.True(okResult.Value);
+    }
+
+    [Theory]
+    [MemberData(nameof(FloodReportTestHelpers.Test100TheoryFloodReports), MemberType = typeof(FloodReportTestHelpers))]
+    public async Task FloodReportExists_ReturnsFalse_WhenDoesntExist(FloodReport expected)
+    {
+        // Arrange
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.FloodReportExists(expected.Id, Arg.Any<CancellationToken>()).Returns(false);
+
+        // Act
+        var result = await FloodReportEndpoints.FloodReportExists(floodReportService, expected.Id, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<bool>>(result.Result);
+        Assert.False(okResult.Value);
+    }
 }

@@ -3,7 +3,7 @@ using FloodOnlineReportingTool.Contracts;
 
 namespace Tests.Helpers;
 
-internal static class EligibilityCheckCreatedTestHelpers
+public static class EligibilityCheckCreatedTestHelpers
 {
     internal static IEnumerable<TheoryDataRow<EligibilityCheckCreated>> CreateMessages(int count, string locale = "en_GB")
     {
