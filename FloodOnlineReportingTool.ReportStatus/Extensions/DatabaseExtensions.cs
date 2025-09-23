@@ -13,15 +13,15 @@ internal static class DatabaseExtensions
     internal static TBuilder AddReportStatusDatabase<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         var logSensitiveData = builder.Environment.IsDevelopment();
-        var connectionStringBuilder = builder.Configuration.GetReportStatusConnectionString(logSensitiveData);
-        
+        var connectionString = builder.Configuration.GetReportStatusConnectionString(logSensitiveData);
+
         // Add the database context
         builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
         {
-            options.UseNpgsql(connectionStringBuilder.ToString(), o =>
+            options.UseNpgsql(connectionString, o =>
             {
                 o.EnableRetryOnFailure(3);
-                o.MigrationsHistoryTable("__EFMigrationsHistory", connectionStringBuilder.SearchPath);
+                o.MigrationsHistoryTable("__EFMigrationsHistory", SchemaNames.ReportStatus);
                 o.UseNetTopologySuite();
             });
             options.EnableSensitiveDataLogging(logSensitiveData);
@@ -42,7 +42,7 @@ internal static class DatabaseExtensions
         return builder;
     }
 
-    private static NpgsqlConnectionStringBuilder GetReportStatusConnectionString(this IConfigurationManager configuration, bool logSensitiveData)
+    private static string GetReportStatusConnectionString(this IConfigurationManager configuration, bool logSensitiveData)
     {
         var connectionString = configuration.GetConnectionString("FloodReportingReportStatus");
         if (string.IsNullOrWhiteSpace(connectionString))
@@ -60,11 +60,13 @@ internal static class DatabaseExtensions
         {
             throw new ConfigurationMissingException("Missing configuration setting: The connection string for the database needs a schema set in the Search Path parameter.");
         }
-        if (!connectionStringBuilder.SearchPath.Equals(SchemaNames.ReportStatus, StringComparison.Ordinal))
+        var hasSchema1 = connectionStringBuilder.SearchPath.Contains(SchemaNames.ReportStatus, StringComparison.Ordinal);
+        var hasSchema2 = connectionStringBuilder.SearchPath.Contains(SchemaNames.Public, StringComparison.Ordinal);
+        if (!(hasSchema1 && hasSchema2))
         {
-            throw new ConfigurationMissingException($"Invalid configuration setting: The connection string for the database has an invalid schema set in the Search Path parameter. Expected '{SchemaNames.ReportStatus}', but found '{connectionStringBuilder.SearchPath}'.");
+            throw new ConfigurationMissingException($"Invalid configuration setting: The connection string for the database has an invalid schema set in the Search Path parameter. Expected '{SchemaNames.ReportStatus}' and '{SchemaNames.Public}', but found '{connectionStringBuilder.SearchPath}'.");
         }
 
-        return connectionStringBuilder;
+        return connectionStringBuilder.ToString();
     }
 }
