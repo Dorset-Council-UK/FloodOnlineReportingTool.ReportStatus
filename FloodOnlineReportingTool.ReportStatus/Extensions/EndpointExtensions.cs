@@ -83,7 +83,7 @@ internal static class EndpointExtensions
 
         // Exists
         group
-            .MapDelete(pattern: "/{id}/exists", FloodLocationEndpoints.FloodLocationExists)
+            .MapGet(pattern: "/{id}/exists", FloodLocationEndpoints.FloodLocationExists)
             .WithSummary("Flood location - Exists")
             .WithDescription("Checks if a flood location exists in the database")
             .RequireAuthorization(PolicyNames.Reader);
@@ -134,14 +134,12 @@ internal static class EndpointExtensions
         group
             .MapDelete(pattern: "/{floodReportId}", FloodLocationFloodReportEndpoints.DeleteFloodReport)
             .WithSummary("Deletes a flood report for a flood location")
-            //.WithDescription("Deletes a flood report for a flood location")
             .RequireAuthorization(PolicyNames.Writer);
 
         // Exists
         group
-            .MapDelete(pattern: "/{floodReportId}/exists", FloodLocationFloodReportEndpoints.FloodReportExists)
+            .MapGet(pattern: "/{floodReportId}/exists", FloodLocationFloodReportEndpoints.FloodReportExists)
             .WithSummary("Checks if a flood report exists for a flood location")
-            //.WithDescription("Checks if a flood report exists for a flood location")
             .RequireAuthorization(PolicyNames.Reader);
     }
 
@@ -200,7 +198,7 @@ internal static class EndpointExtensions
 
         // Exists
         group
-            .MapDelete(pattern: "/{id}/exists", FloodPropertyEndpoints.FloodPropertyExists)
+            .MapGet(pattern: "/{id}/exists", FloodPropertyEndpoints.FloodPropertyExists)
             .WithSummary("Flood property - Exists")
             .WithDescription("Checks if a flood property exists in the database")
             .RequireAuthorization(PolicyNames.Reader);
@@ -251,14 +249,12 @@ internal static class EndpointExtensions
         group
             .MapDelete(pattern: "/{floodReportId}", FloodPropertyFloodReportEndpoints.DeleteFloodReport)
             .WithSummary("Deletes a flood report for a flood property")
-            //.WithDescription("Deletes a flood report for a flood property")
             .RequireAuthorization(PolicyNames.Writer);
 
         // Exists
         group
-            .MapDelete(pattern: "/{floodReportId}/exists", FloodPropertyFloodReportEndpoints.FloodReportExists)
+            .MapGet(pattern: "/{floodReportId}/exists", FloodPropertyFloodReportEndpoints.FloodReportExists)
             .WithSummary("Checks if a flood report exists for a flood property")
-            //.WithDescription("Checks if a flood report exists for a flood property")
             .RequireAuthorization(PolicyNames.Reader);
     }
 
@@ -317,7 +313,7 @@ internal static class EndpointExtensions
 
         // Exists
         group
-            .MapDelete(pattern: "/{id}/exists", FloodRoadEndpoints.FloodRoadExists)
+            .MapGet(pattern: "/{id}/exists", FloodRoadEndpoints.FloodRoadExists)
             .WithSummary("Flood road - Exists")
             .WithDescription("Checks if a flood road exists in the database")
             .RequireAuthorization(PolicyNames.Reader);
@@ -368,14 +364,12 @@ internal static class EndpointExtensions
         group
             .MapDelete(pattern: "/{floodReportId}", FloodRoadFloodReportEndpoints.DeleteFloodReport)
             .WithSummary("Deletes a flood report for a flood road")
-            //.WithDescription("Deletes a flood report for a flood road")
             .RequireAuthorization(PolicyNames.Writer);
 
         // Exists
         group
-            .MapDelete(pattern: "/{floodReportId}/exists", FloodRoadFloodReportEndpoints.FloodReportExists)
+            .MapGet(pattern: "/{floodReportId}/exists", FloodRoadFloodReportEndpoints.FloodReportExists)
             .WithSummary("Checks if a flood report exists for a flood road")
-            //.WithDescription("Checks if a flood report exists for a flood road")
             .RequireAuthorization(PolicyNames.Reader);
     }
 
@@ -439,7 +433,7 @@ internal static class EndpointExtensions
 
         // Exists
         group
-            .MapDelete(pattern: "/{id}/exists", FloodReportEndpoints.FloodReportExists)
+            .MapGet(pattern: "/{id}/exists", FloodReportEndpoints.FloodReportExists)
             .WithSummary("Flood report - Exists")
             .WithDescription("Checks if a flood report exists in the database")
             .RequireAuthorization(PolicyNames.Reader);
@@ -485,14 +479,12 @@ internal static class EndpointExtensions
         group
             .MapDelete(pattern: "/{sourceId}", FloodReportSourceEndpoints.DeleteReportSource)
             .WithSummary("Deletes a flood source for a flood report")
-            //.WithDescription("Deletes a flood report for a flood location")
             .RequireAuthorization(PolicyNames.Writer);
 
         // Exists
         group
-            .MapDelete(pattern: "/{sourceId}/exists", FloodReportSourceEndpoints.FloodReportSourceExists)
+            .MapGet(pattern: "/{sourceId}/exists", FloodReportSourceEndpoints.FloodReportSourceExists)
             .WithSummary("Checks if a flood report exists for a flood location")
-            //.WithDescription("Checks if a flood report exists for a flood location")
             .RequireAuthorization(PolicyNames.Reader);
     }
 
