@@ -7,7 +7,7 @@ public interface ISearchService
     /// <summary>
     /// Gets search results by UPRN.
     /// </summary>
-    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByUPRN(double uprn, CancellationToken ct);
+    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByUPRN(long uprn, CancellationToken ct);
 
     /// <summary>
     /// Gets search results by coordinates (Easting and Northing).

@@ -7,7 +7,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class SearchService(ILogger<SearchService> logger, ApplicationDbContext context) : ISearchService
 {
-    public async Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByUPRN(double uprn, CancellationToken ct)
+    public async Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByUPRN(long uprn, CancellationToken ct)
     {
         logger.LogDebug("Retrieving search results by UPRN");
 

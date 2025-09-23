@@ -6,7 +6,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class SearchEndpoints
 {
-    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetFloodReportsByUPRN(ISearchService searchService, double uprn, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetFloodReportsByUPRN(ISearchService searchService, long uprn, CancellationToken ct)
     {
         var reports = await searchService.GetFloodReportsByUPRN(uprn, ct).ConfigureAwait(false);
         return TypedResults.Ok(reports);

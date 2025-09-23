@@ -18,6 +18,5 @@ public record FloodReport : ICreatedUpdated
     public DateTimeOffset? ImpactStartUtc { get; init; }
     public int ImpactDurationHours { get; init; }
 
-    [JsonIgnore]
-    public virtual IReadOnlyCollection<FloodReportSource> Sources { get; init; } = [];
+    public virtual ICollection<FloodReportSource> Sources { get; init; } = [];
 }

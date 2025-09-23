@@ -1,5 +1,4 @@
 ﻿using NetTopologySuite.Geometries;
-using System.Text.Json.Serialization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
@@ -15,6 +14,5 @@ public record FloodLocation : ICreatedUpdated
     public string? Notes { get; init; }
     public Point? Location { get; init; }
 
-    [JsonIgnore]
-    public virtual IReadOnlyCollection<FloodLocationFloodReport> FloodReports { get; init; } = [];
+    public virtual ICollection<FloodLocationFloodReport> FloodReports { get; init; } = [];
 }

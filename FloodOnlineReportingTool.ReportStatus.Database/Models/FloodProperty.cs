@@ -15,6 +15,5 @@ public record FloodProperty : ICreatedUpdated
     public string? Notes { get; init; }
     public Point? Location { get; init; }
 
-    [JsonIgnore]
-    public virtual IReadOnlyCollection<FloodPropertyFloodReport> FloodReports { get; init; } = [];
+    public virtual ICollection<FloodPropertyFloodReport> FloodReports { get; init; } = [];
 }
