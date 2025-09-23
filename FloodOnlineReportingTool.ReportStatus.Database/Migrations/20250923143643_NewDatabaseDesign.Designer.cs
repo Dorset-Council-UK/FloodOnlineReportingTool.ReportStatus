@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250923095523_NewDatabaseDesign")]
+    [Migration("20250923143643_NewDatabaseDesign")]
     partial class NewDatabaseDesign
     {
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Point>("Location")
-                        .HasColumnType("geometry");
+                        .HasColumnType("geometry (point)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
@@ -97,7 +97,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Point>("Location")
-                        .HasColumnType("geometry");
+                        .HasColumnType("geometry (point)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
@@ -218,7 +218,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Point>("Location")
-                        .HasColumnType("geometry");
+                        .HasColumnType("geometry (point)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");

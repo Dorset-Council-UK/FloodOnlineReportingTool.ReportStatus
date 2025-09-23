@@ -29,7 +29,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     UpdatedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: true),
-                    Location = table.Column<Point>(type: "geometry", nullable: true)
+                    Location = table.Column<Point>(type: "geometry (point)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -46,7 +46,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     UpdatedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: true),
-                    Location = table.Column<Point>(type: "geometry", nullable: true)
+                    Location = table.Column<Point>(type: "geometry (point)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -84,7 +84,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     UpdatedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: true),
-                    Location = table.Column<Point>(type: "geometry", nullable: true)
+                    Location = table.Column<Point>(type: "geometry (point)", nullable: true)
                 },
                 constraints: table =>
                 {
