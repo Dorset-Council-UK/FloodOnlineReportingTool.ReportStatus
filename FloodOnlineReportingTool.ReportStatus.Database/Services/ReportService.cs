@@ -89,7 +89,7 @@ public class ReportService(ILogger<ReportService> logger, ApplicationDbContext c
             Usrn = dto.Usrn,
             Easting = dto.Easting,
             Northing = dto.Northing,
-            ImpactStartUtc = dto.ImpactStartUtc,
+            ImpactStartUtc = dto.ImpactStartUtc?.UtcDateTime,
             ImpactDurationHours = dto.ImpactDurationHours,
         };
 

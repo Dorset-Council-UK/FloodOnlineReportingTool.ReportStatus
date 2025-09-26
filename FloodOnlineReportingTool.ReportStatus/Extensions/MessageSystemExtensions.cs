@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Consumers;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Exceptions;
 using FloodOnlineReportingTool.ReportStatus.Settings;
@@ -27,6 +28,7 @@ internal static class MessageSystemExtensions
 
             o.SetKebabCaseEndpointNameFormatter();
             o.AddConsumers(assembly);
+            o.AddConsumer<EligibilityCheckCreatedConsumer>();
 
             // Add the outbox pattern
             o.AddEntityFrameworkOutbox<ApplicationDbContext>(o =>
@@ -48,7 +50,11 @@ internal static class MessageSystemExtensions
 
                 var subscriptionName = SubscriptionName(assembly);
 
-                config.SubscriptionEndpoint<EligibilityCheckCreated>(subscriptionName, o => { });
+                config.SubscriptionEndpoint<EligibilityCheckCreated>(subscriptionName, o => 
+                {
+                    o.ConfigureConsumer<EligibilityCheckCreatedConsumer>(context);
+                }
+                );
             });
         });
 
