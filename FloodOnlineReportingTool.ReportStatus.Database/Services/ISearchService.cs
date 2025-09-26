@@ -7,15 +7,15 @@ public interface ISearchService
     /// <summary>
     /// Gets search results by UPRN.
     /// </summary>
-    Task<IReadOnlyCollection<Report>> GetReportsByUPRN(double uprn, CancellationToken ct);
+    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByUPRN(long uprn, CancellationToken ct);
 
     /// <summary>
     /// Gets search results by coordinates (Easting and Northing).
     /// </summary>
-    Task<IReadOnlyCollection<Report>> GetReportsByCoordinates(double easting, double northing, CancellationToken ct);
+    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByCoordinates(double easting, double northing, CancellationToken ct);
 
     /// <summary>
     /// Gets search results by date the flood started.
     /// </summary>
-    Task<IReadOnlyCollection<Report>> GetReportsByStartDate(DateTimeOffset startDateUtc, CancellationToken ct);
+    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByStartDate(DateTimeOffset startDateUtc, CancellationToken ct);
 }

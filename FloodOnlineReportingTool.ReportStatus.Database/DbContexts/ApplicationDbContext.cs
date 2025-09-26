@@ -6,9 +6,17 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<Report> Reports { get; set; }
-    public DbSet<ReportDuplicate> ReportDuplicates { get; set; }
-    public DbSet<ReportSource> ReportSources { get; set; }
+    public DbSet<FloodLocation> FloodLocations { get; set; }
+    public DbSet<FloodLocationFloodReport> FloodLocationFloodReports { get; set; }
+
+    public DbSet<FloodProperty> FloodProperties { get; set; }
+    public DbSet<FloodPropertyFloodReport> FloodPropertyReports { get; set; }
+
+    public DbSet<FloodRoad> FloodRoads { get; set; }
+    public DbSet<FloodRoadFloodReport> FloodRoadFloodReports { get; set; }
+
+    public DbSet<FloodReport> FloodReports { get; set; }
+    public DbSet<FloodReportSource> FloodReportSources { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

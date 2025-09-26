@@ -6,21 +6,21 @@ namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class SearchEndpoints
 {
-    internal static async Task<Results<Ok<IReadOnlyCollection<Report>>, BadRequest>> GetReportsByUPRN(ISearchService searchService, Double Uprn, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetFloodReportsByUPRN(ISearchService searchService, long uprn, CancellationToken ct)
     {
-        var reports = await searchService.GetReportsByUPRN(Uprn, ct).ConfigureAwait(false);
+        var reports = await searchService.GetFloodReportsByUPRN(uprn, ct).ConfigureAwait(false);
         return TypedResults.Ok(reports);
     }
 
-    internal static async Task<Results<Ok<IReadOnlyCollection<Report>>, BadRequest>> GetReportsByCoordinates(ISearchService searchService, Double Easting, Double Northing, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetReportsByCoordinates(ISearchService searchService, double easting, double northing, CancellationToken ct)
     {
-        var reports = await searchService.GetReportsByCoordinates(Easting, Northing, ct).ConfigureAwait(false);
+        var reports = await searchService.GetFloodReportsByCoordinates(easting, northing, ct).ConfigureAwait(false);
         return TypedResults.Ok(reports);
     }
 
-    internal static async Task<Results<Ok<IReadOnlyCollection<Report>>, BadRequest>> GetReportsByStartDate(ISearchService searchService, DateTimeOffset ImpactStartUtc, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetReportsByStartDate(ISearchService searchService, DateTimeOffset ImpactStartUtc, CancellationToken ct)
     {
-        var reports = await searchService.GetReportsByStartDate(ImpactStartUtc, ct).ConfigureAwait(false);
+        var reports = await searchService.GetFloodReportsByStartDate(ImpactStartUtc, ct).ConfigureAwait(false);
         return TypedResults.Ok(reports);
     }
 }
