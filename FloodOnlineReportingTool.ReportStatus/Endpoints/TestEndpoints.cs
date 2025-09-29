@@ -5,7 +5,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class TestEndpoints
 {
-    internal static async Task<Results<Ok<string>, BadRequest>> TestVulnerableNotification(IGovNotifyEmailSender govNotifyEmailSender, CancellationToken ct)
+    internal static async Task<Results<Ok<string>, BadRequest>> TestVulnerableNotification(IGovNotifyEmailSender govNotifyEmailSender)
     {
         var floodEventId = Guid.CreateVersion7();
         double easting = 368911;

@@ -29,6 +29,9 @@ internal static class OpenApiExtensions
                 options.AddOperationTransformer(new AuthOperationTransformer());
 
                 options.ShouldInclude = description => ShouldIncludeVersion(description, versionInfo);
+
+                // Add schema transformer to handle specific schema transformations
+                options.AddSchemaTransformer<GeometryPointSchemaTransformer>();
             });
         }
 
