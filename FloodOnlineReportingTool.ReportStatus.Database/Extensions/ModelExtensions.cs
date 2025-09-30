@@ -19,6 +19,7 @@ public static class ModelExtensions
         return new()
         {
             Title = floodProperty.Title,
+            Uprn = floodProperty.Uprn,
             Notes = floodProperty.Notes,
             Location = floodProperty.Location,
         };
@@ -29,6 +30,7 @@ public static class ModelExtensions
         return new()
         {
             Title = floodRoad.Title,
+            Usrn = floodRoad.Usrn,
             Notes = floodRoad.Notes,
             Location = floodRoad.Location,
         };

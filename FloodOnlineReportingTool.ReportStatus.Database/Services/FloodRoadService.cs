@@ -17,6 +17,18 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsByUsrn(long Usrn, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving all flood properties for USRN {Usrn} from the database.", Usrn);
+
+        return await context.FloodRoads
+            .AsNoTracking()
+            .Where(o => o.Usrn.Equals(Usrn))
+            .Include(o => o.FloodReports)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
     public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsWithReports(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood roads and their flood reports from the database.");
@@ -58,6 +70,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             CreatedUtc = DateTimeOffset.UtcNow,
 
             Title = dto.Title,
+            Usrn = dto.Usrn,
             Notes = dto.Notes,
             Location = dto.Location,
         };

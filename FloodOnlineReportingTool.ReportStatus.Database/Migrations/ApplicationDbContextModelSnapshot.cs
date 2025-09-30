@@ -106,6 +106,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<long>("Uprn")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.ToTable("FloodProperties", "fortreportstatus");
@@ -226,6 +229,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Usrn")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
