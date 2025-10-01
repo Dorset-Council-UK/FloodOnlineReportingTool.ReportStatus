@@ -1,9 +1,8 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Consumers;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Exceptions;
 using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
-using System.Reflection;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.AspNetCore.Builder;
@@ -23,18 +22,29 @@ internal static class MessageSystemExtensions
 
         services.AddMassTransit(o =>
         {
-            var assembly = typeof(Program).Assembly;
-
             o.SetKebabCaseEndpointNameFormatter();
-            o.AddConsumers(assembly);
 
-            // Add the outbox pattern
-            o.AddEntityFrameworkOutbox<ApplicationDbContext>(o =>
+            o.AddConsumer<EligibilityCheckCreatedConsumer>();
+
+            // Transactional Outbox Configuration https://masstransit.io/documentation/configuration/middleware/outbox
+            o.AddEntityFrameworkOutbox<ApplicationDbContext>(config =>
             {
-                o.UsePostgres();
-                o.UseBusOutbox();
+                config.UsePostgres();
+                config.UseBusOutbox();
             });
 
+            // Using Service Bus Dead-letter Queues https://masstransit.io/documentation/configuration/transports/azure-service-bus#using-service-bus-dead-letter-queues
+            o.AddConfigureEndpointsCallback((_, config) =>
+            {
+                if (config is IServiceBusReceiveEndpointConfigurator sb)
+                {
+                    sb.ConfigureDeadLetterQueueDeadLetterTransport();
+                    sb.ConfigureDeadLetterQueueErrorTransport();
+                }
+            });
+
+            // Azure Service Bus Configuration https://masstransit.io/documentation/configuration/transports/azure-service-bus
+            // Azure Service Bus Transport https://masstransit.io/documentation/transports/azure-service-bus
             o.UsingAzureServiceBus((context, config) =>
             {
                 if (messagingSettings.ConnectionString.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase))
@@ -43,26 +53,20 @@ internal static class MessageSystemExtensions
                 }
                 else
                 {
+                    // Using Azure Managed Identity https://masstransit.io/documentation/configuration/transports/azure-service-bus#using-azure-managed-identity
                     config.Host(new Uri(messagingSettings.ConnectionString));
                 }
 
-                var subscriptionName = SubscriptionName(assembly);
+                // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
+                config.SubscriptionEndpoint<EligibilityCheckCreated>("floodonlinereportingtool-reportstatus", o => 
+                {
+                    o.ConfigureConsumer<EligibilityCheckCreatedConsumer>(context);
+                });
 
-                config.SubscriptionEndpoint<EligibilityCheckCreated>(subscriptionName, o => { });
+                config.ConfigureEndpoints(context);
             });
         });
 
         return services;
-    }
-
-    private static string SubscriptionName(Assembly assembly)
-    {
-        var name = assembly.GetName().Name;
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ConfigurationMissingException("The assembly name cannot be null or empty. Ensure the assembly has a valid name.");
-        }
-        
-        return name.ToLowerInvariant().Replace('.', '-');
     }
 }
