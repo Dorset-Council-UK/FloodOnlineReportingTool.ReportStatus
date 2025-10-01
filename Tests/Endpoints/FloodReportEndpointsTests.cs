@@ -10,7 +10,7 @@ namespace Tests.Endpoints;
 public class FloodReportEndpointsTests
 {
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Collection), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Collections_4), MemberType = typeof(FloodReportTestHelpers))]
     internal async Task GetFloodReports_ReturnsOkay_WhenSuccessful(IReadOnlyCollection<FloodReport> expected)
     {
         // Arrange
@@ -41,7 +41,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task GetFloodReportById_ReturnsFloodReport_WhenFound(FloodReport expected)
     {
         // Arrange
@@ -72,16 +72,15 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Collection_WithUprn), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReportWithUprn_Collections_4), MemberType = typeof(FloodReportTestHelpers))]
     public async Task GetFloodReportsByUprn_ReturnsFloodReports_WhenFound(IReadOnlyCollection<FloodReport> expected)
     {
         // Arrange
-        var uprn = expected.FirstOrDefault()?.Uprn ?? 1234567890;
         var floodReportService = Substitute.For<IFloodReportService>();
-        floodReportService.GetFloodReportsByUprn(uprn, Arg.Any<CancellationToken>()).Returns(expected);
+        floodReportService.GetFloodReportsByUprn(FloodReportTestHelpers.FixedUprn, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
-        var result = await FloodReportEndpoints.GetFloodReportsByUprn(floodReportService, uprn, TestContext.Current.CancellationToken);
+        var result = await FloodReportEndpoints.GetFloodReportsByUprn(floodReportService, FloodReportTestHelpers.FixedUprn, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
@@ -92,12 +91,11 @@ public class FloodReportEndpointsTests
     public async Task GetFloodReportsByUprn_ReturnsOkayAndEmpty_WhenNoFloodReportsFound()
     {
         // Arrange
-        var uprn = 1234567890;
         var floodReportService = Substitute.For<IFloodReportService>();
         floodReportService.GetFloodReportsByUprn(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
-        var result = await FloodReportEndpoints.GetFloodReportsByUprn(floodReportService, uprn, TestContext.Current.CancellationToken);
+        var result = await FloodReportEndpoints.GetFloodReportsByUprn(floodReportService, FloodReportTestHelpers.FixedUprn, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
@@ -105,16 +103,15 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Collection_WithUsrn), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReportWithUsrn_Collections_4), MemberType = typeof(FloodReportTestHelpers))]
     public async Task GetFloodReportsByUsrn_ReturnsOkay_WhenFound(IReadOnlyCollection<FloodReport> expected)
     {
         // Arrange
-        var usrn = expected.FirstOrDefault()?.Usrn ?? 123456;
         var floodReportService = Substitute.For<IFloodReportService>();
-        floodReportService.GetFloodReportsByUsrn(usrn, Arg.Any<CancellationToken>()).Returns(expected);
+        floodReportService.GetFloodReportsByUsrn(FloodReportTestHelpers.FixedUsrn, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
-        var result = await FloodReportEndpoints.GetFloodReportsByUsrn(floodReportService, usrn, TestContext.Current.CancellationToken);
+        var result = await FloodReportEndpoints.GetFloodReportsByUsrn(floodReportService, FloodReportTestHelpers.FixedUsrn, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
@@ -125,12 +122,11 @@ public class FloodReportEndpointsTests
     public async Task GetFloodReportsByUsrn_ReturnsOkayAndEmpty_WhenNoFloodReportsFound()
     {
         // Arrange
-        var usrn = 1234567890;
         var floodReportService = Substitute.For<IFloodReportService>();
         floodReportService.GetFloodReportsByUsrn(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
-        var result = await FloodReportEndpoints.GetFloodReportsByUsrn(floodReportService, usrn, TestContext.Current.CancellationToken);
+        var result = await FloodReportEndpoints.GetFloodReportsByUsrn(floodReportService, FloodReportTestHelpers.FixedUsrn, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
@@ -150,7 +146,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task CreateFloodReport_ReturnsFloodReport_WhenCreated(FloodReport expected)
     {
         // Arrange
@@ -168,7 +164,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task UpdateFloodReport_ReturnsFloodReport_WhenUpdated(FloodReport expected)
     {
         // Arrange
@@ -185,7 +181,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task UpdateFloodReport_ReturnsNotFound_WhenNotFound(FloodReport expected)
     {
         // Arrange
@@ -201,7 +197,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task DeleteFloodReport_ReturnsNoContent_WhenDeleted(FloodReport expected)
     {
         // Arrange
@@ -216,7 +212,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task DeleteFloodReport_ReturnsNotFound_WhenNotFound(FloodReport expected)
     {
         // Arrange
@@ -231,7 +227,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task FloodReportExists_ReturnsTrue_WhenExists(FloodReport expected)
     {
         // Arrange
@@ -247,7 +243,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportTestHelpers.FloodReport_Record_10), MemberType = typeof(FloodReportTestHelpers))]
+    [MemberData(nameof(FloodReportTestHelpers.FloodReports_10), MemberType = typeof(FloodReportTestHelpers))]
     public async Task FloodReportExists_ReturnsFalse_WhenDoesntExist(FloodReport expected)
     {
         // Arrange

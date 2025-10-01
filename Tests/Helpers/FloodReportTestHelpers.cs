@@ -5,87 +5,116 @@ namespace Tests.Helpers;
 
 internal static class FloodReportTestHelpers
 {
-    internal static List<FloodReport> CreateFloodReports(int count, string locale = "en_GB", long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
+    private static readonly IEnumerable<TheoryDataRow<FloodReport>> _test_FloodReports_10;
+    private static readonly IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> _test_FloodReport_Collections_4;
+    private static readonly IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> _test_FloodReportWithUprn_Collections_4;
+    private static readonly IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> _test_FloodReportWithUsrn_Collections_4;
+
+    public const long FixedUprn = 10023242411;
+    public const long FixedUsrn = 43201527;
+    public const double FixedEasting = 368991.12;
+    public const double FixedNorthing = 90881.94;
+
+    static FloodReportTestHelpers()
     {
         Randomizer.Seed = new Random(232589734);
 
-        var floodReportFaker = new Faker<FloodReport>(locale)
+        bool useUprn = false;
+        long? uprn = null;
+        bool useUsrn = false;
+        long? usrn = null;
+        double? easting = null;
+        double? northing = null;
+
+        var floodReportFaker = new Faker<FloodReport>("en_GB")
+            .StrictMode(ensureRulesForAllProperties: true)
             .RuleFor(o => o.Id, f => f.Random.Uuid())
             .RuleFor(o => o.CreatedUtc, f => f.Date.RecentOffset())
-            .RuleFor(o => o.UpdatedUtc, f => f.Random.Bool() ? f.Date.RecentOffset() : null)
+            .RuleFor(o => o.UpdatedUtc, f => f.Date.RecentOffset().OrNull(f))
             .RuleFor(o => o.EligibilityCheckId, f => f.Random.Uuid())
-            .RuleFor(o => o.Uprn, f => FixedLongRule(f, uprn))
-            .RuleFor(o => o.Usrn, f => FixedLongRule(f, usrn))
+            .RuleFor(o => o.Uprn, f => useUprn ? uprn : f.Random.Long(1, 9999999999).OrNull(f))
+            .RuleFor(o => o.Usrn, f => useUsrn ? usrn : f.Random.Long(1, 9999999999).OrNull(f))
             .RuleFor(o => o.Easting, f => easting ?? f.Random.Double(0, 700000))
             .RuleFor(o => o.Northing, f => northing ?? f.Random.Double(0, 1300000))
-            .RuleFor(o => o.ImpactStartUtc, f => f.Random.Bool() ? f.Date.PastOffset(5) : null)
+            .RuleFor(o => o.ImpactStartUtc, f => f.Date.PastOffset(5).OrNull(f))
             .RuleFor(o => o.ImpactDurationHours, f => f.Random.Int(1, 72));
 
-        return floodReportFaker.Generate(count);
+        // 10 test FloodReports
+        IReadOnlyCollection<FloodReport> floodReports_10 = floodReportFaker.Generate(10);
+        _test_FloodReports_10 = floodReports_10
+            .Select(fr => new TheoryDataRow<FloodReport>(fr))
+            .AsEnumerable();
+
+        // 4 test collections of FloodReports
+        IReadOnlyCollection<IReadOnlyCollection<FloodReport>> floodReportCollections_4 = [
+            floodReportFaker.Generate(0),
+            floodReportFaker.Generate(1),
+            floodReportFaker.Generate(5),
+            floodReportFaker.Generate(10),
+        ];
+        _test_FloodReport_Collections_4 = floodReportCollections_4
+            .Select(frc => new TheoryDataRow<IReadOnlyCollection<FloodReport>>(frc))
+            .AsEnumerable();
+
+        // 4 test collections of FloodReports with fixed UPRN
+        useUprn = true;
+        uprn = FixedUprn;
+        IReadOnlyCollection<IReadOnlyCollection<FloodReport>> floodReportWithUprnCollections_4 = [
+            floodReportFaker.Generate(0),
+            floodReportFaker.Generate(1),
+            floodReportFaker.Generate(5),
+            floodReportFaker.Generate(10),
+        ];
+        _test_FloodReportWithUprn_Collections_4 = floodReportWithUprnCollections_4
+            .Select(frc => new TheoryDataRow<IReadOnlyCollection<FloodReport>>(frc))
+            .AsEnumerable();
+
+        // 4 test collections of FloodReports with fixed USRN
+        useUprn = true;
+        uprn = null;
+        useUsrn = true;
+        usrn = FixedUsrn;
+        IReadOnlyCollection<IReadOnlyCollection<FloodReport>> floodReportWithUsrnCollections_4 = [
+            floodReportFaker.Generate(0),
+            floodReportFaker.Generate(1),
+            floodReportFaker.Generate(5),
+            floodReportFaker.Generate(10),
+        ];
+        _test_FloodReportWithUsrn_Collections_4 = floodReportWithUsrnCollections_4
+            .Select(frc => new TheoryDataRow<IReadOnlyCollection<FloodReport>>(frc))
+            .AsEnumerable();
+
     }
 
-    private static long? FixedLongRule(Faker faker, long? value)
+    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReports_10()
     {
-        if (value is not null)
+        foreach (var testFloodReport in _test_FloodReports_10)
         {
-            return value.Value;
+            yield return testFloodReport;
         }
-
-        return faker.Random.Bool() ? faker.Random.Long(1, 9999999999) : null;
     }
 
-    internal static long[] CreateUprns(int count, string locale = "en_GB")
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collections_4()
     {
-        Randomizer.Seed = new Random(232589734);
-        var faker = new Faker(locale);
-
-        var uprns = new long[count];
-        for (int i = 0; i < count; i++)
+        foreach (var testFloodReport_Collection in _test_FloodReport_Collections_4)
         {
-            uprns[i] = faker.Random.Long(1, 9999999999);
+            yield return testFloodReport_Collection;
         }
-
-        return uprns;
     }
 
-    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collection()
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReportWithUprn_Collections_4()
     {
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(0));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(1));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(5));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(10));
-    }
-
-    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReport_Record_10()
-    {
-        var floodReports = CreateFloodReports(10);
-        foreach (var floodReport in floodReports)
+        foreach (var testFloodReportWithUprn_Collection in _test_FloodReportWithUprn_Collections_4)
         {
-            yield return new TheoryDataRow<FloodReport>(floodReport);
+            yield return testFloodReportWithUprn_Collection;
         }
     }
 
-    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collection_WithUprn()
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReportWithUsrn_Collections_4()
     {
-        Randomizer.Seed = new Random(232589734);
-        var faker = new Faker("en_GB");
-        var uprn = faker.Random.Long(1, 9999999999);
-
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(0, uprn: uprn));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(1, uprn: uprn));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(5, uprn: uprn));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(10, uprn: uprn));
-    }
-
-    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collection_WithUsrn()
-    {
-        Randomizer.Seed = new Random(232589734);
-        var faker = new Faker("en_GB");
-        var usrn = faker.Random.Long(1, 9999999999);
-
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(0, usrn: usrn));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(1, usrn: usrn));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(5, usrn: usrn));
-        yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(10, usrn: usrn));
+        foreach (var testFloodReportWithUsrn_Collection in _test_FloodReportWithUsrn_Collections_4)
+        {
+            yield return testFloodReportWithUsrn_Collection;
+        }
     }
 }
