@@ -10,7 +10,12 @@ using Xunit.Sdk;
     typeof(FloodProperty),
     typeof(FloodReport),
     typeof(FloodReportSource),
-    typeof(FloodRoad)
+    typeof(FloodRoad),
+    typeof(ICollection<FloodLocation>),
+    typeof(ICollection<FloodProperty>),
+    typeof(ICollection<FloodReport>),
+    typeof(ICollection<FloodReportSource>),
+    typeof(ICollection<FloodRoad>)
 )]
 
 namespace Tests.Serializers;
@@ -20,7 +25,7 @@ namespace Tests.Serializers;
 ///     <para><see href="https://xunit.net/docs/getting-started/v3/custom-serialization#serialization-support-in-v3">Serialization support in v3 - Custom Theory Data Serialization</see></para>
 /// </summary>
 /// <remarks>
-/// This serializer supports the following types: <see cref="FloodLocation"/>, <see cref="FloodProperty"/>, <see cref="FloodReport"/>, <see cref="FloodReportSource"/>, and <see cref="FloodRoad"/>.
+/// This serializer supports the following types: <see cref="FloodLocation"/>, <see cref="FloodProperty"/>, <see cref="FloodReport"/>, <see cref="FloodReportSource"/>, <see cref="FloodRoad"/> and any Lists of these.
 /// Types outside this list are not supported.
 /// </remarks>
 internal class ReportStatusXunitSerializer : IXunitSerializer
@@ -39,6 +44,20 @@ internal class ReportStatusXunitSerializer : IXunitSerializer
     {
     }
 
+    private static bool IsSupportedType(Type type)
+    {
+        if (SupportedTypes.Contains(type))
+        {
+            return true;
+        }
+
+        // Is a List or Collection of a supported type?
+        return type.GetInterfaces().Any(t =>
+            t.IsGenericType &&
+            t.GetGenericTypeDefinition() == typeof(ICollection<>) &&
+            SupportedTypes.Contains(t.GetGenericArguments()[0]));
+    }
+
     public bool IsSerializable(Type type, object? value, [NotNullWhen(false)] out string? failureReason)
     {
         if (type is null)
@@ -47,14 +66,14 @@ internal class ReportStatusXunitSerializer : IXunitSerializer
             return false;
         }
 
-        if (!SupportedTypes.Contains(type))
+        if (IsSupportedType(type))
         {
-            failureReason = $"Type '{type.FullName}' is not supported by {nameof(ReportStatusXunitSerializer)}";
-            return false;
+            failureReason = null;
+            return true;
         }
 
-        failureReason = null;
-        return true;
+        failureReason = $"Type '{type.FullName}' is not supported by {nameof(ReportStatusXunitSerializer)}";
+        return false;
     }
 
     public string Serialize(object value)
