@@ -48,7 +48,7 @@ internal static class FloodReportTestHelpers
         return uprns;
     }
 
-    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReportCollection()
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collection()
     {
         yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(0));
         yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(1));
@@ -56,25 +56,16 @@ internal static class FloodReportTestHelpers
         yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(10));
     }
 
-    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReportCollection_100()
+    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReport_Record_10()
     {
-        var floodReports = CreateFloodReports(100);
+        var floodReports = CreateFloodReports(10);
         foreach (var floodReport in floodReports)
         {
             yield return new TheoryDataRow<FloodReport>(floodReport);
         }
     }
 
-    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReportRecord()
-    {
-        var floodReports = CreateFloodReports(5);
-        foreach (var floodReport in floodReports)
-        {
-            yield return new TheoryDataRow<FloodReport>(floodReport);
-        }
-    }
-
-    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReportCollectionWithUprn()
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collection_WithUprn()
     {
         Randomizer.Seed = new Random(232589734);
         var faker = new Faker("en_GB");
@@ -86,8 +77,7 @@ internal static class FloodReportTestHelpers
         yield return new TheoryDataRow<IReadOnlyCollection<FloodReport>>(CreateFloodReports(10, uprn: uprn));
     }
 
-
-    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReportCollectionWithUsrn()
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collection_WithUsrn()
     {
         Randomizer.Seed = new Random(232589734);
         var faker = new Faker("en_GB");
