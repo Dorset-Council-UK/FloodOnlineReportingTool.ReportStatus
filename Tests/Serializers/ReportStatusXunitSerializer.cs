@@ -27,6 +27,14 @@ internal class ReportStatusXunitSerializer : IXunitSerializer
 {
     private static readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
 
+    private static readonly HashSet<Type> SupportedTypes = [
+        typeof(FloodLocation),
+        typeof(FloodProperty),
+        typeof(FloodReport),
+        typeof(FloodReportSource),
+        typeof(FloodRoad),
+    ];
+
     public ReportStatusXunitSerializer()
     {
     }
@@ -39,20 +47,14 @@ internal class ReportStatusXunitSerializer : IXunitSerializer
             return false;
         }
 
-        if (value is null)
+        if (!SupportedTypes.Contains(type))
         {
-            failureReason = "Value is null";
+            failureReason = $"Type '{type.FullName}' is not supported by {nameof(ReportStatusXunitSerializer)}";
             return false;
         }
 
-        if (value is FloodLocation or FloodProperty or FloodReport or FloodReportSource or FloodRoad)
-        {
-            failureReason = null;
-            return true;
-        }
-
-        failureReason = $"Type '{type.FullName}' is not supported by {nameof(ReportStatusXunitSerializer)}";
-        return false;
+        failureReason = null;
+        return true;
     }
 
     public string Serialize(object value)
@@ -63,6 +65,6 @@ internal class ReportStatusXunitSerializer : IXunitSerializer
     public object Deserialize(Type type, string serializedValue)
     {
         return JsonSerializer.Deserialize(serializedValue, type, _jsonSerializerOptions)
-            ?? throw new InvalidOperationException($"Deserialization of type '{type.FullName}' returned null");
+            ?? throw new InvalidOperationException($"Deserialization of type '{type.FullName}' returned null. Serialized value: {serializedValue}");
     }
 }
