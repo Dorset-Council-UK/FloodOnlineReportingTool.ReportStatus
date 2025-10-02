@@ -11,11 +11,11 @@ using Xunit.Sdk;
     typeof(FloodReport),
     typeof(FloodReportSource),
     typeof(FloodRoad),
-    typeof(ICollection<FloodLocation>),
-    typeof(ICollection<FloodProperty>),
-    typeof(ICollection<FloodReport>),
-    typeof(ICollection<FloodReportSource>),
-    typeof(ICollection<FloodRoad>)
+    typeof(IReadOnlyCollection<FloodLocation>),
+    typeof(IReadOnlyCollection<FloodProperty>),
+    typeof(IReadOnlyCollection<FloodReport>),
+    typeof(IReadOnlyCollection<FloodReportSource>),
+    typeof(IReadOnlyCollection<FloodRoad>)
 )]
 
 namespace Tests.Serializers;
@@ -52,10 +52,17 @@ internal class ReportStatusXunitSerializer : IXunitSerializer
         }
 
         // Is a List or Collection of a supported type?
-        return type.GetInterfaces().Any(t =>
+        var interfacesWithICollection = type.GetInterfaces()
+            .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ICollection<>))
+            .ToList();
+        var interfacesWithIReadOnlyCollection = type.GetInterfaces()
+            .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>))
+            .ToList();
+        var something = type.GetInterfaces().Any(t =>
             t.IsGenericType &&
             t.GetGenericTypeDefinition() == typeof(ICollection<>) &&
             SupportedTypes.Contains(t.GetGenericArguments()[0]));
+        return something;
     }
 
     public bool IsSerializable(Type type, object? value, [NotNullWhen(false)] out string? failureReason)
