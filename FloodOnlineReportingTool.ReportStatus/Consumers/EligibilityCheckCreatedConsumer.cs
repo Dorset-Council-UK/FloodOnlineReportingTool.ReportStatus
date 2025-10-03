@@ -144,15 +144,26 @@ internal class EligibilityCheckCreatedConsumer(
 #pragma warning restore CS8629 // Nullable value type may be null.
 
             // filter reports that match the sources logic
-            var floodReports = reports.Where(p => p.FloodReports != null).SelectMany(p => p.FloodReports).ToList();
-            List<FloodReport> matchedReports = new List<FloodReport>();
-            foreach (var matchedReport in floodReports)
+            List<Guid> matchedReports = new List<Guid>();
+            foreach (var matchedReport in reports)
             {
-                var report = matchedReport.FloodReport;
-                if (HasMatchingSources(report, message))
+                if (matchedReport.FloodReports != null)
                 {
-                    matchedReports.Add(report);
+                    foreach (FloodPropertyFloodReport propreport in matchedReport.FloodReports)
+                    {
+                        Guid CurrentID = propreport.FloodPropertyId;
+                        var report = await floodReportService.GetFloodReportById(propreport.FloodReportId, ct).ConfigureAwait(false);
+                        if (report != null)
+                        {
+                            if (HasMatchingSources(report, message))
+                            {
+                                matchedReports.Add(CurrentID);
+                            }
+                        }
+                    }
+                    
                 }
+                
             }
 
             if (matchedReports.Count > 0)
@@ -160,7 +171,7 @@ internal class EligibilityCheckCreatedConsumer(
                 logger.LogInformation("Found {Count} matching reports by UPRN", matchedReports.Count);
                 foreach( var linkedReport in matchedReports)
                 {
-                    await floodPropertyFloodReportService.CreateFloodPropertyFloodReport(linkedReport.Id, reportId, ct).ConfigureAwait(false);
+                    await floodPropertyFloodReportService.CreateFloodPropertyFloodReport(linkedReport, reportId, ct).ConfigureAwait(false);
                 }
                 return true;
             }
