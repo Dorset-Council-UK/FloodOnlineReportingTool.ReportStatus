@@ -8,8 +8,6 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Tests.Helpers;
-using static FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport;
 
 namespace Tests.Consumers;
 
