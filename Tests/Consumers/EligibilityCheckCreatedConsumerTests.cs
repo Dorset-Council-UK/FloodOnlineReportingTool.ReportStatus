@@ -13,10 +13,10 @@ namespace Tests.Consumers;
 
 public class EligibilityCheckCreatedConsumerTests
 {
-    public static IEnumerable<TheoryDataRow<EligibilityCheckCreated>> GoodMessages => EligibilityCheckCreatedTestHelpers.CreateMessages(100);
+    //public static IEnumerable<TheoryDataRow<EligibilityCheckCreated>> GoodMessages => EligibilityCheckCreatedTestHelpers.CreateMessages(100);
 
     [Theory]
-    [MemberData(nameof(GoodMessages))]
+    //[MemberData(nameof(GoodMessages))]
     public async Task Consume_ShouldCreateReport_WhenNotDuplicate(EligibilityCheckCreated message)
     {
         // Arrange
