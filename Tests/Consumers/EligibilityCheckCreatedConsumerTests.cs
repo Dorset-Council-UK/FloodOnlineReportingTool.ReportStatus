@@ -8,7 +8,6 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Tests.Helpers;
 
 namespace Tests.Consumers;
 
