@@ -149,10 +149,10 @@ internal class EligibilityCheckCreatedConsumer(
             {
                 if (matchedReport.FloodReports != null)
                 {
-                    foreach (FloodPropertyFloodReport propreport in matchedReport.FloodReports)
+                    foreach (FloodPropertyFloodReport propertyReport in matchedReport.FloodReports)
                     {
-                        Guid CurrentID = propreport.FloodPropertyId;
-                        var report = await floodReportService.GetFloodReportById(propreport.FloodReportId, ct).ConfigureAwait(false);
+                        Guid CurrentID = propertyReport.FloodPropertyId;
+                        var report = await floodReportService.GetFloodReportById(propertyReport.FloodReportId, ct).ConfigureAwait(false);
                         if (report != null)
                         {
                             if (HasMatchingSources(report, message))
@@ -160,10 +160,8 @@ internal class EligibilityCheckCreatedConsumer(
                                 matchedReports.Add(CurrentID);
                             }
                         }
-                    }
-                    
-                }
-                
+                    } 
+                } 
             }
 
             if (matchedReports.Count > 0)
@@ -190,14 +188,23 @@ internal class EligibilityCheckCreatedConsumer(
 #pragma warning restore CS8629 // Nullable value type may be null.
 
             // filter reports that match the sources logic
-            var floodReports = reports.Where(p => p.FloodReports != null).SelectMany(p => p.FloodReports).ToList();
-            List<FloodReport> matchedReports = new List<FloodReport>();
-            foreach (var matchedReport in floodReports)
+            List<Guid> matchedReports = new List<Guid>();
+            foreach (var matchedReport in reports)
             {
-                var report = matchedReport.FloodReport;
-                if (HasMatchingSources(report, message))
+                if (matchedReport.FloodReports != null)
                 {
-                    matchedReports.Add(report);
+                    foreach (FloodRoadFloodReport roadReport in matchedReport.FloodReports)
+                    {
+                        Guid CurrentID = roadReport.FloodRoadId;
+                        var report = await floodReportService.GetFloodReportById(roadReport.FloodReportId, ct).ConfigureAwait(false);
+                        if (report != null)
+                        {
+                            if (HasMatchingSources(report, message))
+                            {
+                                matchedReports.Add(CurrentID);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -206,7 +213,7 @@ internal class EligibilityCheckCreatedConsumer(
                 logger.LogInformation("Found {Count} matching reports by USRN", matchedReports.Count);
                 foreach (var linkedReport in matchedReports)
                 {
-                    await floodRoadFloodReportService.CreateFloodRoadFloodReport(linkedReport.Id, reportId, ct).ConfigureAwait(false);
+                    await floodRoadFloodReportService.CreateFloodRoadFloodReport(linkedReport, reportId, ct).ConfigureAwait(false);
                 }
                 return true;
             }
@@ -221,14 +228,23 @@ internal class EligibilityCheckCreatedConsumer(
         if (withinBufferReports.Count > 0)
         {
             // filter reports that match the sources logic
-            var floodReports = withinBufferReports.Where(p => p.FloodReports != null).SelectMany(p => p.FloodReports).ToList();
-            List<FloodReport> matchedReports = new List<FloodReport>();
-            foreach (var matchedReport in floodReports)
+            List<Guid> matchedReports = new List<Guid>();
+            foreach (var matchedReport in withinBufferReports)
             {
-                var report = matchedReport.FloodReport;
-                if (HasMatchingSources(report, message))
+                if (matchedReport.FloodReports != null)
                 {
-                    matchedReports.Add(report);
+                    foreach (FloodLocationFloodReport roadReport in matchedReport.FloodReports)
+                    {
+                        Guid CurrentID = roadReport.FloodLocationId;
+                        var report = await floodReportService.GetFloodReportById(roadReport.FloodReportId, ct).ConfigureAwait(false);
+                        if (report != null)
+                        {
+                            if (HasMatchingSources(report, message))
+                            {
+                                matchedReports.Add(CurrentID);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -237,7 +253,7 @@ internal class EligibilityCheckCreatedConsumer(
                 logger.LogInformation("Found {Count} matching reports within {Metres} metres", matchedReports.Count, _settings.LocationBufferMetres);
                 foreach (var linkedReport in matchedReports)
                 {
-                    await floodLocationFloodReportService.CreateFloodLocationFloodReport(linkedReport.Id, reportId, ct).ConfigureAwait(false);
+                    await floodLocationFloodReportService.CreateFloodLocationFloodReport(linkedReport, reportId, ct).ConfigureAwait(false);
                 }
                 return true;
             }
