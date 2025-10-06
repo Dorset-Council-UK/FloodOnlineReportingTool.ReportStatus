@@ -1,21 +1,21 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Exceptions;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Settings;
+using FloodOnlineReportingTool.ReportStatus.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+namespace FloodOnlineReportingTool.ReportStatus.Services;
 
-public class SearchRepository : ISearchRepository
+public class GazetteerSearchService : IGazetteerSearchService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly GISSettings _settings;
+    private readonly ReportStatusSettings _settings;
     private readonly JsonSerializerOptions _jsonOptions;
-    private readonly ILogger<SearchRepository> _logger;
+    private readonly ILogger<GazetteerSearchService> _logger;
 
-    public SearchRepository(IHttpClientFactory httpClientFactory, IOptions<GISSettings> settings, ILogger<SearchRepository> logger)
+    public GazetteerSearchService(IHttpClientFactory httpClientFactory, IOptions<ReportStatusSettings> settings, ILogger<GazetteerSearchService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
@@ -35,7 +35,7 @@ public class SearchRepository : ISearchRepository
     {
         // Throw an error if the search URI or API key are not set
         var searchUri = _settings.AddressNameUrl
-            ?? throw new ConfigurationMissingException("Missing configuration setting: The search URL is not set in the settings. Under GIS > AddressSearchUrl");
+            ?? throw new ConfigurationMissingException("Missing configuration setting: The search URL is not set in the settings. Under GIS > AddressNameUrl");
 
         if (_settings.ApiKey is null)
         {
@@ -61,7 +61,7 @@ public class SearchRepository : ISearchRepository
     {
         // Throw an error if the search URI or API key are not set
         var searchUri = _settings.StreetNameUrl
-            ?? throw new ConfigurationMissingException("Missing configuration setting: The search URL is not set in the settings. Under GIS > AddressSearchUrl");
+            ?? throw new ConfigurationMissingException("Missing configuration setting: The search URL is not set in the settings. Under GIS > AddressNameUrl");
 
         if (_settings.ApiKey is null)
         {

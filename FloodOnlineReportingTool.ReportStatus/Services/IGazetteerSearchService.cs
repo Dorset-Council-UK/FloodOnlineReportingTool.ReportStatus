@@ -1,6 +1,6 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+﻿namespace FloodOnlineReportingTool.ReportStatus.Services;
 
-public interface ISearchRepository
+public interface IGazetteerSearchService
 {
     /// <summary>
     /// Gets the address string by UPRN

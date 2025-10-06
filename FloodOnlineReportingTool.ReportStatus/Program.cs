@@ -16,12 +16,10 @@ builder.AddReportStatusDatabase();
 builder.Services.AddMessageSystem(messagingSettings);
 builder.AddGovNotify();
 
-// User service
+// Add services to DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-// Add the repositories
-builder.Services.AddRepositories();
+builder.Services.AddScoped<IGazetteerSearchService, GazetteerSearchService>();
 
 // json serializer options
 builder.Services.Configure<JsonOptions>(options =>

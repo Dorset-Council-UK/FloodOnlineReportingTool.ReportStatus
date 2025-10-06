@@ -1,8 +1,8 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.ReportStatus.Services;
 using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -22,7 +22,7 @@ internal class EligibilityCheckCreatedConsumer(
     IFloodPropertyFloodReportService floodPropertyFloodReportService,
     IFloodRoadFloodReportService floodRoadFloodReportService,
     IFloodLocationFloodReportService floodLocationFloodReportService,
-    ISearchRepository searchRepository
+    IGazetteerSearchService gazetteerSearchService
 ) : IConsumer<EligibilityCheckCreated>
 {
     private readonly ReportStatusSettings _settings = settings.Value;
@@ -61,13 +61,13 @@ internal class EligibilityCheckCreatedConsumer(
             case FloodReportType.Property:
                 if (messageLocationDescription == "" && message.Uprn != null)
                 {
-                    messageLocationDescription = await searchRepository.GetAddressNameByUPRN((long)message.Uprn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
+                    messageLocationDescription = await gazetteerSearchService.GetAddressNameByUPRN((long)message.Uprn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
                 }
                 break;
             case FloodReportType.Road:
                 if (messageLocationDescription == "" && message.Usrn != null)
                 {
-                    messageLocationDescription = await searchRepository.GetStreetNameByUSRN((long)message.Usrn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
+                    messageLocationDescription = await gazetteerSearchService.GetStreetNameByUSRN((long)message.Usrn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
                 }
                 break;
         }
