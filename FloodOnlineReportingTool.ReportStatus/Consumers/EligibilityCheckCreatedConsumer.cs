@@ -50,7 +50,6 @@ internal class EligibilityCheckCreatedConsumer(
 
         //Get the address / road name if not provided
         string messageLocationDescription = string.IsNullOrEmpty(message.LocationDescription) ? "" : message.LocationDescription;
-        messageLocationDescription = "";
         var referer = new UriBuilder { 
             Scheme = "https",
             Host = context.Host.ToString(),
@@ -66,7 +65,7 @@ internal class EligibilityCheckCreatedConsumer(
                 break;
             case FloodReportType.Road:
                 if (messageLocationDescription == "" && message.Usrn != null)
-                {
+                { 
                     messageLocationDescription = await gazetteerSearchService.GetStreetNameByUSRN((long)message.Usrn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
                 }
                 break;

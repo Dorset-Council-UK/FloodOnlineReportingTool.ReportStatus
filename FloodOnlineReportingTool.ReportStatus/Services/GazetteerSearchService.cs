@@ -139,7 +139,7 @@ public class GazetteerSearchService : IGazetteerSearchService
             {
                 if (searchResult.Count > 0)
                 {
-                    resultString = searchResult[0].ConcatenatedAddress;
+                    resultString = searchResult[0].Street;
                 }
             }
         }
