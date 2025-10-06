@@ -1,6 +1,7 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
@@ -20,7 +21,8 @@ internal class EligibilityCheckCreatedConsumer(
     IFloodLocationService floodLocationService,
     IFloodPropertyFloodReportService floodPropertyFloodReportService,
     IFloodRoadFloodReportService floodRoadFloodReportService,
-    IFloodLocationFloodReportService floodLocationFloodReportService
+    IFloodLocationFloodReportService floodLocationFloodReportService,
+    ISearchRepository searchRepository
 ) : IConsumer<EligibilityCheckCreated>
 {
     private readonly ReportStatusSettings _settings = settings.Value;
@@ -46,6 +48,30 @@ internal class EligibilityCheckCreatedConsumer(
         // Determine if we have a property, road or location submission
         FloodReportType reportType = GetReportType(message);
 
+        //Get the address / road name if not provided
+        string messageLocationDescription = string.IsNullOrEmpty(message.LocationDescription) ? "" : message.LocationDescription;
+        messageLocationDescription = "";
+        var referer = new UriBuilder { 
+            Scheme = "https",
+            Host = context.Host.ToString(),
+            Path = "ConsumeEligibilityCheck"
+        };
+        switch (reportType)
+        {
+            case FloodReportType.Property:
+                if (messageLocationDescription == "" && message.Uprn != null)
+                {
+                    messageLocationDescription = await searchRepository.GetAddressNameByUPRN((long)message.Uprn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
+                }
+                break;
+            case FloodReportType.Road:
+                if (messageLocationDescription == "" && message.Usrn != null)
+                {
+                    messageLocationDescription = await searchRepository.GetStreetNameByUSRN((long)message.Usrn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
+                }
+                break;
+        }
+
         // Determine if this is a possible duplicate
         var isPotentialDuplicate = await IsPotentialDuplicate(reportType, newReport.Id, message, context.CancellationToken).ConfigureAwait(false);
 
@@ -57,7 +83,7 @@ internal class EligibilityCheckCreatedConsumer(
             switch (reportType)
             {
                 case FloodReportType.Property:
-                    var propertyDtoModel = message.ToFloodPropertyDto();
+                    var propertyDtoModel = message.ToFloodPropertyDto(messageLocationDescription);
                     if (propertyDtoModel != null)
                     {
                         FloodProperty propertyReport = await floodPropertyService.CreateFloodProperty(propertyDtoModel, context.CancellationToken).ConfigureAwait(false);
@@ -65,7 +91,7 @@ internal class EligibilityCheckCreatedConsumer(
                     }
                     break;
                 case FloodReportType.Road:
-                    var roadDtoModel = message.ToFloodRoadDto();
+                    var roadDtoModel = message.ToFloodRoadDto(messageLocationDescription);
                     if (roadDtoModel != null)
                     {
                         FloodRoad roadReport = await floodRoadService.CreateFloodRoad(roadDtoModel, context.CancellationToken).ConfigureAwait(false);
@@ -73,8 +99,12 @@ internal class EligibilityCheckCreatedConsumer(
                     }
                     break;
                 case FloodReportType.Location:
-                    FloodLocation locationReport = await floodLocationService.CreateFloodLocation(message.ToFloodLocationDto(), context.CancellationToken).ConfigureAwait(false);
-                    await floodLocationFloodReportService.CreateFloodLocationFloodReport(locationReport.Id, newReport.Id, context.CancellationToken).ConfigureAwait(false);
+                    var locationDtoModel = message.ToFloodLocationDto(messageLocationDescription);
+                    if (locationDtoModel != null)
+                    {
+                        FloodLocation locationReport = await floodLocationService.CreateFloodLocation(locationDtoModel, context.CancellationToken).ConfigureAwait(false);
+                        await floodLocationFloodReportService.CreateFloodLocationFloodReport(locationReport.Id, newReport.Id, context.CancellationToken).ConfigureAwait(false);
+                    }
                     break;
             }
             
@@ -273,7 +303,7 @@ internal class EligibilityCheckCreatedConsumer(
             return false;
         }
 
-        var isGroundWaterSource = messageSourceIds.Contains(FloodSourceIds.WaterRisingOutOfTheGround);
+        var isGroundWaterSource = messageSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
 
         return WasReportedWithinDays(report, message, bufferDays);

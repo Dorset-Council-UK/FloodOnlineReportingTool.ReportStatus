@@ -29,14 +29,13 @@ internal static class ContractsExtensions
         };
     }
 
-    // TODO - fix the title bits in here, we need to get them using services potentially
-    internal static FloodPropertyDto? ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    internal static FloodPropertyDto? ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
         if (eligibilityCheckCreated.Uprn != null)
         {
             return new()
             {
-                Title = "Get the address string from UPRN",
+                Title = string.IsNullOrEmpty(locationDescription) ? "No address provided" : locationDescription,
                 Uprn = (long)eligibilityCheckCreated.Uprn,
                 Notes = "",
                 Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
@@ -46,13 +45,13 @@ internal static class ContractsExtensions
         return null;
     }
 
-    internal static FloodRoadDto? ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    internal static FloodRoadDto? ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
         if (eligibilityCheckCreated.Usrn != null)
         {
             return new()
             {
-                Title = "Get the road name from USRN",
+                Title = string.IsNullOrEmpty(locationDescription) ? "No road name provided" : locationDescription,
                 Usrn = (long)eligibilityCheckCreated.Usrn,
                 Notes = "",
                 Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
@@ -62,11 +61,11 @@ internal static class ContractsExtensions
         return null;
     }
 
-    internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
         return new()
         {
-            Title = "Use the location description passed by the message",
+            Title = string.IsNullOrEmpty(locationDescription) ? "No description provided" : locationDescription,
             Notes = "",
             Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
         };

@@ -20,6 +20,9 @@ builder.AddGovNotify();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+// Add the repositories
+builder.Services.AddRepositories();
+
 // json serializer options
 builder.Services.Configure<JsonOptions>(options =>
 {
