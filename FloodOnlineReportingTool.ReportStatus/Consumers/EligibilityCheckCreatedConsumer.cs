@@ -168,9 +168,7 @@ internal class EligibilityCheckCreatedConsumer(
         if (reportType == FloodReportType.Property)
         {
             // find existing reports by UPRN
-#pragma warning disable CS8629 // Nullable value type may be null.
-            var reports = await floodPropertyService.GetFloodPropertiesByUprn(message.Uprn.Value, ct).ConfigureAwait(false);
-#pragma warning restore CS8629 // Nullable value type may be null.
+            var reports = await floodPropertyService.GetFloodPropertiesByUprn(message.Uprn!.Value, ct).ConfigureAwait(false);
 
             // filter reports that match the sources logic
             List<Guid> matchedReports = new List<Guid>();
@@ -212,9 +210,7 @@ internal class EligibilityCheckCreatedConsumer(
         if (reportType == FloodReportType.Road)
         {
             // find existing reports by USRN
-#pragma warning disable CS8629 // Nullable value type may be null.
-            var reports = await floodRoadService.GetFloodRoadsByUsrn(message.Usrn.Value, ct).ConfigureAwait(false);
-#pragma warning restore CS8629 // Nullable value type may be null.
+            var reports = await floodRoadService.GetFloodRoadsByUsrn(message.Usrn!.Value, ct).ConfigureAwait(false);
 
             // filter reports that match the sources logic
             List<Guid> matchedReports = new List<Guid>();
