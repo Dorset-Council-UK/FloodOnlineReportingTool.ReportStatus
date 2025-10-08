@@ -10,6 +10,14 @@ public interface IFloodPropertyService
     Task<IReadOnlyCollection<FloodProperty>> GetFloodProperties(CancellationToken ct);
 
     /// <summary>
+    /// Gets all flood property by its UPRN from the database, including related flood reports.
+    /// </summary>
+    /// <param name="Uprn"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<IReadOnlyCollection<FloodProperty>> GetFloodPropertiesByUprn(long Uprn, CancellationToken ct);
+
+    /// <summary>
     /// Gets all flood properties, including related flood reports.
     /// </summary>
     /// <remarks>Related Flood Reports will be included.</remarks>

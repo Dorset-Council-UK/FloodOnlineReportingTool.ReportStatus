@@ -2,6 +2,7 @@
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -13,6 +14,18 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyCollection<FloodLocation>> GetFloodLocationsByPoint(double easting, double northing, double buffer, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving all flood locations within buffer {buffer} of {easting}, {northing} from the database.", buffer, easting, northing);
+
+        return await context.FloodLocations
+            .AsNoTracking()
+            .Where(o => o.Location.Intersects(new Point(easting,northing).Buffer(buffer)))
+            .Include(o => o.FloodReports)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }

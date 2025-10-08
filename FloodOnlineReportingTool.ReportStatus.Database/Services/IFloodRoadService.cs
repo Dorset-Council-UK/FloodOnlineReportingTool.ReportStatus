@@ -10,6 +10,14 @@ public interface IFloodRoadService
     Task<IReadOnlyCollection<FloodRoad>> GetFloodRoads(CancellationToken ct);
 
     /// <summary>
+    /// Gets all flood road by its USRN from the database, including related flood reports.
+    /// </summary>
+    /// <param name="Usrn"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsByUsrn(long Usrn, CancellationToken ct);
+
+    /// <summary>
     /// Gets all flood roads, including related flood reports.
     /// </summary>
     /// <remarks>Related Flood Reports will be included.</remarks>

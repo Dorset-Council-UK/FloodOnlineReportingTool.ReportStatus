@@ -10,6 +10,16 @@ public interface IFloodLocationService
     Task<IReadOnlyCollection<FloodLocation>> GetFloodLocations(CancellationToken ct);
 
     /// <summary>
+    /// Gets all flood locations by matching within the buffer provided, including related flood reports.
+    /// </summary>
+    /// <param name="easting"></param>
+    /// <param name="northing"></param>
+    /// <param name="buffer"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<IReadOnlyCollection<FloodLocation>> GetFloodLocationsByPoint(double easting, double northing, double buffer, CancellationToken ct);
+
+    /// <summary>
     /// Gets all flood locations, including related flood reports.
     /// </summary>
     /// <remarks>Related Flood Reports will be included.</remarks>

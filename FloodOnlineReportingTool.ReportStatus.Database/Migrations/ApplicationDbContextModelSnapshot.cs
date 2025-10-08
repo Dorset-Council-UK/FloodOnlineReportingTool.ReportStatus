@@ -34,6 +34,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Point>("Location")
+                        .IsRequired()
                         .HasColumnType("geometry (point)");
 
                     b.Property<string>("Notes")
@@ -94,6 +95,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Point>("Location")
+                        .IsRequired()
                         .HasColumnType("geometry (point)");
 
                     b.Property<string>("Notes")
@@ -105,6 +107,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Uprn")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -215,6 +220,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Point>("Location")
+                        .IsRequired()
                         .HasColumnType("geometry (point)");
 
                     b.Property<string>("Notes")
@@ -226,6 +232,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Usrn")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

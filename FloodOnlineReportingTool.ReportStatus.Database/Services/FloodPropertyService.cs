@@ -17,6 +17,18 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyCollection<FloodProperty>> GetFloodPropertiesByUprn(long Uprn, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving all flood properties for UPRN {Uprn} from the database.", Uprn);
+
+        return await context.FloodProperties
+            .AsNoTracking()
+            .Where(o => o.Uprn.Equals(Uprn))
+            .Include(o => o.FloodReports)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
     public async Task<IReadOnlyCollection<FloodProperty>> GetFloodPropertiesWithReports(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood properties and their flood reports from the database.");
@@ -58,6 +70,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             CreatedUtc = DateTimeOffset.UtcNow,
 
             Title = dto.Title,
+            Uprn = dto.Uprn,
             Notes = dto.Notes,
             Location = dto.Location,
         };

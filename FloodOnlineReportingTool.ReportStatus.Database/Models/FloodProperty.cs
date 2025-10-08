@@ -12,8 +12,9 @@ public record FloodProperty : ICreatedUpdated
     public DateTimeOffset? UpdatedUtc { get; init; }
 
     public required string Title { get; init; }
+    public required long Uprn { get; init; }
     public string? Notes { get; init; }
-    public Point? Location { get; init; }
+    public required Point Location { get; init; }
 
     public virtual ICollection<FloodPropertyFloodReport> FloodReports { get; init; } = [];
 }
