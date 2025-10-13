@@ -1,16 +1,14 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using System.Diagnostics;
 
 namespace Tests.Data;
 
-internal static class FloodReportData
+public static class FloodReportData
 {
     internal static long FixedUprn = 10023242411;
     internal static long FixedUsrn = 20023242411;
 
-    //[DebuggerDisplay("{Id}, Uprn = {Uprn}, Usrn = {Usrn}, Easting = {Easting}, Northing = {Northing}")]
-    internal static readonly FloodReport FloodReport1 = new ()
+    public static readonly FloodReport FloodReport1 = new ()
     {
         Id = Guid.Parse("11111111-1111-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -42,7 +40,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReport2 = new()
+    public static readonly FloodReport FloodReport2 = new()
     {
         Id = Guid.Parse("11111111-2222-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -74,7 +72,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReport3 = new()
+    public static readonly FloodReport FloodReport3 = new()
     {
         Id = Guid.Parse("11111111-3333-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -106,7 +104,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReportWithUprn1 = new()
+    public static readonly FloodReport FloodReportWithUprn1 = new()
     {
         Id = Guid.Parse("11111111-1111-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -138,7 +136,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReportWithUprn2 = new()
+    public static readonly FloodReport FloodReportWithUprn2 = new()
     {
         Id = Guid.Parse("11111111-2222-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -170,7 +168,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReportWithUprn3 = new()
+    public static readonly FloodReport FloodReportWithUprn3 = new()
     {
         Id = Guid.Parse("11111111-3333-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -202,7 +200,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReportWithUsrn1 = new()
+    public static readonly FloodReport FloodReportWithUsrn1 = new()
     {
         Id = Guid.Parse("11111111-1111-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -234,7 +232,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReportWithUsrn2 = new()
+    public static readonly FloodReport FloodReportWithUsrn2 = new()
     {
         Id = Guid.Parse("11111111-2222-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -266,7 +264,7 @@ internal static class FloodReportData
         ],
     };
 
-    internal static readonly FloodReport FloodReportWithUsrn3 = new()
+    public static readonly FloodReport FloodReportWithUsrn3 = new()
     {
         Id = Guid.Parse("11111111-3333-0000-0000-000000000000"),
         CreatedUtc = new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -297,4 +295,31 @@ internal static class FloodReportData
             },
         ],
     };
+
+    public static IEnumerable<object[]> FloodReport_3 => [
+        [FloodReport1],
+        [FloodReport2],
+        [FloodReport3],
+    ];
+
+    public static IEnumerable<object[]> FloodReport_Collections_4 => [
+        [new List<FloodReport>()],
+        [new List<FloodReport> { FloodReport1 }],
+        [new List<FloodReport> { FloodReport1, FloodReport2 }],
+        [new List<FloodReport> { FloodReport1, FloodReport2, FloodReport3 }],
+    ];
+
+    public static IEnumerable<object[]> FloodReportWithUprn_Collections_4 => [
+        [new List<FloodReport>()],
+        [new List<FloodReport> { FloodReportWithUprn1 }],
+        [new List<FloodReport> { FloodReportWithUprn1, FloodReportWithUprn2 }],
+        [new List<FloodReport> { FloodReportWithUprn1, FloodReportWithUprn2, FloodReportWithUprn3 }],
+    ];
+
+    public static IEnumerable<object[]> FloodReportWithUsrn_Collections_4 => [
+        [new List<FloodReport>()],
+        [new List<FloodReport> { FloodReportWithUsrn1 }],
+        [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2 }],
+        [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2, FloodReportWithUsrn3 }],
+    ];
 }
