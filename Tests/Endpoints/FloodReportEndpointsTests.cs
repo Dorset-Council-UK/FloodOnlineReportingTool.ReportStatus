@@ -133,10 +133,21 @@ public class FloodReportEndpointsTests
         Assert.Empty(okResult.Value!);
     }
 
-    [Fact]
-    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance()
+    [Theory]
+    [MemberData(nameof(FloodReportData.FloodReport_Within50Metres_Collections), MemberType = typeof(FloodReportData))]
+    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance(double easting, double northing, IReadOnlyCollection<FloodReport> expected)
     {
-        Assert.Fail("Not implemented");
+        // Arrange
+        var metres = 50.0;
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReportsWithinMetres(easting, northing, metres, Arg.Any<CancellationToken>()).Returns(expected);
+
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReportsWithinMetres(floodReportService, easting, northing, metres, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
     }
 
     [Fact]

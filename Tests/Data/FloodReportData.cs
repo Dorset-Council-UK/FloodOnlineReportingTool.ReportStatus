@@ -322,4 +322,10 @@ public static class FloodReportData
         [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2 }],
         [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2, FloodReportWithUsrn3 }],
     ];
+
+    public static IEnumerable<object[]> FloodReport_Within50Metres_Collections => [
+        [368991.12, 90881.94, new List<FloodReport> { FloodReport1 }],
+        [368991.12, 90881.94, new List<FloodReport> { FloodReport1, FloodReport2 }],
+        [368991.12, 90881.94, new List<FloodReport> { FloodReport1, FloodReport2, FloodReport3 }],
+    ];
 }
