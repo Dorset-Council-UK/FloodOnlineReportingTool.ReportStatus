@@ -13,6 +13,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         return await context.FloodProperties
             .AsNoTracking()
+            .OrderBy(fp => fp.Id)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -23,8 +24,9 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         return await context.FloodProperties
             .AsNoTracking()
-            .Where(o => o.Uprn.Equals(Uprn))
-            .Include(o => o.FloodReports)
+            .OrderBy(fp => fp.Id)
+            .Where(fp => fp.Uprn.Equals(Uprn))
+            .Include(fp => fp.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -35,7 +37,8 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         return await context.FloodProperties
             .AsNoTracking()
-            .Include(o => o.FloodReports)
+            .OrderBy(fp => fp.Id)
+            .Include(fp => fp.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -55,8 +58,9 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         return await context.FloodProperties
             .AsNoTracking()
-            .Include(o => o.FloodReports)
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
+            .OrderBy(fp => fp.Id)
+            .Include(fp => fp.FloodReports.OrderBy(fr => fr.FloodReportId))
+            .FirstOrDefaultAsync(fp => fp.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }
 
@@ -135,6 +139,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         return await context.FloodProperties
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }

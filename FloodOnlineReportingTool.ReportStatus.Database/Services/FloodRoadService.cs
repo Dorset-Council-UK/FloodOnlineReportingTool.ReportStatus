@@ -13,6 +13,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
+            .OrderBy(fr => fr.Id)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -23,8 +24,9 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Where(o => o.Usrn.Equals(Usrn))
-            .Include(o => o.FloodReports)
+            .OrderBy(fr => fr.Id)
+            .Where(fr => fr.Usrn.Equals(Usrn))
+            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -35,7 +37,8 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Include(o => o.FloodReports)
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -55,8 +58,9 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Include(o => o.FloodReports)
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
+            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }
 
@@ -135,6 +139,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }

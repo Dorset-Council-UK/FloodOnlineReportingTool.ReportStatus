@@ -13,9 +13,5 @@ internal class FloodReportConfiguration : IEntityTypeConfiguration<FloodReport>
         builder
             .Property(o => o.Id)
             .ValueGeneratedNever();
-
-        builder
-            .Navigation(o =>o.Sources)
-            .AutoInclude();
     }
 }

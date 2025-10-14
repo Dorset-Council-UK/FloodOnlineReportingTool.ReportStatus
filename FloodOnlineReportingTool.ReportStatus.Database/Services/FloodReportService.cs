@@ -2,6 +2,7 @@
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -11,8 +12,11 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
     {
         logger.LogDebug("Retrieving all flood reports from the database.");
 
+        // Ensure the flood reports and their flood sources are always returned in a consistent order
         return await context.FloodReports
             .AsNoTracking()
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -22,7 +26,9 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
         logger.LogDebug("Retrieving flood report with ID {FloodReportId} from the database.", id);
 
         return await context.FloodReports
-            .FindAsync([id], ct)
+            .AsNoTracking()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }
 
@@ -32,7 +38,9 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         return await context.FloodReports
             .AsNoTracking()
-            .Where(o => o.Uprn.Equals(uprn))
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => fr.Uprn.Equals(uprn))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -43,7 +51,9 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         return await context.FloodReports
             .AsNoTracking()
-            .Where(o => o.Usrn.Equals(usrn))
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => fr.Usrn.Equals(usrn))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -98,7 +108,8 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         var existing = await context.FloodReports
             .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct)
             .ConfigureAwait(false);
 
         if (existing == null)
@@ -150,6 +161,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         return await context.FloodReports
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }

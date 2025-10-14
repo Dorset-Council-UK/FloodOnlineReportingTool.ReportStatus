@@ -14,6 +14,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
+            .OrderBy(fl => fl.Id)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -24,8 +25,9 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
-            .Where(o => o.Location.Intersects(new Point(easting,northing).Buffer(buffer)))
-            .Include(o => o.FloodReports)
+            .OrderBy(fl => fl.Id)
+            .Where(fl => fl.Location.Intersects(new Point(easting, northing).Buffer(buffer)))
+            .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -36,7 +38,8 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
-            .Include(o => o.FloodReports)
+            .OrderBy(fl => fl.Id)
+            .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -56,8 +59,9 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         var location = await context.FloodLocations
             .AsNoTracking()
-            .Include(o => o.FloodReports)
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
+            .OrderBy(fl => fl.Id)
+            .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
+            .FirstOrDefaultAsync(fl => fl.Id.Equals(id), ct)
             .ConfigureAwait(false);
 
         return location;
@@ -137,6 +141,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }

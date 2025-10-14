@@ -13,6 +13,8 @@ public class FloodPropertyFloodReportService(ILogger<FloodPropertyFloodReportSer
 
         return await context.FloodPropertyReports
             .AsNoTracking()
+            .OrderBy(fpr => fpr.FloodPropertyId)
+            .ThenBy(fpr => fpr.FloodReportId)
             .Where(o => o.FloodPropertyId.Equals(floodPropertyId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
@@ -121,6 +123,7 @@ public class FloodPropertyFloodReportService(ILogger<FloodPropertyFloodReportSer
 
         return await context.FloodPropertyReports
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.FloodPropertyId.Equals(floodPropertyId) && o.FloodReportId.Equals(floodReportId), ct)
             .ConfigureAwait(false);
     }
