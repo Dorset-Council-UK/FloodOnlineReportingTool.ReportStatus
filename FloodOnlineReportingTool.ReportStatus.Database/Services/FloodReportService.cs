@@ -52,26 +52,20 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
     {
         logger.LogDebug("Finding flood reports within {Metres} metres of Easting {Easting} and Northing {Northing}.", metres, easting, northing);
 
-        var metresSquared = metres * metres;
+        var geometry = new Point(easting, northing) { SRID = 27700 };
+
         return await context.FloodReports
             .AsNoTracking()
-            .Where(o =>
-                Math.Pow(o.Easting - easting, 2) + Math.Pow(o.Northing - northing, 2) <= metresSquared
-            )
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => EF.Functions.IsWithinDistance(
+                geometry,
+                new Point(fr.Easting, fr.Northing) { SRID = 27700 },
+                metres,
+                false
+            ))
             .ToListAsync(ct)
             .ConfigureAwait(false);
-
-        // TODO Test the performance of the above against the below, I believe the above is more efficient as it avoids a square root calculation
-        //return await context.FloodReports
-        //    .AsNoTracking()
-        //    .Where(o =>
-        //        Math.Sqrt(
-        //            Math.Pow(o.Easting - easting, 2) +
-        //            Math.Pow(o.Northing - northing, 2)
-        //        ) <= metres
-        //    )
-        //    .ToListAsync(ct)
-        //    .ConfigureAwait(false);
     }
 
     public async Task<FloodReport> CreateFloodReport(FloodReportDto dto, CancellationToken ct)
