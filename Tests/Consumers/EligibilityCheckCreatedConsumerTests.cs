@@ -1,15 +1,4 @@
-﻿using Bogus;
-using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Consumers;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
-using FloodOnlineReportingTool.ReportStatus.Settings;
-using MassTransit;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NSubstitute;
-
-namespace Tests.Consumers;
+﻿namespace Tests.Consumers;
 
 public class EligibilityCheckCreatedConsumerTests
 {
