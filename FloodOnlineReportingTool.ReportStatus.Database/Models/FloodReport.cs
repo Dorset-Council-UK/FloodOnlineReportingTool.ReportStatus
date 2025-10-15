@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 public record FloodReport : ICreatedUpdated
 {
@@ -19,11 +17,4 @@ public record FloodReport : ICreatedUpdated
     public int ImpactDurationHours { get; init; }
 
     public virtual ICollection<FloodReportSource> Sources { get; init; } = [];
-
-    public enum FloodReportType
-    {
-        Property,
-        Road,
-        Location
-    }
 }
