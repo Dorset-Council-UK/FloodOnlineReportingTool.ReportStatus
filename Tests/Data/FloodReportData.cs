@@ -7,6 +7,8 @@ public static class FloodReportData
 {
     internal static long FixedUprn = 10023242411;
     internal static long FixedUsrn = 20023242411;
+    internal static double Easting = 368991.12;
+    internal static double Northing = 90881.94;
 
     public static readonly FloodReport FloodReport1 = new ()
     {
@@ -16,8 +18,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-1111-0000-0000-000000000000"),
         Uprn = null,
         Usrn = null,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -48,8 +50,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-2222-0000-0000-000000000000"),
         Uprn = null,
         Usrn = null,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -80,8 +82,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-3333-0000-0000-000000000000"),
         Uprn = null,
         Usrn = null,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -112,8 +114,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-1111-0000-0000-000000000000"),
         Uprn = FixedUprn,
         Usrn = null,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -144,8 +146,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-2222-0000-0000-000000000000"),
         Uprn = FixedUprn,
         Usrn = null,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -176,8 +178,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-3333-0000-0000-000000000000"),
         Uprn = FixedUprn,
         Usrn = null,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -208,8 +210,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-1111-0000-0000-000000000000"),
         Uprn = null,
         Usrn = FixedUsrn,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -240,8 +242,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-2222-0000-0000-000000000000"),
         Uprn = null,
         Usrn = FixedUsrn,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -272,8 +274,8 @@ public static class FloodReportData
         EligibilityCheckId = Guid.Parse("22222222-3333-0000-0000-000000000000"),
         Uprn = null,
         Usrn = FixedUsrn,
-        Easting = 368991.12,
-        Northing = 90881.94,
+        Easting = Easting,
+        Northing = Northing,
         ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
         ImpactDurationHours = 5,
         Sources = [
@@ -323,9 +325,19 @@ public static class FloodReportData
         [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2, FloodReportWithUsrn3 }],
     ];
 
-    public static IEnumerable<object[]> FloodReport_Within50Metres_Collections => [
-        [368991.12, 90881.94, new List<FloodReport> { FloodReport1 }],
-        [368991.12, 90881.94, new List<FloodReport> { FloodReport1, FloodReport2 }],
-        [368991.12, 90881.94, new List<FloodReport> { FloodReport1, FloodReport2, FloodReport3 }],
-    ];
+    public static IEnumerable<object[]> FloodReport_Within50Metres_Collections
+    {
+        get
+        {
+            var fr1 = FloodReport1 with { Easting = 368991.11, Northing = 90881.11 };
+            var fr2 = FloodReport2 with { Easting = 368976.22, Northing = 90779.22 };
+            var fr3 = FloodReport3 with { Easting = 368950.33, Northing = 90750.33 };
+
+            return [
+                [new List<FloodReport> { fr1 }],
+                [new List<FloodReport> { fr1, fr2 }],
+                [new List<FloodReport> { fr1, fr2, fr3 }],
+            ];
+        }
+    }
 }
