@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -38,6 +39,11 @@ public interface IFloodPropertyService
     /// Creates a new flood property in the database.
     /// </summary>
     Task<FloodProperty> CreateFloodProperty(FloodPropertyDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood property in the database.

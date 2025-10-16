@@ -7,7 +7,6 @@ using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
-using static FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport;
 
 namespace FloodOnlineReportingTool.ReportStatus.Consumers;
 
@@ -32,6 +31,7 @@ internal class EligibilityCheckCreatedConsumer(
         logger.LogInformation("Consuming contract: {Contract}", nameof(EligibilityCheckCreated));
 
         var message = context.Message;
+        var cancellationToken = context.CancellationToken;
 
         // Check if the report triggers a vulnerability warning and sent to subscribers if required
         // Note! This is not an incident management tool but alerts are still sent to help with prioritisation of responses. 
@@ -39,40 +39,38 @@ internal class EligibilityCheckCreatedConsumer(
 
         // Now record the flood report and flood source records (done for every message passed to the system)
         logger.LogInformation("Creating a new report");
-        var newReport = await floodReportService.CreateFloodReport(message.ToFloodReportDto(), context.CancellationToken).ConfigureAwait(false);
-        foreach(var floodSource in message.FloodSources)
+        var floodReport = await floodReportService.CreateFloodReport(message.ToFloodReportDto(), cancellationToken).ConfigureAwait(false);
+        var floodReportId = floodReport.Id;
+        if (message.FloodSources.Count > 0)
         {
-            await floodReportSourceService.CreateFloodReportSource(newReport.Id, floodSource.Id, floodSource.ToFloodReportSourceDto(), context.CancellationToken).ConfigureAwait(false);
+            await floodReportSourceService.CreateFloodReportSources(floodReportId, message.FloodSources, cancellationToken).ConfigureAwait(false);
         }
 
         // Determine if we have a property, road or location submission
-        FloodReportType reportType = GetReportType(message);
-
-        //Get the address / road name if not provided
-        string messageLocationDescription = string.IsNullOrEmpty(message.LocationDescription) ? "" : message.LocationDescription;
-        var referer = new UriBuilder { 
-            Scheme = "https",
-            Host = context.Host.ToString(),
-            Path = "ConsumeEligibilityCheck"
-        };
-        switch (reportType)
+        var reportType = message switch
         {
-            case FloodReportType.Property:
-                if (messageLocationDescription == "" && message.Uprn != null)
-                {
-                    messageLocationDescription = await gazetteerSearchService.GetAddressNameByUPRN((long)message.Uprn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
-                }
-                break;
-            case FloodReportType.Road:
-                if (messageLocationDescription == "" && message.Usrn != null)
-                { 
-                    messageLocationDescription = await gazetteerSearchService.GetStreetNameByUSRN((long)message.Usrn, referer.Uri, context.CancellationToken).ConfigureAwait(false);
-                }
-                break;
+            { Uprn: not null } => FloodReportType.Property,
+            { Usrn: not null } => FloodReportType.Road,
+            _ => FloodReportType.Location,
+        };
+
+        // Location description
+        string locationDescription = "";
+        if (message.LocationDescription is null)
+        {
+            var refererUri = new UriBuilder("https", context.Host.ToString(), 443, "ConsumeEligibilityCheck").Uri;
+
+            // Get the address name for Property or the streey name for Road
+            locationDescription = reportType switch
+            {
+                FloodReportType.Property => await gazetteerSearchService.GetAddressNameByUPRN(message.Uprn!.Value, refererUri, cancellationToken).ConfigureAwait(false),
+                FloodReportType.Road => await gazetteerSearchService.GetStreetNameByUSRN(message.Usrn!.Value, refererUri, cancellationToken).ConfigureAwait(false),
+                _ => "",
+            };
         }
 
         // Determine if this is a possible duplicate
-        var isPotentialDuplicate = await IsPotentialDuplicate(reportType, newReport.Id, message, context.CancellationToken).ConfigureAwait(false);
+        var isPotentialDuplicate = await IsPotentialDuplicate(reportType, floodReportId, message, cancellationToken).ConfigureAwait(false);
 
         // If not then create a new record
         if (!isPotentialDuplicate)
@@ -82,31 +80,18 @@ internal class EligibilityCheckCreatedConsumer(
             switch (reportType)
             {
                 case FloodReportType.Property:
-                    var propertyDtoModel = message.ToFloodPropertyDto(messageLocationDescription);
-                    if (propertyDtoModel != null)
-                    {
-                        FloodProperty propertyReport = await floodPropertyService.CreateFloodProperty(propertyDtoModel, context.CancellationToken).ConfigureAwait(false);
-                        await floodPropertyFloodReportService.CreateFloodPropertyFloodReport(propertyReport.Id, newReport.Id, context.CancellationToken).ConfigureAwait(false);
-                    }
+                    var floodProperty = await floodPropertyService.CreateFloodProperty(message.ToFloodPropertyDto(locationDescription), cancellationToken).ConfigureAwait(false);
+                    await floodPropertyFloodReportService.CreateFloodPropertyFloodReport(floodProperty.Id, floodReportId, cancellationToken).ConfigureAwait(false);
                     break;
                 case FloodReportType.Road:
-                    var roadDtoModel = message.ToFloodRoadDto(messageLocationDescription);
-                    if (roadDtoModel != null)
-                    {
-                        FloodRoad roadReport = await floodRoadService.CreateFloodRoad(roadDtoModel, context.CancellationToken).ConfigureAwait(false);
-                        await floodRoadFloodReportService.CreateFloodRoadFloodReport(roadReport.Id, newReport.Id, context.CancellationToken).ConfigureAwait(false);
-                    }
+                    var floodRoad = await floodRoadService.CreateFloodRoad(message.ToFloodRoadDto(locationDescription), cancellationToken).ConfigureAwait(false);
+                    await floodRoadFloodReportService.CreateFloodRoadFloodReport(floodRoad.Id, floodReportId, cancellationToken).ConfigureAwait(false);
                     break;
                 case FloodReportType.Location:
-                    var locationDtoModel = message.ToFloodLocationDto(messageLocationDescription);
-                    if (locationDtoModel != null)
-                    {
-                        FloodLocation locationReport = await floodLocationService.CreateFloodLocation(locationDtoModel, context.CancellationToken).ConfigureAwait(false);
-                        await floodLocationFloodReportService.CreateFloodLocationFloodReport(locationReport.Id, newReport.Id, context.CancellationToken).ConfigureAwait(false);
-                    }
+                    var floodLocation = await floodLocationService.CreateFloodLocation(message.ToFloodLocationDto(), cancellationToken).ConfigureAwait(false);
+                    await floodLocationFloodReportService.CreateFloodLocationFloodReport(floodLocation.Id, floodReportId, cancellationToken).ConfigureAwait(false);
                     break;
             }
-            
         }
     }
 
@@ -119,42 +104,26 @@ internal class EligibilityCheckCreatedConsumer(
         }
     }
 
-    private FloodReportType GetReportType(EligibilityCheckCreated message)
-    {
-        if (message.Uprn != null)
-        {
-            return FloodReportType.Property;
-        }
-        else if (message.Usrn != null)
-        {
-            return FloodReportType.Road;
-        }
-        else
-        {
-            return FloodReportType.Location;
-        }
-    }
-
     // <summary>
     // Check if the report is potentially a duplicate, this will then be checked by the team.
     // </summary>
     // <returns><see langword = "true" /> if a duplicate report is found, otherwise<see langword = "false" />.</ returns > "
-    private async Task<bool> IsPotentialDuplicate(FloodReportType reportType, Guid reportId, EligibilityCheckCreated message, CancellationToken ct)
+    private async Task<bool> IsPotentialDuplicate(FloodReportType reportType, Guid floodReportId, EligibilityCheckCreated message, CancellationToken ct)
     {
         // check by UPRN first
-        if (await HasDuplicateCandidatesByUprn(reportType, reportId, message, ct).ConfigureAwait(false))
+        if (await HasDuplicateCandidatesByUprn(reportType, floodReportId, message, ct).ConfigureAwait(false))
         {
             return true;
         }
 
         // no UPRN, check by USRN
-        if (await HasDuplicateCandidatesByUsrn(reportType, reportId, message, ct).ConfigureAwait(false))
+        if (await HasDuplicateCandidatesByUsrn(reportType, floodReportId, message, ct).ConfigureAwait(false))
         {
             return true;
         }
 
         // no UPRN or USRN, check by buffer of location
-        if (await HasDuplicateCandidatesByLocation(reportType, reportId, message, ct).ConfigureAwait(false))
+        if (await HasDuplicateCandidatesByLocation(reportType, floodReportId, message, ct).ConfigureAwait(false))
         {
             return true;
         }
@@ -165,44 +134,46 @@ internal class EligibilityCheckCreatedConsumer(
 
     private async Task<bool> HasDuplicateCandidatesByUprn(FloodReportType reportType, Guid reportId, EligibilityCheckCreated message, CancellationToken ct)
     {
-        if (reportType == FloodReportType.Property)
+        if (reportType != FloodReportType.Property)
         {
-            // find existing reports by UPRN
-            var reports = await floodPropertyService.GetFloodPropertiesByUprn(message.Uprn!.Value, ct).ConfigureAwait(false);
-
-            // filter reports that match the sources logic
-            List<Guid> matchedReports = new List<Guid>();
-            foreach (var matchedReport in reports)
-            {
-                if (matchedReport.FloodReports != null)
-                {
-                    foreach (FloodPropertyFloodReport propertyReport in matchedReport.FloodReports)
-                    {
-                        Guid CurrentID = propertyReport.FloodPropertyId;
-                        var report = await floodReportService.GetFloodReportById(propertyReport.FloodReportId, ct).ConfigureAwait(false);
-                        if (report != null)
-                        {
-                            if (HasMatchingSources(report, message))
-                            {
-                                matchedReports.Add(CurrentID);
-                            }
-                        }
-                    } 
-                } 
-            }
-
-            if (matchedReports.Count > 0)
-            {
-                logger.LogInformation("Found {Count} matching reports by UPRN", matchedReports.Count);
-                foreach( var linkedReport in matchedReports)
-                {
-                    await floodPropertyFloodReportService.CreateFloodPropertyFloodReport(linkedReport, reportId, ct).ConfigureAwait(false);
-                }
-                return true;
-            }
+            return false;
         }
 
-        return false;
+        // find existing reports by UPRN
+        var reports = await floodPropertyService.GetFloodPropertiesByUprn(message.Uprn!.Value, ct).ConfigureAwait(false);
+
+        // filter reports that match the sources logic
+        List<Guid> matchedReports = new List<Guid>();
+        foreach (var matchedReport in reports)
+        {
+            if (matchedReport.FloodReports != null)
+            {
+                foreach (FloodPropertyFloodReport propertyReport in matchedReport.FloodReports)
+                {
+                    Guid CurrentID = propertyReport.FloodPropertyId;
+                    var report = await floodReportService.GetFloodReportById(propertyReport.FloodReportId, ct).ConfigureAwait(false);
+                    if (report != null)
+                    {
+                        if (HasMatchingSources(report, message))
+                        {
+                            matchedReports.Add(CurrentID);
+                        }
+                    }
+                } 
+            } 
+        }
+
+        if (matchedReports.Count == 0)
+        {
+            return false;
+        }
+
+        logger.LogInformation("Found {Count} matching reports by UPRN", matchedReports.Count);
+        foreach( var linkedReport in matchedReports)
+        {
+            await floodPropertyFloodReportService.CreateFloodPropertyFloodReport(linkedReport, reportId, ct).ConfigureAwait(false);
+        }
+        return true;
     }
 
     private async Task<bool> HasDuplicateCandidatesByUsrn(FloodReportType reportType, Guid reportId, EligibilityCheckCreated message, CancellationToken ct)
@@ -287,10 +258,10 @@ internal class EligibilityCheckCreatedConsumer(
         return false;
     }
 
-    private bool HasMatchingSources(FloodReport report, EligibilityCheckCreated message)
+    private bool HasMatchingSources(FloodReport floodReport, EligibilityCheckCreated message)
     {
         // do any of the message Ids match on any of the report Ids
-        ImmutableHashSet<Guid> reportSourceIds = [.. report.Sources.Select(s => s.SourceId)];
+        ImmutableHashSet<Guid> reportSourceIds = [.. floodReport.Sources.Select(s => s.SourceId)];
         ImmutableHashSet<Guid> messageSourceIds = [.. message.FloodSources.Select(s => s.Id)];
 
         if (!messageSourceIds.Overlaps(reportSourceIds))
@@ -301,14 +272,14 @@ internal class EligibilityCheckCreatedConsumer(
         var isGroundWaterSource = messageSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
 
-        return WasReportedWithinDays(report, message, bufferDays);
+        return WasReportedWithinDays(floodReport, message, bufferDays);
     }
 
-    private bool WasReportedWithinDays(FloodReport report, EligibilityCheckCreated message, int bufferDays)
+    private bool WasReportedWithinDays(FloodReport floodReport, EligibilityCheckCreated message, int bufferDays)
     {
-        if (report.ImpactStartUtc == null)
+        if (floodReport.ImpactStartUtc == null)
         {
-            logger.LogError("Existing report does not have an ImpactStartUtc date, please investigate.");
+            logger.LogError("Existing flood report does not have an ImpactStartUtc date, please investigate.");
             return false;
         }
         if (message.ImpactStartUTC == null)
@@ -317,8 +288,8 @@ internal class EligibilityCheckCreatedConsumer(
             return false;
         }
 
-        DateTimeOffset existingStartDate = report.ImpactStartUtc.Value;
-        DateTimeOffset existingEndDate = report.ImpactStartUtc.Value.AddHours(report.ImpactDurationHours);
+        DateTimeOffset existingStartDate = floodReport.ImpactStartUtc.Value;
+        DateTimeOffset existingEndDate = floodReport.ImpactStartUtc.Value.AddHours(floodReport.ImpactDurationHours);
 
         DateTimeOffset incomingStartDate = (message.ImpactStartUTC.Value).AddDays(-bufferDays);
         DateTimeOffset incomingEndDate = message.IsOnGoing ? DateTimeOffset.UtcNow : message.ImpactStartUTC.Value.AddHours(message.ImpactDurationHours);

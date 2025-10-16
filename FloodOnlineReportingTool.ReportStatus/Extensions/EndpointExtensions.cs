@@ -531,5 +531,11 @@ internal static class EndpointExtensions
             .WithSummary("Test the vulnerable notification")
             .WithDescription("Test the vulnerable notification Gov Notify functionality")
             .RequireAuthorization(PolicyNames.Admin);
+
+        group
+            .MapGet(pattern: "/consumer/property", TestEndpoints.TestFloodPropertyMessage)
+            .WithSummary("Test the consumer flood property message")
+            .WithDescription("Test the consumer flood property message functionality in the flood property service")
+            .RequireAuthorization(PolicyNames.Admin);
     }
 }
