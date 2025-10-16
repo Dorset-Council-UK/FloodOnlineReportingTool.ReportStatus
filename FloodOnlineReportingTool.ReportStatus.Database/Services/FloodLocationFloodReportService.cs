@@ -13,9 +13,9 @@ public class FloodLocationFloodReportService(ILogger<FloodLocationFloodReportSer
 
         return await context.FloodLocationFloodReports
             .AsNoTracking()
+            .Where(flr => flr.FloodLocationId.Equals(floodLocationId))
             .OrderBy(flr => flr.FloodLocationId)
             .ThenBy(flr => flr.FloodReportId)
-            .Where(flr => flr.FloodLocationId.Equals(floodLocationId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }

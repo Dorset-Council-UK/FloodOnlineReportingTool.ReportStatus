@@ -38,9 +38,9 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         return await context.FloodReports
             .AsNoTracking()
+            .Where(fr => fr.Uprn.Equals(uprn))
             .OrderBy(fr => fr.Id)
             .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => fr.Uprn.Equals(uprn))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -51,9 +51,9 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         return await context.FloodReports
             .AsNoTracking()
+            .Where(fr => fr.Usrn.Equals(usrn))
             .OrderBy(fr => fr.Id)
             .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => fr.Usrn.Equals(usrn))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -66,14 +66,14 @@ public class FloodReportService(ILogger<FloodReportService> logger, ApplicationD
 
         return await context.FloodReports
             .AsNoTracking()
-            .OrderBy(fr => fr.Id)
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
             .Where(fr => EF.Functions.IsWithinDistance(
                 geometry,
                 new Point(fr.Easting, fr.Northing) { SRID = 27700 },
                 metres,
                 false
             ))
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }

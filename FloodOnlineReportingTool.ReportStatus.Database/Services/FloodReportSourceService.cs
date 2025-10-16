@@ -14,9 +14,9 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
 
         return await context.FloodReportSources
             .AsNoTracking()
+            .Where(frs => frs.FloodReportId.Equals(floodReportId))
             .OrderBy(frs => frs.FloodReportId)
             .ThenBy(frs => frs.SourceId)
-            .Where(frs => frs.FloodReportId.Equals(floodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }

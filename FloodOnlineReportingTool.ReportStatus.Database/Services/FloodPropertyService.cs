@@ -24,8 +24,8 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         return await context.FloodProperties
             .AsNoTracking()
-            .OrderBy(fp => fp.Id)
             .Where(fp => fp.Uprn.Equals(Uprn))
+            .OrderBy(fp => fp.Id)
             .Include(fp => fp.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);

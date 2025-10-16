@@ -24,8 +24,8 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
-            .OrderBy(fr => fr.Id)
             .Where(fr => fr.Usrn.Equals(Usrn))
+            .OrderBy(fr => fr.Id)
             .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);

@@ -25,8 +25,8 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
-            .OrderBy(fl => fl.Id)
             .Where(fl => fl.Location.Intersects(new Point(easting, northing).Buffer(buffer)))
+            .OrderBy(fl => fl.Id)
             .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
