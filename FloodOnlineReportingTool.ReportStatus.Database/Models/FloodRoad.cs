@@ -1,5 +1,4 @@
 ﻿using NetTopologySuite.Geometries;
-using System.Text.Json.Serialization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
