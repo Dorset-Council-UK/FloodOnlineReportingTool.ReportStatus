@@ -38,36 +38,18 @@ internal class EligibilityCheckCreatedConsumer(
             _ => FloodReportType.Location,
         };
 
-        // TODO use location description when calling floodPropertyService.CreateFromEligibilityCheckCreated and floodRoadService.CreateFromEligibilityCheckCreated
-        // Location description
-        string locationDescription = "";
-        if (message.LocationDescription is null)
-        {
-            var refererUri = new UriBuilder("https", context.Host.ToString(), 443, "ConsumeEligibilityCheck").Uri;
-
-            // Get the address name for Property or the streey name for Road
-            locationDescription = reportType switch
-            {
-                FloodReportType.Property => await gazetteerSearchService.GetAddressNameByUPRN(message.Uprn!.Value, refererUri, cancellationToken).ConfigureAwait(false),
-                FloodReportType.Road => await gazetteerSearchService.GetStreetNameByUSRN(message.Usrn!.Value, refererUri, cancellationToken).ConfigureAwait(false),
-                _ => "",
-            };
-        }
+        string locationDescription = await LocationDescriptionForReportType(reportType, message, context.Host, cancellationToken);
 
         switch (reportType)
         {
             case FloodReportType.Property:
-                await floodPropertyService.CreateFromEligibilityCheckCreated(message, cancellationToken).ConfigureAwait(false);
+                await floodPropertyService.CreateFromEligibilityCheckCreated(message, locationDescription, cancellationToken).ConfigureAwait(false);
                 break;
             case FloodReportType.Road:
-                // TODO new logic to be created
-                // var reports = await floodRoadService.GetFloodRoadsByUsrn(message.Usrn!.Value, ct).ConfigureAwait(false);
-                await floodRoadService.CreateFromEligibilityCheckCreated(message, cancellationToken).ConfigureAwait(false);
+                await floodRoadService.CreateFromEligibilityCheckCreated(message, locationDescription, cancellationToken).ConfigureAwait(false);
                 break;
             case FloodReportType.Location:
-                // TODO new logic to be created
-                // var withinBufferReports = await floodLocationService.GetFloodLocationsByPoint(message.Easting, message.Northing, _settings.LocationBufferMetres, ct).ConfigureAwait(false);
-                await floodLocationService.CreateFromEligibilityCheckCreated(message, cancellationToken).ConfigureAwait(false);
+                await floodLocationService.CreateFromEligibilityCheckCreated(message, locationDescription, _settings.LocationBufferMetres, cancellationToken).ConfigureAwait(false);
                 break;
         }
     }
@@ -78,6 +60,43 @@ internal class EligibilityCheckCreatedConsumer(
         if (message.IsUninhabitable && message.IsOnGoing && message.VulnerableCount > 1)
         {
             logger.LogInformation("There are {VulnerableCount} vulnerable people in an uninhabitable and ongoing flood area", message.VulnerableCount);
+        }
+    }
+
+    /// <summary>
+    /// Returns a location description for a flood report based on the report type and message data.
+    /// <para>If the message contains a <c>LocationDescription</c> that is used.</para>
+    /// <para>For <see cref="FloodReportType.Property" />, attempts to resolve the address name using the UPRN via <see cref="IGazetteerSearchService"/>.</para>
+    /// <para>For <see cref="FloodReportType.Road" />, attempts to resolve the street name using the USRN via <see cref="IGazetteerSearchService"/>.</para>
+    /// <para>For <see cref="FloodReportType.Location" /> or if no description can be resolved, returns a default message.</para>
+    /// </summary>
+    /// <returns>
+    /// A <see cref="string" /> containing the most appropriate location description for the report.
+    /// </returns>
+    private async Task<string> LocationDescriptionForReportType(FloodReportType floodReportType, EligibilityCheckCreated message, HostInfo hostInfo, CancellationToken cancellationToken)
+    {
+        var locationDescription = message.LocationDescription?.Trim();
+        if (!string.IsNullOrWhiteSpace(locationDescription)) return locationDescription;
+
+        var refererUri = new UriBuilder("https", hostInfo.ToString(), 443, "ConsumeEligibilityCheck").Uri;
+
+        switch (floodReportType)
+        {
+            case FloodReportType.Property:
+                var addressName = await gazetteerSearchService
+                    .GetAddressNameByUPRN(message.Uprn!.Value, refererUri, cancellationToken)
+                    .ConfigureAwait(false);
+                return string.IsNullOrWhiteSpace(addressName) ? "No address provided" : addressName;
+
+            case FloodReportType.Road:
+                var streetName = await gazetteerSearchService
+                    .GetStreetNameByUSRN(message.Usrn!.Value, refererUri, cancellationToken)
+                    .ConfigureAwait(false);
+                return string.IsNullOrWhiteSpace(streetName) ? "No road name provided" : streetName;
+
+            case FloodReportType.Location:
+            default:
+                return "No description provided";
         }
     }
 }
