@@ -89,7 +89,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         return creating;
     }
 
-    public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, CancellationToken ct)
+    public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct)
     {
         if (ecc.Uprn is null)
         {
@@ -149,7 +149,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
                 Id = floodPropertyId,
                 CreatedUtc = createdUtc,
 
-                Title = ecc.LocationDescription ?? "No description provided",
+                Title = locationDescription,
                 Uprn = uprn,
                 Notes = null,
                 Location = new Point(ecc.Easting, ecc.Northing),
@@ -239,7 +239,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     /// <param name="uprn">The UPRN of the property to search for existing flood reports.</param>
     /// <param name="ecc">The <see cref="EligibilityCheckCreated"/> message containing details of the new flood report.</param>
     /// <returns>
-    /// A read-only collection of <see cref="FloodReport"/> records that are potential duplicates based on source and date overlap criteria.
+    /// A read-only collection of Flood property <see cref="Guid"/>'s that are potential duplicates based on source and date overlap criteria.
     /// </returns>
     private async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(long uprn, EligibilityCheckCreated ecc, CancellationToken ct)
     {

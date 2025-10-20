@@ -45,7 +45,7 @@ public interface IFloodPropertyService
     /// <para>Sometimes add the property + linked flood report</para>
     /// <para>Sometimes just link the property flood report(s)</para>
     /// </summary>
-    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, CancellationToken ct);
+    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood property in the database.
