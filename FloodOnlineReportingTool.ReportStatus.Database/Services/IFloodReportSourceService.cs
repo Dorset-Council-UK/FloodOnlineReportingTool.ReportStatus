@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -18,6 +19,11 @@ public interface IFloodReportSourceService
     /// Creates a new flood report source in the database.
     /// </summary>
     Task<FloodReportSource> CreateFloodReportSource(Guid floodReportId, Guid sourceId, FloodReportSourceDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// Creates multiple flood report sources at once using the message data.
+    /// </summary>
+    Task CreateFloodReportSources(Guid floodReportId, IReadOnlyCollection<EligibilityCheckFloodSource> floodSources, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood report source in the database.

@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -15,7 +16,7 @@ public interface IFloodPropertyService
     /// <param name="Uprn"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IReadOnlyCollection<FloodProperty>> GetFloodPropertiesByUprn(long Uprn, CancellationToken ct);
+    Task<IReadOnlyCollection<FloodProperty>> GetFloodPropertiesByUprn(long uprn, CancellationToken ct);
 
     /// <summary>
     /// Gets all flood properties, including related flood reports.
@@ -38,6 +39,13 @@ public interface IFloodPropertyService
     /// Creates a new flood property in the database.
     /// </summary>
     Task<FloodProperty> CreateFloodProperty(FloodPropertyDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// <para>Always add the flood report + sources</para>
+    /// <para>Sometimes add the property + linked flood report</para>
+    /// <para>Sometimes just link the property flood report(s)</para>
+    /// </summary>
+    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood property in the database.

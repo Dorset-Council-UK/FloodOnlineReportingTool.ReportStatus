@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -38,6 +39,13 @@ public interface IFloodRoadService
     /// Creates a new flood road in the database.
     /// </summary>
     Task<FloodRoad> CreateFloodRoad(FloodRoadDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// <para>Always add the flood report + sources</para>
+    /// <para>Sometimes add the road + linked flood report</para>
+    /// <para>Sometimes just link the road flood report(s)</para>
+    /// </summary>
+    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood road in the database.

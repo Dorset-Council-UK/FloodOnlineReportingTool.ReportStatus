@@ -9,60 +9,8 @@ namespace Tests.Endpoints;
 
 public class FloodReportEndpointsTests
 {
-    public static IEnumerable<object[]> FloodReport_3()
-    {
-        yield return new object[] { FloodReportData.FloodReport1 };
-        yield return new object[] { FloodReportData.FloodReport2 };
-        yield return new object[] { FloodReportData.FloodReport3 };
-    }
-
-    public static IEnumerable<object[]> FloodReport_Collections_4()
-    {
-        IReadOnlyCollection<FloodReport> empty = [];
-        yield return new object[] { empty };
-
-        IReadOnlyCollection<FloodReport> one = [FloodReportData.FloodReport1];
-        yield return new object[] { one };
-
-        IReadOnlyCollection<FloodReport> two = [FloodReportData.FloodReport1, FloodReportData.FloodReport2];
-        yield return new object[] { two };
-
-        IReadOnlyCollection<FloodReport> three = [FloodReportData.FloodReport1, FloodReportData.FloodReport2, FloodReportData.FloodReport3];
-        yield return new object[] { three };
-    }
-
-    public static IEnumerable<object[]> FloodReportWithUprn_Collections_4()
-    {
-        IReadOnlyCollection<FloodReport> empty = [];
-        yield return new object[] { empty };
-
-        IReadOnlyCollection<FloodReport> one = [FloodReportData.FloodReportWithUprn1];
-        yield return new object[] { one };
-
-        IReadOnlyCollection<FloodReport> two = [FloodReportData.FloodReportWithUprn1, FloodReportData.FloodReportWithUprn2];
-        yield return new object[] { two };
-
-        IReadOnlyCollection<FloodReport> three = [FloodReportData.FloodReportWithUprn1, FloodReportData.FloodReportWithUprn2, FloodReportData.FloodReportWithUprn3];
-        yield return new object[] { three };
-    }
-
-    public static IEnumerable<object[]> FloodReportWithUsrn_Collections_4()
-    {
-        IReadOnlyCollection<FloodReport> empty = [];
-        yield return new object[] { empty };
-
-        IReadOnlyCollection<FloodReport> one = [FloodReportData.FloodReportWithUsrn1];
-        yield return new object[] { one };
-
-        IReadOnlyCollection<FloodReport> two = [FloodReportData.FloodReportWithUsrn1, FloodReportData.FloodReportWithUsrn2];
-        yield return new object[] { two };
-
-        IReadOnlyCollection<FloodReport> three = [FloodReportData.FloodReportWithUsrn1, FloodReportData.FloodReportWithUsrn2, FloodReportData.FloodReportWithUsrn3];
-        yield return new object[] { three };
-    }
-
     [Theory]
-    [MemberData(nameof(FloodReport_Collections_4))]
+    [MemberData(nameof(FloodReportData.FloodReport_Collections_4), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReports_ReturnsOkay_WhenSuccessful(IReadOnlyCollection<FloodReport> expected)
     {
         // Arrange
@@ -89,11 +37,12 @@ public class FloodReportEndpointsTests
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
-        Assert.Empty(okResult.Value!);
+        Assert.NotNull(okResult.Value);
+        Assert.Empty(okResult.Value);
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReportById_ReturnsFloodReport_WhenFound(FloodReport expected)
     {
         // Arrange
@@ -124,7 +73,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportWithUprn_Collections_4))]
+    [MemberData(nameof(FloodReportData.FloodReportWithUprn_Collections_4), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReportsByUprn_ReturnsFloodReports_WhenFound(IReadOnlyCollection<FloodReport> expected)
     {
         // Arrange
@@ -151,11 +100,12 @@ public class FloodReportEndpointsTests
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
-        Assert.Empty(okResult.Value!);
+        Assert.NotNull(okResult.Value);
+        Assert.Empty(okResult.Value);
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportWithUsrn_Collections_4))]
+    [MemberData(nameof(FloodReportData.FloodReportWithUsrn_Collections_4), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReportsByUsrn_ReturnsOkay_WhenFound(IReadOnlyCollection<FloodReport> expected)
     {
         // Arrange
@@ -182,23 +132,46 @@ public class FloodReportEndpointsTests
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
-        Assert.Empty(okResult.Value!);
+        Assert.NotNull(okResult.Value);
+        Assert.Empty(okResult.Value);
     }
 
-    [Fact]
-    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance()
+    [Theory]
+    [MemberData(nameof(FloodReportData.FloodReport_Within50Metres_Collections), MemberType = typeof(FloodReportData))]
+    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance(IReadOnlyCollection<FloodReport> expected)
     {
-        Assert.Fail("Not implemented");
+        // Arrange
+        var metres = 50.0;
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReportsWithinMetres(Arg.Any<double>(), Arg.Any<double>(), metres, Arg.Any<CancellationToken>()).Returns(expected);
+
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReportsWithinMetres(floodReportService, FloodReportData.Easting, FloodReportData.Northing, metres, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
     }
 
     [Fact]
     public async Task GetFloodReportsWithinMetres_ReturnsOkayAndEmpty_WhenNotWithinDistance()
     {
-        Assert.Fail("Not implemented");
+        // Arrange
+        var metres = 50.0;
+        var floodReportService = Substitute.For<IFloodReportService>();
+        floodReportService.GetFloodReportsWithinMetres(Arg.Any<double>(), Arg.Any<double>(), metres, Arg.Any<CancellationToken>()).Returns([]);
+
+        // Act
+        var result = await FloodReportEndpoints.GetFloodReportsWithinMetres(floodReportService, FloodReportData.Easting, FloodReportData.Northing, metres, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
+        Assert.NotNull(okResult.Value);
+        Assert.Empty(okResult.Value);
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task CreateFloodReport_ReturnsFloodReport_WhenCreated(FloodReport expected)
     {
         // Arrange
@@ -216,7 +189,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task UpdateFloodReport_ReturnsFloodReport_WhenUpdated(FloodReport expected)
     {
         // Arrange
@@ -233,7 +206,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task UpdateFloodReport_ReturnsNotFound_WhenNotFound(FloodReport expected)
     {
         // Arrange
@@ -249,7 +222,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task DeleteFloodReport_ReturnsNoContent_WhenDeleted(FloodReport expected)
     {
         // Arrange
@@ -264,7 +237,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task DeleteFloodReport_ReturnsNotFound_WhenNotFound(FloodReport expected)
     {
         // Arrange
@@ -279,7 +252,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task FloodReportExists_ReturnsTrue_WhenExists(FloodReport expected)
     {
         // Arrange
@@ -295,7 +268,7 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReport_3))]
+    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
     public async Task FloodReportExists_ReturnsFalse_WhenDoesntExist(FloodReport expected)
     {
         // Arrange

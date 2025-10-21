@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,9 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
 
         return await context.FloodReportSources
             .AsNoTracking()
-            .Where(o => o.FloodReportId.Equals(floodReportId))
+            .Where(frs => frs.FloodReportId.Equals(floodReportId))
+            .OrderBy(frs => frs.FloodReportId)
+            .ThenBy(frs => frs.SourceId)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -43,6 +46,23 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return newFloodReportSource;
+    }
+
+    public async Task CreateFloodReportSources(Guid floodReportId, IReadOnlyCollection<EligibilityCheckFloodSource> floodSources, CancellationToken ct)
+    {
+        logger.LogDebug("Creating multiple flood report sources for flood report ID {FloodReportId}.", floodReportId);
+
+        var now = DateTimeOffset.UtcNow;
+        var newFloodReportSources = floodSources.Select(fs => new FloodReportSource()
+        {
+            FloodReportId = floodReportId,
+            SourceId = fs.Id,
+            CreatedUtc = now,
+            Name = fs.Name,
+        });
+
+        context.FloodReportSources.AddRange(newFloodReportSources);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<FloodReportSource?> UpdateFloodReportSource(Guid floodReportId, Guid sourceId, FloodReportSourceDto dto, CancellationToken ct)
@@ -96,6 +116,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
 
         return await context.FloodReportSources
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.FloodReportId.Equals(floodReportId) && o.SourceId.Equals(sourceId), ct)
             .ConfigureAwait(false);
     }

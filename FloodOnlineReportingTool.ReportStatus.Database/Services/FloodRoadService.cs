@@ -1,7 +1,11 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
+using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -13,18 +17,20 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
+            .OrderBy(fr => fr.Id)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsByUsrn(long Usrn, CancellationToken ct)
     {
-        logger.LogDebug("Retrieving all flood properties for USRN {Usrn} from the database.", Usrn);
+        logger.LogDebug("Retrieving all flood roads for USRN {Usrn} from the database.", Usrn);
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Where(o => o.Usrn.Equals(Usrn))
-            .Include(o => o.FloodReports)
+            .Where(fr => fr.Usrn.Equals(Usrn))
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -35,7 +41,8 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Include(o => o.FloodReports)
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -55,8 +62,9 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Include(o => o.FloodReports)
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
+            .OrderBy(fr => fr.Id)
+            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
+            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct)
             .ConfigureAwait(false);
     }
 
@@ -79,6 +87,89 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return creating;
+    }
+
+    public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct)
+    {
+        if (ecc.Usrn is null)
+        {
+            throw new InvalidOperationException("Cannot create Flood Road without a USRN.");
+        }
+
+        var createdUtc = DateTimeOffset.UtcNow;
+        var floodReportId = Guid.CreateVersion7();
+        var usrn = ecc.Usrn.Value;
+
+        // Build the flood report and sources
+        var floodReport = new FloodReport()
+        {
+            Id = floodReportId,
+            CreatedUtc = createdUtc,
+
+            EligibilityCheckId = ecc.Id,
+            Uprn = ecc.Uprn,
+            Usrn = usrn,
+            Easting = ecc.Easting,
+            Northing = ecc.Northing,
+            ImpactStartUtc = ecc.ImpactStartUTC,
+            ImpactDurationHours = ecc.ImpactDurationHours,
+
+            Sources = [.. ecc.FloodSources.Select(ecfs =>
+                new FloodReportSource()
+                {
+                    FloodReportId = floodReportId,
+                    SourceId = ecfs.Id,
+                    CreatedUtc = createdUtc,
+                    Name = ecfs.Name,
+                }),
+            ],
+        };
+
+        var potentialDuplicates = await FindPotentialDuplicates(usrn, ecc, ct).ConfigureAwait(false);
+
+        FloodRoad? floodRoad = null;
+        ICollection<FloodRoadFloodReport> floodRoadFloodReports = [];
+        if (potentialDuplicates.Count > 0)
+        {
+            foreach (var duplicateFloodRoadId in potentialDuplicates)
+            {
+                floodRoadFloodReports.Add(new FloodRoadFloodReport()
+                {
+                    FloodRoadId = duplicateFloodRoadId,
+                    FloodReportId = floodReportId,
+                    CreatedUtc = createdUtc,
+                });
+            }
+        }
+        else
+        {
+            var floodRoadId = Guid.CreateVersion7();
+            floodRoad = new FloodRoad()
+            {
+                Id = floodRoadId,
+                CreatedUtc = createdUtc,
+
+                Title = locationDescription,
+                Usrn = usrn,
+                Notes = null,
+                Location = new Point(ecc.Easting, ecc.Northing),
+
+                FloodReports = [
+                    new()
+                    {
+                        FloodRoadId = floodRoadId,
+                        FloodReportId = floodReportId,
+                        CreatedUtc = createdUtc,
+                    },
+                ],
+            };
+        }
+
+        context.FloodReports.Add(floodReport);
+        if (floodRoad is not null) context.FloodRoads.Add(floodRoad);
+        if (floodRoadFloodReports.Count > 0) context.FloodRoadFloodReports.AddRange(floodRoadFloodReports);
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<FloodRoad?> UpdateFloodRoad(Guid id, FloodRoadDto dto, CancellationToken ct)
@@ -135,7 +226,48 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         return await context.FloodRoads
             .AsNoTracking()
+            .IgnoreAutoIncludes()
             .AnyAsync(o => o.Id.Equals(id), ct)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Searches for existing flood reports associated with a road (by USRN) that are considered potential duplicates of a new flood report.
+    /// A flood report is considered a potential duplicate if it shares at least one flood source (by <c>SourceId</c>) with the new flood report
+    /// and its impact period overlaps with the new flood report's impact period (with a buffer).
+    /// </summary>
+    /// <param name="usrn">The USRN of the road to search for existing flood reports.</param>
+    /// <param name="ecc">The <see cref="EligibilityCheckCreated"/> message containing details of the new flood report.</param>
+    /// <returns>
+    /// A read-only collection of Flood road <see cref="Guid"/>'s that are potential duplicates based on source and date overlap criteria.
+    /// </returns>
+    private async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(long usrn, EligibilityCheckCreated ecc, CancellationToken ct)
+    {
+        ImmutableHashSet<Guid> newSourceIds = [.. ecc.FloodSources.Select(s => s.Id)];
+        var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
+        var bufferDays = isGroundWaterSource ? 14 : 7;
+        var incomingStart = ecc.ImpactStartUTC?.AddDays(-bufferDays);
+        var incomingEnd = ecc.IsOnGoing ? DateTimeOffset.UtcNow : ecc.ImpactStartUTC?.AddHours(ecc.ImpactDurationHours);
+
+        return await context.FloodRoads
+            .AsNoTracking()
+            .Where(fr => fr.Usrn.Equals(usrn))
+            .SelectMany(fr => fr.FloodReports
+                .Where(frfr =>
+                    // At least one matching source
+                    frfr.FloodReport.Sources.Any(src => newSourceIds.Contains(src.SourceId))
+                    // Date overlap
+                    && frfr.FloodReport.ImpactStartUtc != null
+                    && incomingStart != null
+                    && incomingEnd != null
+                    && frfr.FloodReport.ImpactStartUtc <= incomingEnd
+                    && frfr.FloodReport.ImpactStartUtc.Value.AddHours(frfr.FloodReport.ImpactDurationHours) >= incomingStart
+                )
+                .OrderBy(frfr => frfr.FloodRoadId)
+                    .ThenBy(frfr => frfr.FloodReportId)
+            )
+            .Select(frfr => frfr.FloodRoadId)
+            .ToListAsync(ct)
             .ConfigureAwait(false);
     }
 }

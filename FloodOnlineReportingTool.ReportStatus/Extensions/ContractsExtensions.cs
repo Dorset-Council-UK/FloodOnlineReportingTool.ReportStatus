@@ -29,44 +29,53 @@ internal static class ContractsExtensions
         };
     }
 
-    internal static FloodPropertyDto? ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
+    internal static FloodPropertyDto ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated)
     {
-        if (eligibilityCheckCreated.Uprn != null)
+        return eligibilityCheckCreated.ToFloodPropertyDto(eligibilityCheckCreated.LocationDescription ?? "No address provided");
+    }
+    internal static FloodPropertyDto ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
+    {
+        if (eligibilityCheckCreated.Uprn is null)
         {
-            return new()
-            {
-                Title = string.IsNullOrEmpty(locationDescription) ? "No address provided" : locationDescription,
-                Uprn = (long)eligibilityCheckCreated.Uprn,
-                Notes = "",
-                Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
-            };
+            throw new InvalidOperationException("Cannot create Flood Property DTO without a UPRN.");
         }
 
-        return null;
-    }
-
-    internal static FloodRoadDto? ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
-    {
-        if (eligibilityCheckCreated.Usrn != null)
+        return new()
         {
-            return new()
-            {
-                Title = string.IsNullOrEmpty(locationDescription) ? "No road name provided" : locationDescription,
-                Usrn = (long)eligibilityCheckCreated.Usrn,
-                Notes = "",
-                Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
-            };
-        }
-        
-        return null;
+            Title = locationDescription,
+            Uprn = eligibilityCheckCreated.Uprn.Value,
+            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+        };
     }
 
+    internal static FloodRoadDto ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    {
+        return eligibilityCheckCreated.ToFloodRoadDto(eligibilityCheckCreated.LocationDescription ?? "No road name provided");
+    }
+    internal static FloodRoadDto ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
+    {
+        if (eligibilityCheckCreated.Usrn is null)
+        {
+            throw new InvalidOperationException("Cannot create Flood Road DTO without a USRN.");
+        }
+
+        return new()
+        {
+            Title = locationDescription,
+            Usrn = eligibilityCheckCreated.Usrn.Value,
+            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+        };
+    }
+
+    internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    {
+        return eligibilityCheckCreated.ToFloodLocationDto(eligibilityCheckCreated.LocationDescription ?? "No description provided");
+    }
     internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
         return new()
         {
-            Title = string.IsNullOrEmpty(locationDescription) ? "No description provided" : locationDescription,
-            Notes = "",
+            Title = locationDescription,
             Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
         };
     }
