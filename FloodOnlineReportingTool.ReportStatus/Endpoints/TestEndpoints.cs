@@ -54,7 +54,7 @@ internal static class TestEndpoints
                     new(PrimaryCauseIds.RainwaterFlowingOverTheGround, "Rainwater flowing over the ground"),
                 ]
             );
-            await floodPropertyService.CreateFromEligibilityCheckCreated(ecc, cancellationToken).ConfigureAwait(false);
+            await floodPropertyService.CreateFromEligibilityCheckCreated(ecc, "Test location description", cancellationToken).ConfigureAwait(false);
             return TypedResults.Ok();
         }
         catch (Exception)
