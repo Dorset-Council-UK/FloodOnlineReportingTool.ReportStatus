@@ -266,7 +266,6 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
                 .OrderBy(fpfr => fpfr.FloodPropertyId)
                     .ThenBy(fpfr => fpfr.FloodReportId)
             )
-            .OrderBy(fpfr => fpfr.FloodPropertyId)
             .Select(fpfr => fpfr.FloodPropertyId)
             .ToListAsync(ct)
             .ConfigureAwait(false);

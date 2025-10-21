@@ -266,7 +266,6 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
                 .OrderBy(frfr => frfr.FloodRoadId)
                     .ThenBy(frfr => frfr.FloodReportId)
             )
-            .OrderBy(frfr => frfr.FloodRoadId)
             .Select(frfr => frfr.FloodRoadId)
             .ToListAsync(ct)
             .ConfigureAwait(false);

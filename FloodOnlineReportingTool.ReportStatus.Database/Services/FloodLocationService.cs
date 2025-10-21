@@ -260,7 +260,6 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
                 .OrderBy(flfr => flfr.FloodLocationId)
                     .ThenBy(flfr => flfr.FloodReportId)
             )
-            .OrderBy(flfr => flfr.FloodLocationId)
             .Select(flfr => flfr.FloodLocationId)
             .ToListAsync(ct)
             .ConfigureAwait(false);
