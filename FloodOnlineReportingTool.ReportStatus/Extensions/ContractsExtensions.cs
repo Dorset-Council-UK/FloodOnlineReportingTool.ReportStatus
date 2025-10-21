@@ -31,17 +31,7 @@ internal static class ContractsExtensions
 
     internal static FloodPropertyDto ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated)
     {
-        if (eligibilityCheckCreated.Uprn is null)
-        {
-            throw new InvalidOperationException("Cannot create Flood Property DTO without a UPRN.");
-        }
-
-        return new()
-        {
-            Title = eligibilityCheckCreated.LocationDescription ?? "No address provided",
-            Uprn = eligibilityCheckCreated.Uprn.Value,
-            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
-        };
+        return eligibilityCheckCreated.ToFloodPropertyDto(eligibilityCheckCreated.LocationDescription ?? "No address provided");
     }
     internal static FloodPropertyDto ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
@@ -60,17 +50,7 @@ internal static class ContractsExtensions
 
     internal static FloodRoadDto ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated)
     {
-        if (eligibilityCheckCreated.Usrn is null)
-        {
-            throw new InvalidOperationException("Cannot create Flood Road DTO without a USRN.");
-        }
-
-        return new()
-        {
-            Title = eligibilityCheckCreated.LocationDescription ?? "No road name provided",
-            Usrn = eligibilityCheckCreated.Usrn.Value,
-            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
-        };
+        return eligibilityCheckCreated.ToFloodRoadDto(eligibilityCheckCreated.LocationDescription ?? "No road name provided");
     }
     internal static FloodRoadDto ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
@@ -89,11 +69,7 @@ internal static class ContractsExtensions
 
     internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated)
     {
-        return new()
-        {
-            Title = eligibilityCheckCreated.LocationDescription ?? "No description provided",
-            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
-        };
+        return eligibilityCheckCreated.ToFloodLocationDto(eligibilityCheckCreated.LocationDescription ?? "No description provided");
     }
     internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
     {
