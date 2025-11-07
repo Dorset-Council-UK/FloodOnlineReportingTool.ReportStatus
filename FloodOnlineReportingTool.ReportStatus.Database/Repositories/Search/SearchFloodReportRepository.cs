@@ -1,0 +1,55 @@
+﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
+
+namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories.Search;
+
+public class SearchFloodReportRepository(ApplicationDbContext context) : ISearchFloodReportRepository
+{
+    public IQueryable<FloodReport> GetFloodReports()
+    {
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .OrderBy(fr => fr.Id);
+    }
+
+    public IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres)
+    {
+        var geometry = new Point(easting, northing) { SRID = 27700 };
+
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => EF.Functions.IsWithinDistance(
+                geometry,
+                new Point(fr.Easting, fr.Northing) { SRID = 27700 },
+                metres,
+                false
+            ))
+            .OrderBy(fr => fr.Id);
+    }
+
+    public IQueryable<FloodReport> GetFloodReportsByUprn(long uprn)
+    {
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => fr.Uprn.Equals(uprn))
+            .OrderBy(fr => fr.Id);
+    }
+
+    public IQueryable<FloodReport> GetFloodReportsByUsrn(long usrn)
+    {
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => fr.Usrn.Equals(usrn))
+            .OrderBy(fr => fr.Id);
+    }
+}

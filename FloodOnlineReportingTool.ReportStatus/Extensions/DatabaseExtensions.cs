@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories.Search;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,7 @@ internal static class DatabaseExtensions
             .AddScoped<IFloodRoadFloodReportService, FloodRoadFloodReportService>()
             .AddScoped<IFloodReportService, FloodReportService>()
             .AddScoped<IFloodReportSourceService, FloodReportSourceService>()
-            .AddScoped<ISearchService, SearchService>();
+            .AddScoped<ISearchFloodReportRepository, SearchFloodReportRepository>();
 
         return builder;
     }
