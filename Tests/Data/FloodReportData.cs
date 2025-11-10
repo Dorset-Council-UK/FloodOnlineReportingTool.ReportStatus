@@ -304,11 +304,11 @@ public static class FloodReportData
         [FloodReport3],
     ];
 
-    public static IEnumerable<object[]> FloodReport_Collections_4 => [
-        [new List<FloodReport>()],
-        [new List<FloodReport> { FloodReport1 }],
-        [new List<FloodReport> { FloodReport1, FloodReport2 }],
-        [new List<FloodReport> { FloodReport1, FloodReport2, FloodReport3 }],
+    public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collections_4 => [
+        new([]),
+        new([FloodReport1]),
+        new([FloodReport1, FloodReport2]),
+        new([FloodReport1, FloodReport2, FloodReport3]),
     ];
 
     public static IEnumerable<object[]> FloodReportWithUprn_Collections_4 => [

@@ -1,17 +1,18 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using NSubstitute;
-using System.Text.Json;
 using Tests.Data;
-using Tests.Fixtures;
 
 namespace Tests.Services;
 
-public class FloodReportServiceTests(DatabaseFixture fixture) : IClassFixture<DatabaseFixture>
+public class FloodReportServiceTests
 {
-    private readonly ApplicationDbContext _context = fixture.Context;
+    private readonly ApplicationDbContext _context = new(new DbContextOptionsBuilder<ApplicationDbContext>().Options);
     private readonly ILogger<FloodReportService> _logger = Substitute.For<ILogger<FloodReportService>>();
 
     [Theory]
@@ -20,20 +21,17 @@ public class FloodReportServiceTests(DatabaseFixture fixture) : IClassFixture<Da
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = Substitute.For<IFloodReportRepository>();
+        ICollection<FloodReport> collection = [.. expected]; // We need ICollection for MockQueryable.NSubstitute
+        var query = collection.BuildMock();
+        repository.GetFloodReports().Returns(query);
 
-        _context.FloodReports.RemoveRange(_context.FloodReports);
-        await _context.SaveChangesAsync(cancellationToken);
-        _context.FloodReports.AddRange(expected);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        var service = new FloodReportService(_logger, _context);
+        var service = new FloodReportService(_logger, repository, _context);
 
         // Act
         var result = await service.GetFloodReports(cancellationToken);
 
         // Assert
-        var expectedJson = JsonSerializer.Serialize(expected);
-        var resultJson = JsonSerializer.Serialize(result);
-        Assert.Equal(expectedJson, resultJson);
+        Assert.Equal(expected, result);
     }
 }
