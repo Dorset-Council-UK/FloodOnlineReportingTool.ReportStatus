@@ -1,5 +1,5 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories.Search;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +28,10 @@ internal static class DatabaseExtensions
             options.EnableSensitiveDataLogging(logSensitiveData);
         });
 
+        // Database reportServices
+        builder.Services
+            .AddScoped<IFloodReportRepository, FloodReportRepository>();
+
         // Database services
         builder.Services
             .AddScoped<IFloodLocationService, FloodLocationService>()
@@ -37,8 +41,7 @@ internal static class DatabaseExtensions
             .AddScoped<IFloodRoadService, FloodRoadService>()
             .AddScoped<IFloodRoadFloodReportService, FloodRoadFloodReportService>()
             .AddScoped<IFloodReportService, FloodReportService>()
-            .AddScoped<IFloodReportSourceService, FloodReportSourceService>()
-            .AddScoped<ISearchFloodReportRepository, SearchFloodReportRepository>();
+            .AddScoped<IFloodReportSourceService, FloodReportSourceService>();
 
         return builder;
     }

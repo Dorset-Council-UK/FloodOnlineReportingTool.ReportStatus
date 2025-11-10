@@ -3,9 +3,9 @@ using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories.Search;
+namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 
-public class SearchFloodReportRepository(ApplicationDbContext context) : ISearchFloodReportRepository
+public class FloodReportRepository(ApplicationDbContext context) : IFloodReportRepository
 {
     public IQueryable<FloodReport> GetFloodReports()
     {
@@ -14,6 +14,15 @@ public class SearchFloodReportRepository(ApplicationDbContext context) : ISearch
             .IgnoreAutoIncludes()
             .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
             .OrderBy(fr => fr.Id);
+    }
+
+    public IQueryable<FloodReport?> GetFloodReportById(Guid id)
+    {
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Where(fr => fr.Id.Equals(id));
     }
 
     public IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres)
