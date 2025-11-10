@@ -298,10 +298,10 @@ public static class FloodReportData
         ],
     };
 
-    public static IEnumerable<object[]> FloodReport_3 => [
-        [FloodReport1],
-        [FloodReport2],
-        [FloodReport3],
+    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReport_3 => [
+        new(FloodReport1),
+        new(FloodReport2),
+        new(FloodReport3),
     ];
 
     public static IEnumerable<TheoryDataRow<IReadOnlyCollection<FloodReport>>> FloodReport_Collections_4 => [
