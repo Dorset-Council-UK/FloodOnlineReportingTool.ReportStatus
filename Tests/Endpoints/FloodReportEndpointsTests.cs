@@ -11,9 +11,10 @@ public class FloodReportEndpointsTests
 {
     [Theory]
     [MemberData(nameof(FloodReportData.FloodReport_Collections_4), MemberType = typeof(FloodReportData))]
-    public async Task GetFloodReports_ReturnsOkay_WhenSuccessful(IReadOnlyCollection<FloodReport> expected)
+    public async Task GetFloodReports_ReturnsOkay_WhenSuccessful(ICollection<FloodReport> testData)
     {
         // Arrange
+        IReadOnlyCollection<FloodReport> expected = [.. testData];
         var floodReportService = Substitute.For<IFloodReportService>();
         floodReportService.GetFloodReports(Arg.Any<CancellationToken>()).Returns(expected);
 
@@ -74,9 +75,10 @@ public class FloodReportEndpointsTests
 
     [Theory]
     [MemberData(nameof(FloodReportData.FloodReportWithUprn_Collections_4), MemberType = typeof(FloodReportData))]
-    public async Task GetFloodReportsByUprn_ReturnsFloodReports_WhenFound(IReadOnlyCollection<FloodReport> expected)
+    public async Task GetFloodReportsByUprn_ReturnsFloodReports_WhenFound(ICollection<FloodReport> testData)
     {
         // Arrange
+        IReadOnlyCollection<FloodReport> expected = [.. testData];
         var floodReportService = Substitute.For<IFloodReportService>();
         floodReportService.GetFloodReportsByUprn(10023242411, Arg.Any<CancellationToken>()).Returns(expected);
 
@@ -106,9 +108,10 @@ public class FloodReportEndpointsTests
 
     [Theory]
     [MemberData(nameof(FloodReportData.FloodReportWithUsrn_Collections_4), MemberType = typeof(FloodReportData))]
-    public async Task GetFloodReportsByUsrn_ReturnsOkay_WhenFound(IReadOnlyCollection<FloodReport> expected)
+    public async Task GetFloodReportsByUsrn_ReturnsOkay_WhenFound(ICollection<FloodReport> testData)
     {
         // Arrange
+        IReadOnlyCollection<FloodReport> expected = [.. testData];
         var floodReportService = Substitute.For<IFloodReportService>();
         floodReportService.GetFloodReportsByUsrn(FloodReportData.FixedUsrn, Arg.Any<CancellationToken>()).Returns(expected);
 
@@ -138,10 +141,11 @@ public class FloodReportEndpointsTests
 
     [Theory]
     [MemberData(nameof(FloodReportData.FloodReport_Within50Metres_Collections), MemberType = typeof(FloodReportData))]
-    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance(IReadOnlyCollection<FloodReport> expected)
+    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance(ICollection<FloodReport> testData)
     {
         // Arrange
         var metres = 50.0;
+        IReadOnlyCollection<FloodReport> expected = [.. testData];
         var floodReportService = Substitute.For<IFloodReportService>();
         floodReportService.GetFloodReportsWithinMetres(Arg.Any<double>(), Arg.Any<double>(), metres, Arg.Any<CancellationToken>()).Returns(expected);
 
