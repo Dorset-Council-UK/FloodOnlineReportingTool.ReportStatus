@@ -43,30 +43,9 @@ This document provides best practices and standards for writing, organizing, and
 - Use xUnit's `[Fact]` for single-scenario tests and `[Theory]` with `[MemberData]` for parameterized tests.
 - Prefer `async Task` for test methods that test asynchronous code.
 - Use `Assert` methods to verify outcomes; avoid using multiple asserts per test unless verifying related aspects of the same scenario. 1 Assert in most cases, 2 at most.
-
-### Good Example
-
-```csharp
-[Theory]
-[MemberData(nameof(FloodReportData.FloodReport_Collections_4), MemberType = typeof(FloodReportData))]
-public async Task GetFloodReports_ReturnsOkay_WhenSuccessful(ICollection<FloodReport> testData)
-{
-IReadOnlyCollection<FloodReport> expected = [.. testData];
-var floodReportService = Substitute.For<IFloodReportService>();
-floodReportService.GetFloodReports(Arg.Any<CancellationToken>()).Returns(expected);
-
-var result = await FloodReportEndpoints.GetFloodReports(floodReportService, TestContext.Current.CancellationToken);
-
-var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
-Assert.Equal(expected, okResult.Value);
-}
-```
-
-### Bad Example
-
-```csharp
-[TestMethod] public void Test1() { // This test does not describe what it is testing or why. }
-```
+- IQueryable can be tested directly if appropriate, but prefer converting to List or FirstOrDefault for clarity.
+- When making tests for services use `BuildMock()` from `MockQueryable.NSubstitute` on `ICollection` to create IQueryable mocks.
+- When making tests for repositories use `BuildMockDbSet()` from `MockQueryable.NSubstitute` on `ICollection` to create DbSet mocks.
 
 ## Mocking Tests
 
