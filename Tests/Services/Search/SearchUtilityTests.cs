@@ -21,23 +21,159 @@ public class SearchUtilityTests
         Assert.Equal(expectedTake, take);
         Assert.Equal(expectedSkip, skip);
     }
-    
-    [Theory]
-    [MemberData(nameof(PagedResultData.PagingScenarios), MemberType = typeof(PagedResultData))]
-    public async Task CreatePagedResult_ReturnsExpectedPagedResult(PagedResultTest pagedResultTest)
+
+    [Fact]
+    [Trait("Category", "Empty data")]
+    public async Task CreatePagedResult_ReturnPageResult_WhenNothingFound()
     {
         // Arrange
-        var query = pagedResultTest.Data.BuildMock();
+        var data = PagedResultData.EmptySimpleItems;
+        var pageNumber = 1;
+        var pageSize = 4;
+        var defaultPageSize = 10;
+
+        var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pagedResultTest.PageNumber, pagedResultTest.PageSize, pagedResultTest.DefaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
 
         // Assert
-        Assert.Equal(pagedResultTest.Expected.Results.Count, pagedResult.Results.Count);
-        Assert.Equal(pagedResultTest.Expected.Results, pagedResult.Results);
-        Assert.Equal(pagedResultTest.Expected.TotalCount, pagedResult.TotalCount);
-        Assert.Equal(pagedResultTest.Expected.PageSize, pagedResult.PageSize);
-        Assert.Equal(pagedResultTest.Expected.CurrentPage, pagedResult.CurrentPage);
-        Assert.Equal(pagedResultTest.Expected.TotalPages, pagedResult.TotalPages);
+        Assert.Empty(pagedResult.Results);
+        Assert.Equal(0, pagedResult.TotalCount);
+        Assert.Equal(pageSize, pagedResult.PageSize);
+        Assert.Equal(pageNumber, pagedResult.CurrentPage);
+        Assert.Equal(0, pagedResult.TotalPages);
+    }
+
+    [Theory]
+    [Trait("Category", "PageNumber")]
+    [InlineData(0)]
+    [InlineData(-3)]
+    public async Task CreatePagedResult_ReturnsPageResult_WhenFound(int pageNumber)
+    {
+        // Arrange
+        var data = PagedResultData.TenSimpleItems;
+        var pageSize = 5;
+        var defaultPageSize = 5;
+        IReadOnlyCollection<SimpleReferenceType> expectedResults = [.. Enumerable.Range(1, 5).Select(i => new SimpleReferenceType(i))];
+
+        var query = data.BuildMock();
+
+        // Act
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+
+        // Assert
+        Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
+        Assert.Equal(expectedResults, pagedResult.Results);
+        Assert.Equal(data.Count, pagedResult.TotalCount);
+        Assert.Equal(pageSize, pagedResult.PageSize);
+        Assert.Equal(1, pagedResult.CurrentPage);
+        Assert.Equal(2, pagedResult.TotalPages);
+    }
+
+    [Theory]
+    [Trait("Category", "PageNumber")]
+    [InlineData(0)]
+    [InlineData(-3)]
+    public async Task CreatePagedResult_UsesFirstPage_WhenPageNumberLessThanOne(int pageNumber)
+    {
+        // Arrange
+        var data = PagedResultData.TenSimpleItems;
+        var pageSize = 5;
+        var defaultPageSize = 5;
+        IReadOnlyCollection<SimpleReferenceType> expectedResults = [.. Enumerable.Range(1, 5).Select(i => new SimpleReferenceType(i))];
+
+        var query = data.BuildMock();
+
+        // Act
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+
+        // Assert
+        Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
+        Assert.Equal(expectedResults, pagedResult.Results);
+        Assert.Equal(data.Count, pagedResult.TotalCount);
+        Assert.Equal(pageSize, pagedResult.PageSize);
+        Assert.Equal(1, pagedResult.CurrentPage);
+        Assert.Equal(2, pagedResult.TotalPages);
+    }
+
+    [Theory]
+    [Trait("Category", "PageNumber")]
+    [InlineData(1, 1, 4)]
+    [InlineData(2, 5, 4)]
+    [InlineData(99, 0, 0)]
+    public async Task CreatePagedResult_ReturnsCorrectPage_WhenPageNumberIsGreaterThanZero(int pageNumber, int expectedStart, int expectedCount)
+    {
+        // Arrange
+        var data = PagedResultData.TenSimpleItems;
+        var pageSize = 4;
+        var defaultPageSize = 10;
+        IReadOnlyCollection<SimpleReferenceType> expectedResults = [.. Enumerable.Range(expectedStart, expectedCount).Select(i => new SimpleReferenceType(i))];
+
+        var query = data.BuildMock();
+
+        // Act
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+
+        // Assert
+        Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
+        Assert.Equal(expectedResults, pagedResult.Results);
+        Assert.Equal(data.Count, pagedResult.TotalCount);
+        Assert.Equal(pageSize, pagedResult.PageSize);
+        Assert.Equal(pageNumber, pagedResult.CurrentPage);
+        Assert.Equal(3, pagedResult.TotalPages);
+    }
+
+    [Theory]
+    [Trait("Category", "PageSize")]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public async Task CreatePagedResult_UsesDefaultPageSize_WhenPageSizeLessThanOne(int pageSize)
+    {
+        // Arrange
+        var data = PagedResultData.TenSimpleItems;
+        var pageNumber = 2;
+        var defaultPageSize = 6;
+        IReadOnlyCollection<SimpleReferenceType> expectedResults = [.. Enumerable.Range(7, 4).Select(i => new SimpleReferenceType(i))];
+
+        var query = data.BuildMock();
+
+        // Act
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+
+        // Assert
+        Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
+        Assert.Equal(expectedResults, pagedResult.Results);
+        Assert.Equal(data.Count, pagedResult.TotalCount);
+        Assert.Equal(defaultPageSize, pagedResult.PageSize);
+        Assert.Equal(pageNumber, pagedResult.CurrentPage);
+        Assert.Equal(2, pagedResult.TotalPages);
+    }
+
+    [Theory]
+    [Trait("Category", "PageSize")]
+    [InlineData(1, 2, 1, 10)]
+    [InlineData(2, 3, 2, 5)]
+    [InlineData(99, 0, 0, 1)]
+    public async Task CreatePagedResult_ReturnsCorrectPage_WhenPageSizeIsGreaterThanZero(int pageSize, int expectedStart, int expectedCount, int expectedTotalPages)
+    {
+        // Arrange
+        var data = PagedResultData.TenSimpleItems;
+        var pageNumber = 2;
+        var defaultPageSize = 10;
+        IReadOnlyCollection<SimpleReferenceType> expectedResults = [.. Enumerable.Range(expectedStart, expectedCount).Select(i => new SimpleReferenceType(i))];
+
+        var query = data.BuildMock();
+
+        // Act
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+
+        // Assert
+        Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
+        Assert.Equal(expectedResults, pagedResult.Results);
+        Assert.Equal(data.Count, pagedResult.TotalCount);
+        Assert.Equal(pageSize, pagedResult.PageSize);
+        Assert.Equal(pageNumber, pagedResult.CurrentPage);
+        Assert.Equal(expectedTotalPages, pagedResult.TotalPages);
     }
 }

@@ -13,6 +13,16 @@ internal static class SearchUtility
 
     internal static async Task<PagedResult<T>> CreatePagedResult<T>(IQueryable<T> query, int pageNumber, int pageSize, int defaultPageSize)
     {
+        if (pageNumber < 1)
+        {
+            pageNumber = 1;
+        }
+
+        if (pageSize < 1)
+        {
+            pageSize = defaultPageSize;
+        }
+
         var (take, skip) = Pagination(pageNumber, pageSize, defaultPageSize);
 
         var totalCount = await query.CountAsync();
