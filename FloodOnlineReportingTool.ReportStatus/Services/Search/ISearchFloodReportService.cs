@@ -1,5 +1,4 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Models.Search;
+﻿using FloodOnlineReportingTool.ReportStatus.Models.Search;
 
 namespace FloodOnlineReportingTool.ReportStatus.Services.Search;
 
@@ -11,4 +10,9 @@ internal interface ISearchFloodReportService
     Task<PagedResult<SearchResultFloodReport>> GetFloodReportsWithinMetres(double easting, double northing, double metres, int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
     Task<PagedResult<SearchResultFloodReport>> GetFloodReportsByUprn(long uprn, int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
     Task<PagedResult<SearchResultFloodReport>> GetFloodReportsByUsrn(long usrn, int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
+
+    // TODO: Search by created date
+    // TODO: Search by impact start date
+    // TODO: Search by ID
+    // TODO: Search by reference
 }
