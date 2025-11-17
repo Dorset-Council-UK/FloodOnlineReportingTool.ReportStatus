@@ -1,4 +1,4 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Models.Search;
+﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
 using FloodOnlineReportingTool.ReportStatus.Services.Search;
 using Microsoft.AspNetCore.Http.HttpResults;
 

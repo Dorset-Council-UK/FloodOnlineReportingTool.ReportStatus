@@ -1,6 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
-using FloodOnlineReportingTool.ReportStatus.Models.Search;
 
 namespace FloodOnlineReportingTool.ReportStatus.Services.Search;
 

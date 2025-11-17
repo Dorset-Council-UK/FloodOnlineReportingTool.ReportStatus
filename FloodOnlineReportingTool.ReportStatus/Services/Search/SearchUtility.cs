@@ -1,4 +1,4 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Models.Search;
+﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace FloodOnlineReportingTool.ReportStatus.Services.Search;
