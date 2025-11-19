@@ -22,7 +22,7 @@ internal static class EndpointExtensions
         MapFloodReportEndpoints(app);
         MapFloodReportSourceEndpoints(app);
 
-        MapSearchEndpoints(app);
+        MapSearchFloodReportEndpoints(app);
         MapTestEndpoints(app);
 
         return app;
@@ -488,33 +488,41 @@ internal static class EndpointExtensions
             .RequireAuthorization(PolicyNames.Reader);
     }
 
-    private static void MapSearchEndpoints(WebApplication app)
+    private static void MapSearchFloodReportEndpoints(WebApplication app)
     {
         var group = app
             .NewVersionedApi()
-            .MapGroup("/api/search")
+            .MapGroup("/api/search/floodreports")
             .HasApiVersion(Versions.V1.Version)
-            .WithTags("Search");
+            .WithTags("Search - Flood Reports");
 
-        // Search reports by UPRN
+
+        // Search all flood reports
         group
-            .MapGet(pattern: "/uprn", SearchEndpoints.GetFloodReportsByUPRN)
-            .WithSummary("Search - Reports by UPRN")
-            .WithDescription("Searches for reports based on the provided UPRN")
+            .MapGet(pattern: "/", SearchFloodReportEndpoints.GetFloodReports)
+            .WithSummary("Search - Flood Reports")
+            .WithDescription("Searches for flood reports")
             .RequireAuthorization(PolicyNames.Reader);
 
-        // Search reports by coordinates
+        // Search flood reports within metres of coordinates
         group
-            .MapGet(pattern: "/coordinates", SearchEndpoints.GetReportsByCoordinates)
-            .WithSummary("Search - Reports by Coordinates")
-            .WithDescription("Searches for reports based on the provided Easting and Northing coordinates")
+            .MapGet(pattern: "/within-metres", SearchFloodReportEndpoints.GetFloodReportsWithinMetres)
+            .WithSummary("Search - Flood Reports within Metres of Coordinates")
+            .WithDescription("Searches for flood reports within a specified distance of the provided coordinates")
             .RequireAuthorization(PolicyNames.Reader);
 
-        // Search reports by start date
+        // Search flood reports by UPRN
         group
-            .MapGet(pattern: "/startdate", SearchEndpoints.GetReportsByStartDate)
-            .WithSummary("Search - Reports by Start Date")
-            .WithDescription("Searches for reports based on the date the flood started")
+            .MapGet(pattern: "/uprn", SearchFloodReportEndpoints.GetFloodReportsByUprn)
+            .WithSummary("Search - Flood reports by UPRN")
+            .WithDescription("Searches for flood reports based on the provided UPRN")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        // Search flood reports by USRN
+        group
+            .MapGet(pattern: "/usrn", SearchFloodReportEndpoints.GetFloodReportsByUsrn)
+            .WithSummary("Search - Flood reports by USRN")
+            .WithDescription("Searches for flood reports based on the date the provided USRN")
             .RequireAuthorization(PolicyNames.Reader);
     }
     

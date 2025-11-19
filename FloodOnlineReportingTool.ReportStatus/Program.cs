@@ -1,4 +1,5 @@
 using FloodOnlineReportingTool.ReportStatus.Services;
+using FloodOnlineReportingTool.ReportStatus.Services.Search;
 using Microsoft.AspNetCore.Http.Json;
 using NetTopologySuite.IO.Converters;
 
@@ -20,6 +21,7 @@ builder.AddGovNotify();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IGazetteerSearchService, GazetteerSearchService>();
+builder.Services.AddScoped<ISearchFloodReportService, SearchFloodReportService>();
 
 // json serializer options
 builder.Services.Configure<JsonOptions>(options =>

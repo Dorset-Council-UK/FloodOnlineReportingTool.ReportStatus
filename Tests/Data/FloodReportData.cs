@@ -298,34 +298,34 @@ public static class FloodReportData
         ],
     };
 
-    public static IEnumerable<object[]> FloodReport_3 => [
-        [FloodReport1],
-        [FloodReport2],
-        [FloodReport3],
+    public static IEnumerable<TheoryDataRow<FloodReport>> FloodReport_3 => [
+        new(FloodReport1),
+        new(FloodReport2),
+        new(FloodReport3),
     ];
 
-    public static IEnumerable<object[]> FloodReport_Collections_4 => [
-        [new List<FloodReport>()],
-        [new List<FloodReport> { FloodReport1 }],
-        [new List<FloodReport> { FloodReport1, FloodReport2 }],
-        [new List<FloodReport> { FloodReport1, FloodReport2, FloodReport3 }],
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> FloodReport_Collections_4 => [
+        new([]),
+        new([FloodReport1]),
+        new([FloodReport1, FloodReport2]),
+        new([FloodReport1, FloodReport2, FloodReport3]),
     ];
 
-    public static IEnumerable<object[]> FloodReportWithUprn_Collections_4 => [
-        [new List<FloodReport>()],
-        [new List<FloodReport> { FloodReportWithUprn1 }],
-        [new List<FloodReport> { FloodReportWithUprn1, FloodReportWithUprn2 }],
-        [new List<FloodReport> { FloodReportWithUprn1, FloodReportWithUprn2, FloodReportWithUprn3 }],
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> FloodReportWithUprn_Collections_4 => [
+        new([]),
+        new([FloodReportWithUprn1]),
+        new([FloodReportWithUprn1, FloodReportWithUprn2]),
+        new([FloodReportWithUprn1, FloodReportWithUprn2, FloodReportWithUprn3]),
     ];
 
-    public static IEnumerable<object[]> FloodReportWithUsrn_Collections_4 => [
-        [new List<FloodReport>()],
-        [new List<FloodReport> { FloodReportWithUsrn1 }],
-        [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2 }],
-        [new List<FloodReport> { FloodReportWithUsrn1, FloodReportWithUsrn2, FloodReportWithUsrn3 }],
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> FloodReportWithUsrn_Collections_4 => [
+        new([]),
+        new([FloodReportWithUsrn1]),
+        new([FloodReportWithUsrn1, FloodReportWithUsrn2]),
+        new([FloodReportWithUsrn1, FloodReportWithUsrn2, FloodReportWithUsrn3]),
     ];
 
-    public static IEnumerable<object[]> FloodReport_Within50Metres_Collections
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> FloodReport_Within50Metres_Collections
     {
         get
         {
@@ -334,9 +334,9 @@ public static class FloodReportData
             var fr3 = FloodReport3 with { Easting = 368950.33, Northing = 90750.33 };
 
             return [
-                [new List<FloodReport> { fr1 }],
-                [new List<FloodReport> { fr1, fr2 }],
-                [new List<FloodReport> { fr1, fr2, fr3 }],
+                new([fr1]),
+                new([fr1, fr2]),
+                new([fr1, fr2, fr3]),
             ];
         }
     }
