@@ -1,6 +1,6 @@
 ﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
-internal interface IConfirmed
+public interface IConfirmed
 {
     public DateTimeOffset? ConfirmedUtc { get; init; }
     public string? ConfirmedByUserId { get; init; }

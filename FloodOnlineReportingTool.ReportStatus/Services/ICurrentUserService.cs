@@ -1,6 +1,6 @@
 ﻿namespace FloodOnlineReportingTool.ReportStatus.Services;
 
-internal interface ICurrentUserService
+public interface ICurrentUserService
 {
     bool IsAuthenticated { get; }
     string UserId { get; }
