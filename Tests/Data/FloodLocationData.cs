@@ -5,8 +5,8 @@ namespace Tests.Data;
 
 public static class FloodLocationData
 {
-    internal static double Easting = 368991.12;
-    internal static double Northing = 90881.94;
+    internal static readonly double Easting = 368991.12;
+    internal static readonly double Northing = 90881.94;
     public static readonly DateTimeOffset FixedDate = new(2025, 11, 25, 14, 16, 0, TimeSpan.Zero);
 
     /// <summary>

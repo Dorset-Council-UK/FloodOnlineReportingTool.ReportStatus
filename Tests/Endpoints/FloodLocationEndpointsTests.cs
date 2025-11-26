@@ -74,7 +74,6 @@ public class FloodLocationEndpointsTests
         Assert.IsType<NotFound>(result.Result);
     }
 
-
     [Theory]
     [MemberData(nameof(FloodLocationData.Four_WithReports), MemberType = typeof(FloodLocationData))]
     public async Task GetFloodLocationWithReports_ReturnsFloodLocationWithReports_WhenFound(FloodLocation expected)
@@ -113,7 +112,7 @@ public class FloodLocationEndpointsTests
         // Arrange
         var service = Substitute.For<IFloodLocationService>();
         var dto = expected.ToDto();
-       service.CreateFloodLocation(dto, Arg.Any<CancellationToken>()).Returns(expected);
+        service.CreateFloodLocation(dto, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
         var result = await FloodLocationEndpoints.CreateFloodLocation(service, dto, TestContext.Current.CancellationToken);
