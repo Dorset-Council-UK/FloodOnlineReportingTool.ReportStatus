@@ -24,10 +24,9 @@ public class FloodLocationFloodReportEndpointsTests
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodLocationFloodReport>>>(result.Result);
-        var floodLocationFloodReport = okResult.Value;
-        Assert.NotNull(floodLocationFloodReport);
-        Assert.Equal(expected, floodLocationFloodReport);
-        Assert.All(floodLocationFloodReport, flfr => Assert.Equal(expectedFloodLocationId, flfr.FloodLocationId));
+        var floodLocationFloodReports = okResult.Value;
+        Assert.Equal(expected, okResult.Value);
+        Assert.All(okResult.Value!, flfr => Assert.Equal(expectedFloodLocationId, flfr.FloodLocationId));
     }
 
     [Theory]
@@ -68,7 +67,7 @@ public class FloodLocationFloodReportEndpointsTests
     {
         // Arrange
         var service = Substitute.For<IFloodLocationFloodReportService>();
-       service.CreateFloodLocationFloodReport(expected.FloodLocationId, expected.FloodReportId, Arg.Any<CancellationToken>()).Returns(expected);
+        service.CreateFloodLocationFloodReport(expected.FloodLocationId, expected.FloodReportId, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
         var result = await FloodLocationFloodReportEndpoints.CreateFloodReport(service, expected.FloodLocationId, expected.FloodReportId, TestContext.Current.CancellationToken);
@@ -96,18 +95,13 @@ public class FloodLocationFloodReportEndpointsTests
 
         // Assert
         var createdResult = Assert.IsType<Created<FloodLocationFloodReport>>(result.Result);
-        var floodLocationFloodReport = createdResult.Value;
-        Assert.NotNull(floodLocationFloodReport);
         Assert.Equal($"/api/flood/location/{expected.FloodLocationId}/reports/{expected.FloodReportId}", createdResult.Location);
-        Assert.Equal(expected, floodLocationFloodReport);
-        Assert.Equal(FloodLocationFloodReportData.TestConfirmedDate, floodLocationFloodReport.ConfirmedUtc);
-        Assert.Equal(FloodLocationFloodReportData.TestConfirmedUserId, floodLocationFloodReport.ConfirmedByUserId);
-        Assert.Equal(FloodLocationFloodReportData.TestConfirmedUserName, floodLocationFloodReport.ConfirmedUserName);
+        Assert.Equal(expected, createdResult.Value);
     }
 
     [Theory]
     [MemberData(nameof(FloodLocationFloodReportData.FourConfirmed), MemberType = typeof(FloodLocationFloodReportData))]
-    public async Task ConfirmFloodReport_ReturnsConfirmedFloodLocationFloodReport_WhenComfirmed(FloodLocationFloodReport expected)
+    public async Task ConfirmFloodReport_ReturnsConfirmedFloodLocationFloodReport_WhenConfirmed(FloodLocationFloodReport expected)
     {
         // Arrange
         var currentUserService = Substitute.For<ICurrentUserService>();
@@ -122,12 +116,7 @@ public class FloodLocationFloodReportEndpointsTests
 
         // Assert
         var okResult = Assert.IsType<Ok<FloodLocationFloodReport>>(result.Result);
-        var floodLocationFloodReport = okResult.Value;
-        Assert.NotNull(floodLocationFloodReport);
-        Assert.Equal(expected, floodLocationFloodReport);
-        Assert.Equal(FloodLocationFloodReportData.TestConfirmedDate, floodLocationFloodReport.ConfirmedUtc);
-        Assert.Equal(FloodLocationFloodReportData.TestConfirmedUserId, floodLocationFloodReport.ConfirmedByUserId);
-        Assert.Equal(FloodLocationFloodReportData.TestConfirmedUserName, floodLocationFloodReport.ConfirmedUserName);
+        Assert.Equal(expected, okResult.Value);
     }
 
     [Theory]
