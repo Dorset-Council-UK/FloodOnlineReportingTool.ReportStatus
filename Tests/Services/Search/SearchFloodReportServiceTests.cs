@@ -14,7 +14,7 @@ public class SearchFloodReportServiceTests
     private readonly JsonSerializerOptions _jsonSerializerOptions = JsonSerializerOptions.Web;
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReport_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.Collection_Four), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReports_ReturnsPagedResult_WhenSuccessful(ICollection<FloodReport> expectedData)
     {
         // Arrange
