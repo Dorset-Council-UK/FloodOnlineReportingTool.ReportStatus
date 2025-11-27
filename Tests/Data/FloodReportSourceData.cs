@@ -6,14 +6,14 @@ public static class FloodReportSourceData
 {
     public static readonly DateTimeOffset TestCreatedDate = new(2025, 11, 26, 15, 31, 0, TimeSpan.Zero);
 
-    public static FloodReportSource Create(Guid? floodReportId = null, Guid? sourceId = null, string? sourceName = null)
+    public static FloodReportSource Create(Guid? floodReportId = null, Guid? sourceId = null, string? name = null)
     {
         return new()
         {
             FloodReportId = floodReportId ?? Guid.NewGuid(),
             SourceId = sourceId ?? Guid.NewGuid(),
             CreatedUtc = TestCreatedDate,
-            Name = sourceName ?? "Test Source",
+            Name = name ?? "Test Source",
         };
     }
 

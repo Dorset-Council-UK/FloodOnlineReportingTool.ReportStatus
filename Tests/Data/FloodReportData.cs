@@ -10,9 +10,9 @@ public static class FloodReportData
     internal static double Easting = 368991.12;
     internal static double Northing = 90881.94;
 
-    private static FloodReport FloodReport1 => Create(floodReportId: "11111111-1111-0000-0000-000000000000", eligibilityCheckId: "22222222-1111-0000-0000-000000000000");
-    private static FloodReport FloodReport2 => Create(floodReportId: "11111111-2222-0000-0000-000000000000", eligibilityCheckId: "22222222-2222-0000-0000-000000000000");
-    private static FloodReport FloodReport3 => Create(floodReportId: "11111111-3333-0000-0000-000000000000", eligibilityCheckId: "22222222-3333-0000-0000-000000000000");
+    private static readonly FloodReport FloodReport1 = Create(floodReportId: "11111111-1111-0000-0000-000000000000", eligibilityCheckId: "22222222-1111-0000-0000-000000000000");
+    private static readonly FloodReport FloodReport2 = Create(floodReportId: "11111111-2222-0000-0000-000000000000", eligibilityCheckId: "22222222-2222-0000-0000-000000000000");
+    private static readonly FloodReport FloodReport3 = Create(floodReportId: "11111111-3333-0000-0000-000000000000", eligibilityCheckId: "22222222-3333-0000-0000-000000000000");
 
     public static FloodReport Create(string? floodReportId = null, string? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
     {
