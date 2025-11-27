@@ -6,7 +6,7 @@ public static class FloodRoadFloodReportData
 {
     public static readonly DateTimeOffset TestCreatedDate = new(2025, 11, 26, 14, 24, 0, TimeSpan.Zero);
     public static readonly DateTimeOffset TestConfirmedDate = new(2025, 11, 27, 14, 24, 0, TimeSpan.Zero);
-    public static readonly string TestConfirmedUserId = Guid.NewGuid().ToString();
+    public static readonly string TestConfirmedUserId = "550e8400-e29b-41d4-a716-446655440000";
     public static readonly string TestConfirmedUserName = "Test User";
 
     public static FloodRoadFloodReport Create(Guid? floodRoadId = null, Guid? floodReportId = null)
