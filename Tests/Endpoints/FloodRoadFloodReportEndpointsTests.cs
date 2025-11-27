@@ -24,7 +24,6 @@ public class FloodRoadFloodReportEndpointsTests
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodRoadFloodReport>>>(result.Result);
-        var floodRoadFloodReports = okResult.Value;
         Assert.Equal(expected, okResult.Value);
         Assert.All(okResult.Value!, flfr => Assert.Equal(expectedFloodRoadId, flfr.FloodRoadId));
     }
