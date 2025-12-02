@@ -8,6 +8,10 @@ using Tests.Data;
 
 namespace Tests.Repositories;
 
+/// <summary>
+/// Unit tests for the <see cref="FloodReportRepository"/> class.
+/// </summary>
+/// <remarks>Because <see cref="FloodReportRepository.GetFloodReportsWithinMetres"/> uses <see cref="IsWithinDistance"/> (DbFunction) which runs on the database, that has to be an integration test not a unit test.</remarks>
 public class FloodReportRepositoryTests
 {
     /// <summary>
@@ -53,26 +57,6 @@ public class FloodReportRepositoryTests
         // Act
         var query = repository.GetFloodReportById(expected.Id);
         var result = query.FirstOrDefault();
-
-        // Assert
-        Assert.Equal(expected, result);
-    }
-
-    [Theory]
-    [MemberData(nameof(FloodReportData.Collection_Within50Metres_Three), MemberType = typeof(FloodReportData))]
-    public void GetFloodReportsWithinMetres_ReturnsQuery_WhenSuccessful(ICollection<FloodReport> expected)
-    {
-        // Arrange
-        var metres = 50.0;
-        var mockDbSet = expected.BuildMockDbSet();
-        var mockContext = MockDbContext();
-        mockContext.FloodReports.Returns(mockDbSet);
-
-        var repository = new FloodReportRepository(mockContext);
-
-        // Act
-        var query = repository.GetFloodReportsWithinMetres(FloodReportData.Easting, FloodReportData.Northing, metres);
-        var result = query.ToList();
 
         // Assert
         Assert.Equal(expected, result);
