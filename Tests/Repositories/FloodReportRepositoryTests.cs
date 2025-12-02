@@ -20,7 +20,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReport_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.Collection_Four), MemberType = typeof(FloodReportData))]
     public void GetFloodReports_ReturnsQuery_WhenSuccessful(ICollection<FloodReport> expected)
     {
         // Arrange
@@ -39,7 +39,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.Three), MemberType = typeof(FloodReportData))]
     public void GetFloodReportById_ReturnsQuery_WhenSuccessful(FloodReport expected)
     {
         // Arrange
@@ -59,7 +59,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReport_Within50Metres_Collections), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.Collection_Within50Metres_Three), MemberType = typeof(FloodReportData))]
     public void GetFloodReportsWithinMetres_ReturnsQuery_WhenSuccessful(ICollection<FloodReport> expected)
     {
         // Arrange
@@ -79,7 +79,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReportWithUprn_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.CollectionWithUprn_Four), MemberType = typeof(FloodReportData))]
     public void GetFloodReportsByUprn_ReturnsQuery_WhenFound(ICollection<FloodReport> expected)
     {
         // Arrange
@@ -98,7 +98,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReportWithUsrn_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.CollectionWithUsrn_Four), MemberType = typeof(FloodReportData))]
     public void GetFloodReportsByUprn_ReturnsEmptyQuery_WhenNoneFound(ICollection<FloodReport> expected)
     {
         // Note: The USRN data has the UPRN field set to null, meaning it works for this test
@@ -120,7 +120,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReportWithUsrn_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.CollectionWithUsrn_Four), MemberType = typeof(FloodReportData))]
     public void GetFloodReportsByUsrn_ReturnsQuery_WhenFound(ICollection<FloodReport> expected)
     {
         // Arrange
@@ -139,7 +139,7 @@ public class FloodReportRepositoryTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReportWithUprn_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.CollectionWithUprn_Four), MemberType = typeof(FloodReportData))]
     public void GetFloodReportsByUsrn_ReturnsEmptyQuery_WhenNoneFound(ICollection<FloodReport> expected)
     {
         // Note: The UPRN data has the USRN field set to null, meaning it works for this test

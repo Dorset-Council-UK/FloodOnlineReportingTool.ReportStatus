@@ -23,7 +23,7 @@ public class FloodReportServiceTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReport_Collections_4), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.Collection_Four), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReports_ReturnsCollection_WhenSuccessful(ICollection<FloodReport> expected)
     {
         // Arrange
@@ -43,7 +43,7 @@ public class FloodReportServiceTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.FloodReport_3), MemberType = typeof(FloodReportData))]
+    [MemberData(nameof(FloodReportData.Three), MemberType = typeof(FloodReportData))]
     public async Task GetFloodReportById_ReturnsFloodReport_WhenSuccessful(FloodReport expected)
     {
         // Arrange
