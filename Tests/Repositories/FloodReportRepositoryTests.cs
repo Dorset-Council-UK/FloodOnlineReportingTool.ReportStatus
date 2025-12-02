@@ -11,7 +11,7 @@ namespace Tests.Repositories;
 /// <summary>
 /// Unit tests for the <see cref="FloodReportRepository"/> class.
 /// </summary>
-/// <remarks>Because <see cref="FloodReportRepository.GetFloodReportsWithinMetres"/> uses <see cref="IsWithinDistance"/> (DbFunction) which runs on the database, that has to be an integration test not a unit test.</remarks>
+/// <remarks>Because <see cref="FloodReportRepository.GetFloodReportsWithinMetres"/> uses <see cref="NpgsqlNetTopologySuiteDbFunctionsExtensions.IsWithinDistance"/> which runs on the database, that must be an integration test not a unit test.</remarks>
 public class FloodReportRepositoryTests
 {
     /// <summary>
