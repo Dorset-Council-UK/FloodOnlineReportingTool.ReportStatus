@@ -22,13 +22,13 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsByUsrn(long Usrn, CancellationToken ct)
+    public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsByUsrn(long usrn, CancellationToken ct)
     {
-        logger.LogDebug("Retrieving all flood roads for USRN {Usrn} from the database.", Usrn);
+        logger.LogDebug("Retrieving all flood roads for USRN {Usrn} from the database.", usrn);
 
         return await context.FloodRoads
             .AsNoTracking()
-            .Where(fr => fr.Usrn.Equals(Usrn))
+            .Where(fr => fr.Usrn.Equals(usrn))
             .OrderBy(fr => fr.Id)
             .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct)
