@@ -12,6 +12,12 @@ internal static class FloodRoadEndpoints
         return TypedResults.Ok(floodRoads);
     }
 
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodRoad>>, BadRequest>> GetFloodRoadsByUsrn(IFloodRoadService floodRoadService, long usrn, CancellationToken ct)
+    {
+        var floodRoads = await floodRoadService.GetFloodRoadsByUsrn(usrn, ct).ConfigureAwait(false);
+        return TypedResults.Ok(floodRoads);
+    }
+
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodRoad>>, BadRequest>> GetFloodRoadsWithReports(IFloodRoadService floodRoadService, CancellationToken ct)
     {
         var floodRoads = await floodRoadService.GetFloodRoadsWithReports(ct).ConfigureAwait(false);
