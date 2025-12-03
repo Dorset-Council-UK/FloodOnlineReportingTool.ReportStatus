@@ -12,6 +12,12 @@ internal static class FloodPropertyEndpoints
         return TypedResults.Ok(floodProperties);
     }
 
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodProperty>>, BadRequest>> GetFloodPropertiesByUprn(IFloodPropertyService floodPropertyService, long uprn, CancellationToken ct)
+    {
+        var floodProperties = await floodPropertyService.GetFloodPropertiesByUprn(uprn, ct).ConfigureAwait(false);
+        return TypedResults.Ok(floodProperties);
+    }
+
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodProperty>>, BadRequest>> GetFloodPropertiesWithReports(IFloodPropertyService floodPropertyService, CancellationToken ct)
     {
         var floodProperties = await floodPropertyService.GetFloodPropertiesWithReports(ct).ConfigureAwait(false);
