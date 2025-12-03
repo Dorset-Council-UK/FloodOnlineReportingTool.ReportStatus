@@ -48,14 +48,14 @@ public static class FloodPropertyData
     ];
 
     public static IEnumerable<TheoryDataRow<ICollection<FloodProperty>>> Collection_Four_WithReports => [
-    new([]),
+        new([]),
         new([Create(floodReportCount: 1)]),
         new([Create(floodReportCount: 1), Create(floodReportCount: 2)]),
         new([Create(floodReportCount: 1), Create(floodReportCount: 2), Create(floodReportCount: 3)]),
     ];
 
     public static IEnumerable<TheoryDataRow<long, ICollection<FloodProperty>>> Collection_Four_WithUprn => [
-    new(100040634390, []),
+        new(100040634390, []),
         new(10013290693, [Create(uprn: 10013290693)]),
         new(10023242411, [Create(uprn: 10023242411), Create(uprn: 10023242411)]),
         new(10002062622, [Create(uprn: 10002062622), Create(uprn: 10002062622), Create(uprn: 10002062622)]),
