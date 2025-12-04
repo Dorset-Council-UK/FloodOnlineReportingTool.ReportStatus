@@ -28,8 +28,9 @@ internal static class DatabaseExtensions
             options.EnableSensitiveDataLogging(logSensitiveData);
         });
 
-        // Database reportServices
+        // Database repositories
         builder.Services
+            .AddScoped<IFloodLocationRepository, FloodLocationRepository>()
             .AddScoped<IFloodReportRepository, FloodReportRepository>();
 
         // Database services
