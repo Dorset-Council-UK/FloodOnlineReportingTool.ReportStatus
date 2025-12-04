@@ -241,6 +241,11 @@ public class FloodLocationServiceTests
         ICollection<FloodLocation> testData = [expected]; // We need ICollection for MockQueryable.NSubstitute
         var mockDbSet = testData.BuildMockDbSet();
         context.FloodLocations.Returns(mockDbSet);
+        mockDbSet.FindAsync(Arg.Any<object?[]?>(), Arg.Any<CancellationToken>()).Returns(callInfo =>
+        {
+            return new ValueTask<FloodLocation?>(mockDbSet.FirstOrDefault(fl => fl.Id.Equals(expected.Id)));
+        });
+        context.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         var service = new FloodLocationService(logger, context, repository);
 
@@ -263,8 +268,11 @@ public class FloodLocationServiceTests
 
         ICollection<FloodLocation> testData = []; // We need ICollection for MockQueryable.NSubstitute
         var mockDbSet = testData.BuildMockDbSet();
-        mockDbSet.FindAsync([expected.Id], Arg.Any<CancellationToken>()).Returns((FloodLocation?)null);
         context.FloodLocations.Returns(mockDbSet);
+        mockDbSet.FindAsync(Arg.Any<object?[]?>(), Arg.Any<CancellationToken>()).Returns(callInfo =>
+        {
+            return new ValueTask<FloodLocation?>((FloodLocation?)null);
+        });
 
         var service = new FloodLocationService(logger, context, repository);
 
