@@ -2,6 +2,7 @@
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
@@ -9,63 +10,51 @@ using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class FloodLocationService(ILogger<FloodLocationService> logger, ApplicationDbContext context) : IFloodLocationService
+public class FloodLocationService(ILogger<FloodLocationService> logger, ApplicationDbContext context, IFloodLocationRepository floodLocationRepository) : IFloodLocationService
 {
     public async Task<IReadOnlyCollection<FloodLocation>> GetFloodLocations(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood locations from the database.");
 
-        return await context.FloodLocations
-            .AsNoTracking()
-            .OrderBy(fl => fl.Id)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await floodLocationRepository
+            .GetFloodLocations()
+            .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyCollection<FloodLocation>> GetFloodLocationsByPoint(double easting, double northing, double buffer, CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood locations within buffer {buffer} of {easting}, {northing} from the database.", buffer, easting, northing);
 
-        return await context.FloodLocations
-            .AsNoTracking()
-            .Where(fl => fl.Location.Intersects(new Point(easting, northing).Buffer(buffer)))
-            .OrderBy(fl => fl.Id)
-            .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await floodLocationRepository
+            .GetFloodLocationsByPoint(easting, northing, buffer)
+            .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyCollection<FloodLocation>> GetFloodLocationsWithReports(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood locations and their flood reports from the database.");
 
-        return await context.FloodLocations
-            .AsNoTracking()
-            .OrderBy(fl => fl.Id)
-            .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await floodLocationRepository
+            .GetFloodLocationsWithReports()
+            .ToListAsync(ct);
     }
 
     public async Task<FloodLocation?> GetFloodLocation(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving flood location with ID {FloodLocationId} from the database.", id);
 
-        return await context.FloodLocations
-            .FindAsync([id], ct)
-            .ConfigureAwait(false);
+        return await floodLocationRepository
+            .GetFloodLocations()
+            .FirstOrDefaultAsync(fl => fl.Id.Equals(id), ct);
     }
 
     public async Task<FloodLocation?> GetFloodLocationWithReports(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving flood location and its flood reports with ID {FloodLocationId} from the database.", id);
 
-        var location = await context.FloodLocations
-            .AsNoTracking()
-            .OrderBy(fl => fl.Id)
-            .Include(fl => fl.FloodReports.OrderBy(fr => fr.FloodReportId))
-            .FirstOrDefaultAsync(fl => fl.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+        var location = await floodLocationRepository
+            .GetFloodLocationsWithReports()
+            .FirstOrDefaultAsync(fl => fl.Id.Equals(id), ct);
 
         return location;
     }
@@ -85,7 +74,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
         };
 
         context.FloodLocations.Add(creating);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return creating;
     }
@@ -120,7 +109,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
             ],
         };
 
-        var potentialDuplicates = await FindPotentialDuplicates(buffer, ecc, ct).ConfigureAwait(false);
+        var potentialDuplicates = await FindPotentialDuplicates(buffer, ecc, ct);
 
         FloodLocation? floodLocation = null;
         ICollection<FloodLocationFloodReport> floodLocationFloodReports = [];
@@ -163,17 +152,16 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
         if (floodLocation is not null) context.FloodLocations.Add(floodLocation);
         if (floodLocationFloodReports.Count > 0) context.FloodLocationFloodReports.AddRange(floodLocationFloodReports);
 
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
     }
 
     public async Task<FloodLocation?> UpdateFloodLocation(Guid id, FloodLocationDto dto, CancellationToken ct)
     {
         logger.LogDebug("Updating flood location with ID {FloodLocationId} in the database.", id);
 
-        var existing = await context.FloodLocations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+        var existing = await floodLocationRepository
+            .GetFloodLocations()
+            .FirstOrDefaultAsync(fl => fl.Id.Equals(id), ct);
 
         if (existing == null)
         {
@@ -190,7 +178,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
         };
 
         context.FloodLocations.Update(updated);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return updated;
     }
@@ -199,9 +187,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
     {
         logger.LogDebug("Delete flood location with ID {FloodLocationId} from the database.", id);
 
-        var existing = await context.FloodLocations
-            .FindAsync([id], ct)
-            .ConfigureAwait(false);
+        var existing = await context.FloodLocations.FindAsync([id], ct);
 
         if (existing == null)
         {
@@ -209,7 +195,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
         }
 
         context.FloodLocations.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }
@@ -221,8 +207,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
         return await context.FloodLocations
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .AnyAsync(o => o.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+            .AnyAsync(o => o.Id.Equals(id), ct);
     }
 
     /// <summary>
@@ -261,7 +246,6 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
                     .ThenBy(flfr => flfr.FloodReportId)
             )
             .Select(flfr => flfr.FloodLocationId)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 }
