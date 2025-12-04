@@ -8,49 +8,55 @@ internal static class FloodLocationEndpoints
 {
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodLocation>>, BadRequest>> GetFloodLocations(IFloodLocationService floodLocationService, CancellationToken ct)
     {
-        var floodLocations = await floodLocationService.GetFloodLocations(ct).ConfigureAwait(false);
+        var floodLocations = await floodLocationService.GetFloodLocations(ct);
+        return TypedResults.Ok(floodLocations);
+    }
+
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodLocation>>, BadRequest>> GetFloodLocationsByPoint(IFloodLocationService floodLocationService, double easting, double northing, double buffer, CancellationToken ct)
+    {
+        var floodLocations = await floodLocationService.GetFloodLocationsByPoint(easting, northing, buffer, ct);
         return TypedResults.Ok(floodLocations);
     }
 
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodLocation>>, BadRequest>> GetFloodLocationsWithReports(IFloodLocationService floodLocationService, CancellationToken ct)
     {
-        var floodLocations = await floodLocationService.GetFloodLocationsWithReports(ct).ConfigureAwait(false);
+        var floodLocations = await floodLocationService.GetFloodLocationsWithReports(ct);
         return TypedResults.Ok(floodLocations);
     }
 
     internal static async Task<Results<Ok<FloodLocation>, NotFound>> GetFloodLocation(IFloodLocationService floodLocationService, Guid id, CancellationToken ct)
     {
-        var floodLocation = await floodLocationService.GetFloodLocation(id, ct).ConfigureAwait(false);
+        var floodLocation = await floodLocationService.GetFloodLocation(id, ct);
         return floodLocation is null ? TypedResults.NotFound() : TypedResults.Ok(floodLocation);
     }
 
     internal static async Task<Results<Ok<FloodLocation>, NotFound>> GetFloodLocationWithReports(IFloodLocationService floodLocationService, Guid id, CancellationToken ct)
     {
-        var floodLocation = await floodLocationService.GetFloodLocationWithReports(id, ct).ConfigureAwait(false);
+        var floodLocation = await floodLocationService.GetFloodLocationWithReports(id, ct);
         return floodLocation is null ? TypedResults.NotFound() : TypedResults.Ok(floodLocation);
     }
 
     internal static async Task<Results<Created<FloodLocation>, BadRequest>> CreateFloodLocation(IFloodLocationService floodLocationService, FloodLocationDto dto, CancellationToken ct)
     {
-        var floodLocation = await floodLocationService.CreateFloodLocation(dto, ct).ConfigureAwait(false);
+        var floodLocation = await floodLocationService.CreateFloodLocation(dto, ct);
         return TypedResults.Created($"/api/flood/location/{floodLocation.Id}", floodLocation);
     }
 
     internal static async Task<Results<Ok<FloodLocation>, NotFound, BadRequest>> UpdateFloodLocation(IFloodLocationService floodLocationService, Guid id, FloodLocationDto dto, CancellationToken ct)
     {
-        var floodLocation = await floodLocationService.UpdateFloodLocation(id, dto, ct).ConfigureAwait(false);
+        var floodLocation = await floodLocationService.UpdateFloodLocation(id, dto, ct);
         return floodLocation is null ? TypedResults.NotFound() : TypedResults.Ok(floodLocation);
     }
 
     internal static async Task<Results<NoContent, NotFound, BadRequest>> DeleteFloodLocation(IFloodLocationService floodLocationService, Guid id, CancellationToken ct)
     {
-        var deleted = await floodLocationService.DeleteFloodLocation(id, ct).ConfigureAwait(false);
+        var deleted = await floodLocationService.DeleteFloodLocation(id, ct);
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
     internal static async Task<Results<Ok<bool>, BadRequest>> FloodLocationExists(IFloodLocationService floodLocationService, Guid id, CancellationToken ct)
     {
-        var exists = await floodLocationService.FloodLocationExists(id, ct).ConfigureAwait(false);
+        var exists = await floodLocationService.FloodLocationExists(id, ct);
         return TypedResults.Ok(exists);
     }
 }

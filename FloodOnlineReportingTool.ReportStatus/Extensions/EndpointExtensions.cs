@@ -43,6 +43,11 @@ internal static class EndpointExtensions
             .WithDescription("Gets all flood locations from the database")
             .RequireAuthorization(PolicyNames.Reader);
         group
+            .MapGet(pattern: "/by-point", FloodLocationEndpoints.GetFloodLocationsByPoint)
+            .WithSummary("Flood location - All by point")
+            .WithDescription("Gets all flood locations within a buffer of the provided easting and northing")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
             .MapGet(pattern: "/with-floodreports/", FloodLocationEndpoints.GetFloodLocationsWithReports)
             .WithSummary("Flood location - All with flood reports")
             .WithDescription("Gets all flood locations and related flood reports from the database")
