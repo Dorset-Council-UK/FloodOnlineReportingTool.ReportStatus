@@ -163,6 +163,11 @@ internal static class EndpointExtensions
             .WithDescription("Gets all flood properties from the database")
             .RequireAuthorization(PolicyNames.Reader);
         group
+            .MapGet(pattern: "/uprn/{uprn:long}", FloodPropertyEndpoints.GetFloodPropertiesByUprn)
+            .WithSummary("Flood properties - All by UPRN")
+            .WithDescription("Gets all flood properties for the provided UPRN from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
             .MapGet(pattern: "/with-floodreports/", FloodPropertyEndpoints.GetFloodPropertiesWithReports)
             .WithSummary("Flood properties - All with flood reports")
             .WithDescription("Gets all flood properties and related flood reports from the database")
@@ -276,6 +281,11 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/", FloodRoadEndpoints.GetFloodRoads)
             .WithSummary("Flood road - All")
             .WithDescription("Gets all flood roads from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
+            .MapGet(pattern: "/by-usrn/{usrn:long}", FloodRoadEndpoints.GetFloodRoadsByUsrn)
+            .WithSummary("Flood road - All by USRN")
+            .WithDescription("Gets all flood roads for the provided USRN from the database")
             .RequireAuthorization(PolicyNames.Reader);
         group
             .MapGet(pattern: "/with-floodreports/", FloodRoadEndpoints.GetFloodRoadsWithReports)
