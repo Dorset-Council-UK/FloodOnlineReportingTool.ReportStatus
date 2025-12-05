@@ -11,7 +11,7 @@ internal static class SearchUtility
         return (take, pageNumber < 1 ? 0 : (pageNumber - 1) * take);
     }
 
-    internal static async Task<PagedResult<T>> CreatePagedResult<T>(IQueryable<T> query, int pageNumber, int pageSize, int defaultPageSize)
+    internal static async Task<PagedResult<T>> CreatePagedResult<T>(IQueryable<T> query, int pageNumber, int pageSize, int defaultPageSize, CancellationToken ct = default)
     {
         if (pageNumber < 1)
         {
@@ -25,11 +25,11 @@ internal static class SearchUtility
 
         var (take, skip) = Pagination(pageNumber, pageSize, defaultPageSize);
 
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(ct);
         var results = await query
             .Skip(skip)
             .Take(take)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         var totalPages = (totalCount + take - 1) / take;
 
