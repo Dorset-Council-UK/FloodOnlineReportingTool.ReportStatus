@@ -22,7 +22,9 @@ internal static class EndpointExtensions
         MapFloodReportEndpoints(app);
         MapFloodReportSourceEndpoints(app);
 
+        MapSearchFloodLocationEndpoints(app);
         MapSearchFloodReportEndpoints(app);
+
         MapTestEndpoints(app);
 
         return app;
@@ -500,6 +502,34 @@ internal static class EndpointExtensions
         group
             .MapGet(pattern: "/{sourceId}/exists", FloodReportSourceEndpoints.FloodReportSourceExists)
             .WithSummary("Checks if a flood report exists for a flood location")
+            .RequireAuthorization(PolicyNames.Reader);
+    }
+
+    private static void MapSearchFloodLocationEndpoints(WebApplication app)
+    {
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/search/floodlocations")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Search - Flood Locations");
+
+        // Get all
+        group
+            .MapGet(pattern: "/", SearchFloodLocationEndpoints.GetFloodLocations)
+            .WithSummary("Search - Flood Locations")
+            .WithDescription("Searches for flood locations")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        group
+            .MapGet(pattern: "/with-floodreports", SearchFloodLocationEndpoints.GetFloodLocationsWithReports)
+            .WithSummary("Search - Flood Locations")
+            .WithDescription("Searches for flood locations")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        group
+            .MapGet(pattern: "/by-point", SearchFloodLocationEndpoints.GetFloodLocationsByPoint)
+            .WithSummary("Search - Flood Locations within Metres of Coordinates")
+            .WithDescription("Searches for flood locations within a buffer of the provided easting and northing")
             .RequireAuthorization(PolicyNames.Reader);
     }
 
