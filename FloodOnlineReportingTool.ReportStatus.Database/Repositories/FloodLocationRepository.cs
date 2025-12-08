@@ -29,7 +29,7 @@ public class FloodLocationRepository(ApplicationDbContext context) : IFloodLocat
         return context.FloodLocations
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Where(fl => fl.Location.Intersects(new Point(easting, northing).Buffer(buffer)))
+            .Where(fl => fl.Location.Intersects(new Point(easting, northing) { SRID = 27700 }.Buffer(buffer)))
             .OrderBy(fl => fl.Id)
             .Include(fl => fl.FloodReports.OrderBy(flfr => flfr.FloodReportId));
     }

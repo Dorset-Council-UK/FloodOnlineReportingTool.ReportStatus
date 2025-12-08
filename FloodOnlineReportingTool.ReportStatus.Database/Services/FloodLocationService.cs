@@ -70,7 +70,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
             Title = dto.Title,
             Notes = dto.Notes,
-            Location = dto.Location,
+            Location = new Point(dto.Location.X, dto.Location.Y) { SRID = 27700 },
         };
 
         context.FloodLocations.Add(creating);
@@ -135,7 +135,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
                 Title = locationDescription,
                 Notes = null,
-                Location = new Point(ecc.Easting, ecc.Northing),
+                Location = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
 
                 FloodReports = [
                     new()
@@ -230,7 +230,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
-            .Where(fl => fl.Location.Intersects(new Point(ecc.Easting, ecc.Northing).Buffer(buffer)))
+            .Where(fl => fl.Location.Intersects(new Point(ecc.Easting, ecc.Northing) { SRID = 27700 }.Buffer(buffer)))
             .SelectMany(fl => fl.FloodReports
                 .Where(flfr =>
                     // At least one matching source
