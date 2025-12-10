@@ -1,6 +1,7 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Globalization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
@@ -12,8 +13,16 @@ internal static class FloodLocationEndpoints
         return TypedResults.Ok(floodLocations);
     }
 
-    internal static async Task<Results<Ok<IReadOnlyCollection<FloodLocation>>, BadRequest>> GetFloodLocationsByPoint(IFloodLocationService floodLocationService, double easting, double northing, double buffer, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodLocation>>, ValidationProblem>> GetFloodLocationsByPoint(IFloodLocationService floodLocationService, double easting, double northing, double buffer, CancellationToken ct)
     {
+        if (buffer < 0 || buffer > IFloodLocationService.MaxBuffer)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { nameof(buffer), [string.Create(CultureInfo.InvariantCulture, $"Buffer must be between 0 and {IFloodLocationService.MaxBuffer} metres.")] },
+            });
+        }
+
         var floodLocations = await floodLocationService.GetFloodLocationsByPoint(easting, northing, buffer, ct);
         return TypedResults.Ok(floodLocations);
     }
