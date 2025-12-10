@@ -1,6 +1,7 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Globalization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
@@ -30,8 +31,16 @@ internal static class FloodReportEndpoints
         return TypedResults.Ok(floodReports);
     }
 
-    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetFloodReportsWithinMetres(IFloodReportService floodReportService, double easting, double northing, double metres, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, ValidationProblem>> GetFloodReportsWithinMetres(IFloodReportService floodReportService, double easting, double northing, double metres, CancellationToken ct)
     {
+        if (metres < 0 || metres > IFloodReportService.MaxMetres)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { nameof(metres), [string.Create(CultureInfo.InvariantCulture, $"Metres must be between 0 and {IFloodReportService.MaxMetres} metres.")] },
+            });
+        }
+
         var floodReports = await floodReportService.GetFloodReportsWithinMetres(easting, northing, metres, ct).ConfigureAwait(false);
         return TypedResults.Ok(floodReports);
     }
