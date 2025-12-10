@@ -5,6 +5,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Services.Search;
 internal interface ISearchFloodReportService
 {
     const int DefaultPageSize = 10;
+    const double MaxMetres = 100;
 
     Task<PagedResult<SearchResultFloodReport>> GetFloodReports(int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
     Task<PagedResult<SearchResultFloodReport>> GetFloodReportsWithinMetres(double easting, double northing, double metres, int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
