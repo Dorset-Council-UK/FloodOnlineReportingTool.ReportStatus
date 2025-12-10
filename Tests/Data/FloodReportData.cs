@@ -1,5 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using NetTopologySuite.Geometries;
 
 namespace Tests.Data;
 
@@ -30,8 +31,7 @@ public static class FloodReportData
             EligibilityCheckId = eligibilityCheckId ?? Guid.NewGuid(),
             Uprn = uprn,
             Usrn = usrn,
-            Easting = easting ?? Easting,
-            Northing = northing ?? Northing,
+            Location = new Point(easting ?? Easting, Northing = northing ?? Northing) { SRID = 27700 },
             ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
             ImpactDurationHours = 5,
             Sources = [
