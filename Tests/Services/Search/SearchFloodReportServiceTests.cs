@@ -1,3 +1,4 @@
+﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Services.Search;
@@ -14,8 +15,8 @@ public class SearchFloodReportServiceTests
     private readonly JsonSerializerOptions _jsonSerializerOptions = JsonSerializerOptions.Web;
 
     [Theory]
-    [MemberData(nameof(FloodReportData.Collection_Four), MemberType = typeof(FloodReportData))]
-    public async Task GetFloodReports_ReturnsPagedResult_WhenSuccessful(ICollection<FloodReport> expectedData)
+    [MemberData(nameof(SearchResultFloodReportData.Four), MemberType = typeof(SearchResultFloodReportData))]
+    public async Task GetFloodReports_ReturnsPagedResult_WhenSuccessful(ICollection<FloodReport> floodReports, PagedResult<SearchResultFloodReport> expected)
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -24,19 +25,18 @@ public class SearchFloodReportServiceTests
         int pageSize = 10;
 
         var repository = Substitute.For<IFloodReportRepository>();
-        var query = expectedData.BuildMock();
+        var query = floodReports.BuildMock();
         repository.GetFloodReports().Returns(query);
 
         var service = new SearchFloodReportService(logger, repository);
 
         // Act
-        var result = await service.GetFloodReports(pageNumber, pageSize, cancellationToken);
+        var result = await service.GetFloodReports(1, expected.PageSize, TestContext.Current.CancellationToken);
 
         // Assert
         // Converting to JSON as I had trouble comparing the records directly
-        var expectedJson = JsonSerializer.Serialize(query.ToSearchResult(), _jsonSerializerOptions);
-        var resultJson = JsonSerializer.Serialize(result.Results, _jsonSerializerOptions);
-
+        var expectedJson = JsonSerializer.Serialize(expected, _jsonSerializerOptions);
+        var resultJson = JsonSerializer.Serialize(result, _jsonSerializerOptions);
         Assert.Equal(expectedJson, resultJson);
     }
 
@@ -44,26 +44,32 @@ public class SearchFloodReportServiceTests
     public async Task GetFloodReports_ReturnsPagedResult_WhenNotFound()
     {
         // Arrange
-        var cancellationToken = TestContext.Current.CancellationToken;
+        ICollection<FloodReport> floodReports = [];
+        PagedResult<SearchResultFloodReport> expected = new(
+            Results: floodReports.ToSearchResults(),
+            TotalCount: 0,
+            PageSize: 10,
+            CurrentPage: 1,
+            TotalPages: 0
+        );
+
         var logger = Substitute.For<ILogger<SearchFloodReportService>>();
         int pageNumber = 1;
         int pageSize = 10;
 
         var repository = Substitute.For<IFloodReportRepository>();
-        ICollection<FloodReport> expectedData = [];
-        var query = expectedData.BuildMock();
+        var query = floodReports.BuildMock();
         repository.GetFloodReports().Returns(query);
 
         var service = new SearchFloodReportService(logger, repository);
 
         // Act
-        var result = await service.GetFloodReports(pageNumber, pageSize, cancellationToken);
+        var result = await service.GetFloodReports(1, expected.PageSize, TestContext.Current.CancellationToken);
 
         // Assert
         // Converting to JSON as I had trouble comparing the records directly
-        var expectedJson = JsonSerializer.Serialize(query.ToSearchResult(), _jsonSerializerOptions);
-        var resultJson = JsonSerializer.Serialize(result.Results, _jsonSerializerOptions);
-
+        var expectedJson = JsonSerializer.Serialize(expected, _jsonSerializerOptions);
+        var resultJson = JsonSerializer.Serialize(result, _jsonSerializerOptions);
         Assert.Equal(expectedJson, resultJson);
     }
 }
