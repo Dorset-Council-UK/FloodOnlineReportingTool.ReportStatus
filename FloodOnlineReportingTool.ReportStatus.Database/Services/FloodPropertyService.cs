@@ -109,8 +109,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             EligibilityCheckId = ecc.Id,
             Uprn = uprn,
             Usrn = ecc.Usrn,
-            Easting = ecc.Easting,
-            Northing = ecc.Northing,
+            Location = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
             ImpactStartUtc = ecc.ImpactStartUTC,
             ImpactDurationHours = ecc.ImpactDurationHours,
 

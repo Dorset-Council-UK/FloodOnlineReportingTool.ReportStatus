@@ -13,8 +13,7 @@ public static class FloodReportExtensions
             EligibilityCheckId = floodReport.EligibilityCheckId,
             Uprn = floodReport.Uprn,
             Usrn = floodReport.Usrn,
-            Easting = floodReport.Easting,
-            Northing = floodReport.Northing,
+            Location = floodReport.Location,
             ImpactStartUtc = floodReport.ImpactStartUtc,
             ImpactDurationHours = floodReport.ImpactDurationHours,
         };
@@ -26,8 +25,7 @@ public static class FloodReportExtensions
             floodReport.Id,
             floodReport.CreatedUtc,
             floodReport.UpdatedUtc,
-            floodReport.Easting,
-            floodReport.Northing,
+            floodReport.Location,
             floodReport.ImpactStartUtc,
             floodReport.Sources.ToSearchResults()
         );

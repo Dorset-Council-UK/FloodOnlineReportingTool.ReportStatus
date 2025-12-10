@@ -158,9 +158,6 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<double>("Easting")
-                        .HasColumnType("double precision");
-
                     b.Property<Guid>("EligibilityCheckId")
                         .HasColumnType("uuid");
 
@@ -170,8 +167,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("ImpactStartUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<double>("Northing")
-                        .HasColumnType("double precision");
+                    b.Property<Point>("Location")
+                        .IsRequired()
+                        .HasColumnType("geometry (point)");
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");

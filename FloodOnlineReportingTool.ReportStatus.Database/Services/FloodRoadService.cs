@@ -109,8 +109,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             EligibilityCheckId = ecc.Id,
             Uprn = ecc.Uprn,
             Usrn = usrn,
-            Easting = ecc.Easting,
-            Northing = ecc.Northing,
+            Location = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
             ImpactStartUtc = ecc.ImpactStartUTC,
             ImpactDurationHours = ecc.ImpactDurationHours,
 

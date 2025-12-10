@@ -14,8 +14,7 @@ internal static class ContractsExtensions
             EligibilityCheckId = eligibilityCheckCreated.Id,
             Uprn = eligibilityCheckCreated.Uprn,
             Usrn = eligibilityCheckCreated.Usrn,
-            Easting = eligibilityCheckCreated.Easting,
-            Northing = eligibilityCheckCreated.Northing,
+            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing) { SRID = 27700 },
             ImpactStartUtc = eligibilityCheckCreated.ImpactStartUTC,
             ImpactDurationHours = eligibilityCheckCreated.ImpactDurationHours,
         };
