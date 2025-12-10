@@ -30,6 +30,12 @@ internal class SearchFloodLocationService(ILogger<SearchFloodLocationService> lo
     {
         logger.LogInformation("Searching flood locations within {buffer} distance of coordinates (Easting: {Easting}, Northing: {Northing}) from page {PageNumber} for {PageSize} items per page.", buffer, easting, northing, pageNumber, pageSize);
 
+        if (buffer > ISearchFloodLocationService.MaxBuffer)
+        {
+            logger.LogWarning("Buffer {Buffer} exceeds maximum allowed buffer of {MaxBuffer}. Using maximum buffer instead.", buffer, ISearchFloodLocationService.MaxBuffer);
+            buffer = ISearchFloodLocationService.MaxBuffer;
+        }
+
         var query = floodLocationRepository
             .GetFloodLocationsByPoint(easting, northing, buffer)
             .ToSearchResult();

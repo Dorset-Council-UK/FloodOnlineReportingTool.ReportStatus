@@ -5,6 +5,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Services.Search;
 internal interface ISearchFloodLocationService
 {
     const int DefaultPageSize = 10;
+    const double MaxBuffer = 100;
 
     Task<PagedResult<SearchResultFloodLocation>> GetFloodLocations(int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
     Task<PagedResult<SearchResultFloodLocation>> GetFloodLocationsWithReports(int pageNumber = 1, int pageSize = DefaultPageSize, CancellationToken ct = default);
