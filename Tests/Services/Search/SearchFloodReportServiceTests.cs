@@ -1,9 +1,10 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Services.Search;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
+using NetTopologySuite.IO.Converters;
 using NSubstitute;
 using System.Text.Json;
 using Tests.Data;
@@ -12,18 +13,22 @@ namespace Tests.Services.Search;
 
 public class SearchFloodReportServiceTests
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = JsonSerializerOptions.Web;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
+
+    public SearchFloodReportServiceTests()
+    {
+        _jsonSerializerOptions = new(JsonSerializerDefaults.Web)
+        {
+            Converters = { new GeoJsonConverterFactory() },
+        };
+    }
 
     [Theory]
     [MemberData(nameof(SearchResultFloodReportData.Four), MemberType = typeof(SearchResultFloodReportData))]
     public async Task GetFloodReports_ReturnsPagedResult_WhenSuccessful(ICollection<FloodReport> floodReports, PagedResult<SearchResultFloodReport> expected)
     {
         // Arrange
-        var cancellationToken = TestContext.Current.CancellationToken;
         var logger = Substitute.For<ILogger<SearchFloodReportService>>();
-        int pageNumber = 1;
-        int pageSize = 10;
-
         var repository = Substitute.For<IFloodReportRepository>();
         var query = floodReports.BuildMock();
         repository.GetFloodReports().Returns(query);
@@ -54,9 +59,6 @@ public class SearchFloodReportServiceTests
         );
 
         var logger = Substitute.For<ILogger<SearchFloodReportService>>();
-        int pageNumber = 1;
-        int pageSize = 10;
-
         var repository = Substitute.For<IFloodReportRepository>();
         var query = floodReports.BuildMock();
         repository.GetFloodReports().Returns(query);
