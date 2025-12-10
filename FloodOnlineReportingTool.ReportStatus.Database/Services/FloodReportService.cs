@@ -44,6 +44,12 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Finding flood reports within {Metres} metres of Easting {Easting} and Northing {Northing}.", metres, easting, northing);
 
+        if (metres > IFloodReportService.MaxMetres)
+        {
+            logger.LogWarning("Metres {Metres} exceeds maximum allowed metres of {MaxMetres}. Using maximum metres instead.", metres, IFloodReportService.MaxMetres);
+            metres = IFloodReportService.MaxMetres;
+        }
+
         var query = floodReportRepository.GetFloodReportsWithinMetres(easting, northing, metres);
         return await query.ToListAsync(ct);
     }
@@ -60,8 +66,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Easting = dto.Easting,
-            Northing = dto.Northing,
+            Location = dto.Location,
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };
@@ -94,8 +99,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Easting = dto.Easting,
-            Northing = dto.Northing,
+            Location = dto.Location,
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };
