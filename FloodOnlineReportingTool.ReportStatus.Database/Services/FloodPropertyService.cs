@@ -10,13 +10,13 @@ using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class FloodPropertyService(ILogger<FloodPropertyService> logger, ApplicationDbContext context, IFloodPropertyRepository floodPropertyRepositiry) : IFloodPropertyService
+public class FloodPropertyService(ILogger<FloodPropertyService> logger, ApplicationDbContext context, IFloodPropertyRepository floodPropertyRepository) : IFloodPropertyService
 {
     public async Task<IReadOnlyCollection<FloodProperty>> GetFloodProperties(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood properties from the database.");
 
-        return await floodPropertyRepositiry
+        return await floodPropertyRepository
             .GetFloodProperties()
             .ToListAsync(ct);
     }
@@ -25,7 +25,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Retrieving all flood properties for UPRN {Uprn} from the database.", uprn);
 
-        return await floodPropertyRepositiry
+        return await floodPropertyRepository
             .GetFloodProperties()
             .Where(fp => fp.Uprn.Equals(uprn))
             .OrderBy(fp => fp.Id)
@@ -37,7 +37,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Retrieving all flood properties and their flood reports from the database.");
 
-        return await floodPropertyRepositiry
+        return await floodPropertyRepository
             .GetFloodPropertiesWithReports()
             .ToListAsync(ct);
     }
@@ -46,7 +46,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Retrieving flood property with ID {FloodPropertyId} from the database.", id);
 
-        return await floodPropertyRepositiry
+        return await floodPropertyRepository
             .GetFloodProperties()
             .FirstOrDefaultAsync(fp => fp.Id.Equals(id), ct);
     }
@@ -55,7 +55,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Retrieving flood property and its flood reports with ID {FloodPropertyId} from the database.", id);
 
-        var property = await floodPropertyRepositiry
+        var property = await floodPropertyRepository
             .GetFloodPropertiesWithReports()
             .FirstOrDefaultAsync(fp => fp.Id.Equals(id), ct);
 
@@ -170,7 +170,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Updating flood property with ID {FloodPropertyId} in the database.", id);
 
-        var existing = await floodPropertyRepositiry
+        var existing = await floodPropertyRepository
             .GetFloodProperties()
             .FirstOrDefaultAsync(o => o.Id.Equals(id), ct);
 
