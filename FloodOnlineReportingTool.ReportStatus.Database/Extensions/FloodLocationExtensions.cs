@@ -32,4 +32,9 @@ public static class FloodLocationExtensions
     {
         return floodLocationQuery.Select(fr => fr.ToSearchResult());
     }
+
+    public static IReadOnlyCollection<SearchResultFloodLocation> ToSearchResults(this ICollection<FloodLocation> floodLocations)
+    {
+        return [.. floodLocations.Select(fr => fr.ToSearchResult())];
+    }
 }
