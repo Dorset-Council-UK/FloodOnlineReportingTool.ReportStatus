@@ -55,11 +55,9 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Retrieving flood property and its flood reports with ID {FloodPropertyId} from the database.", id);
 
-        var property = await floodPropertyRepository
+        return await floodPropertyRepository
             .GetFloodPropertiesWithReports()
             .FirstOrDefaultAsync(fp => fp.Id.Equals(id), ct);
-
-        return property;
     }
 
     public async Task<FloodProperty> CreateFloodProperty(FloodPropertyDto dto, CancellationToken ct)
