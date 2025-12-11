@@ -78,7 +78,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         };
 
         context.FloodProperties.Add(creating);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return creating;
     }
@@ -119,7 +119,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             ],
         };
 
-        var potentialDuplicates = await FindPotentialDuplicates(uprn, ecc, ct).ConfigureAwait(false);
+        var potentialDuplicates = await FindPotentialDuplicates(uprn, ecc, ct);
 
         FloodProperty? floodProperty = null;
         ICollection<FloodPropertyFloodReport> floodPropertyFloodReports = [];
@@ -163,7 +163,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         if (floodProperty is not null) context.FloodProperties.Add(floodProperty);
         if (floodPropertyFloodReports.Count > 0) context.FloodPropertyReports.AddRange(floodPropertyFloodReports);
 
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
     }
 
     public async Task<FloodProperty?> UpdateFloodProperty(Guid id, FloodPropertyDto dto, CancellationToken ct)
@@ -189,7 +189,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         };
 
         context.FloodProperties.Update(updated);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return updated;
     }
@@ -198,9 +198,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Delete flood property with ID {FloodPropertyId} from the database.", id);
 
-        var existing = await context.FloodProperties
-            .FindAsync([id], ct)
-            .ConfigureAwait(false);
+        var existing = await context.FloodProperties.FindAsync([id], ct);
 
         if (existing == null)
         {
@@ -208,7 +206,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         }
 
         context.FloodProperties.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }
@@ -220,8 +218,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         return await context.FloodProperties
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .AnyAsync(o => o.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+            .AnyAsync(o => o.Id.Equals(id), ct);
     }
 
     /// <summary>
@@ -260,7 +257,6 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
                     .ThenBy(fpfr => fpfr.FloodReportId)
             )
             .Select(fpfr => fpfr.FloodPropertyId)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 }
