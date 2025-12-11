@@ -177,7 +177,7 @@ public class FloodLocationServiceTests
         Assert.NotEqual(default, result.CreatedUtc);
         Assert.Equal(expected.Title, result.Title);
         Assert.Equal(expected.Notes, result.Notes);
-        Assert.Equal(expected.Location, result.Location);
+        Assert.Equal(expected.Geom, result.Geom);
     }
 
     // CreateFromEligibilityCheckCreated GOES HERE
@@ -204,7 +204,7 @@ public class FloodLocationServiceTests
         Assert.NotEqual(default, result.UpdatedUtc);
         Assert.Equal(expected.Title, result.Title);
         Assert.Equal(expected.Notes, result.Notes);
-        Assert.Equal(expected.Location, result.Location);
+        Assert.Equal(expected.Geom, result.Geom);
     }
 
     [Theory]

@@ -33,7 +33,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Point>("Location")
+                    b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 
@@ -94,7 +94,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Point>("Location")
+                    b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 
@@ -161,15 +161,15 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("EligibilityCheckId")
                         .HasColumnType("uuid");
 
+                    b.Property<Point>("Geom")
+                        .IsRequired()
+                        .HasColumnType("geometry (point)");
+
                     b.Property<int>("ImpactDurationHours")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("ImpactStartUtc")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Point>("Location")
-                        .IsRequired()
-                        .HasColumnType("geometry (point)");
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
@@ -217,7 +217,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Point>("Location")
+                    b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 

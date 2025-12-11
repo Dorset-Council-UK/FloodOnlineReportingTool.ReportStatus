@@ -66,7 +66,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Location = dto.Location,
+            Geom = dto.Geom,
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };
@@ -99,7 +99,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Location = dto.Location,
+            Geom = dto.Geom,
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };

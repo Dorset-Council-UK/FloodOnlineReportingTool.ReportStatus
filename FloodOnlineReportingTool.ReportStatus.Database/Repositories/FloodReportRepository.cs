@@ -33,7 +33,7 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
             .AsNoTracking()
             .IgnoreAutoIncludes()
             .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => fr.Location.IsWithinDistance(searchPoint, metres))
+            .Where(fr => fr.Geom.IsWithinDistance(searchPoint, metres))
             .OrderBy(fr => fr.Id);
     }
 

@@ -11,7 +11,7 @@ public static class FloodRoadExtensions
             Title = floodRoad.Title,
             Usrn = floodRoad.Usrn,
             Notes = floodRoad.Notes,
-            Location = floodRoad.Location,
+            Geom = floodRoad.Geom,
         };
     }
 }

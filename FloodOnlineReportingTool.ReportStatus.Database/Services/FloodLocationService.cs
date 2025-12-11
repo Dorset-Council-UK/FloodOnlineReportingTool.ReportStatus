@@ -76,7 +76,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
             Title = dto.Title,
             Notes = dto.Notes,
-            Location = new Point(dto.Location.X, dto.Location.Y) { SRID = 27700 },
+            Geom = new Point(dto.Geom.X, dto.Geom.Y) { SRID = 27700 },
         };
 
         context.FloodLocations.Add(creating);
@@ -99,7 +99,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
             EligibilityCheckId = ecc.Id,
             Uprn = ecc.Uprn,
             Usrn = ecc.Usrn,
-            Location = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
+            Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
             ImpactStartUtc = ecc.ImpactStartUTC,
             ImpactDurationHours = ecc.ImpactDurationHours,
 
@@ -140,7 +140,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
                 Title = locationDescription,
                 Notes = null,
-                Location = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
+                Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
 
                 FloodReports = [
                     new()
@@ -179,7 +179,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
             Title = dto.Title,
             Notes = dto.Notes,
-            Location = dto.Location,
+            Geom = dto.Geom,
         };
 
         context.FloodLocations.Update(updated);
@@ -235,7 +235,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
 
         return await context.FloodLocations
             .AsNoTracking()
-            .Where(fl => fl.Location.Intersects(new Point(ecc.Easting, ecc.Northing) { SRID = 27700 }.Buffer(buffer)))
+            .Where(fl => fl.Geom.Intersects(new Point(ecc.Easting, ecc.Northing) { SRID = 27700 }.Buffer(buffer)))
             .SelectMany(fl => fl.FloodReports
                 .Where(flfr =>
                     // At least one matching source

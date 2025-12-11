@@ -11,7 +11,7 @@ public static class FloodPropertyExtensions
             Title = floodProperty.Title,
             Uprn = floodProperty.Uprn,
             Notes = floodProperty.Notes,
-            Location = floodProperty.Location,
+            Geom = floodProperty.Geom,
         };
     }
 }

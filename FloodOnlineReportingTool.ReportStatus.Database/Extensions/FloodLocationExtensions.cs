@@ -12,7 +12,7 @@ public static class FloodLocationExtensions
         {
             Title = floodLocation.Title,
             Notes = floodLocation.Notes,
-            Location = floodLocation.Location,
+            Geom = floodLocation.Geom,
         };
     }
 
@@ -23,7 +23,7 @@ public static class FloodLocationExtensions
             floodLocation.CreatedUtc,
             floodLocation.UpdatedUtc,
             floodLocation.Title,
-            floodLocation.Location,
+            floodLocation.Geom,
             floodLocation.FloodReports.ToSearchResults()
         );
     }

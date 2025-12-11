@@ -31,7 +31,7 @@ public static class FloodReportData
             EligibilityCheckId = eligibilityCheckId ?? Guid.NewGuid(),
             Uprn = uprn,
             Usrn = usrn,
-            Location = new Point(easting ?? Easting, Northing = northing ?? Northing) { SRID = 27700 },
+            Geom = new Point(easting ?? Easting, Northing = northing ?? Northing) { SRID = 27700 },
             ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
             ImpactDurationHours = 5,
             Sources = [

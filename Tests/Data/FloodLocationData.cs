@@ -10,9 +10,9 @@ public static class FloodLocationData
     public static readonly DateTimeOffset FixedDate = new(2025, 11, 25, 14, 16, 0, TimeSpan.Zero);
 
     /// <summary>
-    /// Creates a FloodLocation with an optional ID, Location, and a specified number of related FloodLocationFloodReports.
+    /// Creates a FloodLocation with an optional ID, Geom, and a specified number of related FloodLocationFloodReports.
     /// </summary>
-    public static FloodLocation Create(Guid? floodLocationId = null, Point? location = null, int floodReportCount = 0)
+    public static FloodLocation Create(Guid? floodLocationId = null, Point? geom = null, int floodReportCount = 0)
     {
         var id = floodLocationId ?? Guid.NewGuid();
         var floodReports = Enumerable.Range(0, floodReportCount)
@@ -25,7 +25,7 @@ public static class FloodLocationData
             Id = id,
             CreatedUtc = FixedDate,
             Title = "Flood location",
-            Location = location ?? new Point(Easting, Northing) { SRID = 27700 },
+            Geom = geom ?? new Point(Easting, Northing) { SRID = 27700 },
             FloodReports = floodReports,
         };
     }
@@ -97,7 +97,7 @@ public static class FloodLocationData
 
             var ordered = Enumerable.Range(1, 3)
                 .Select(i => Create(
-                    location: new Point(coords[i].Easting, coords[i].Northing) { SRID = 27700 },
+                    geom: new Point(coords[i].Easting, coords[i].Northing) { SRID = 27700 },
                     floodReportCount: i))
                 .OrderBy(fl => fl.Id)
                 .ToArray();

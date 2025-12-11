@@ -22,7 +22,7 @@ public static class FloodRoadData
             CreatedUtc = FixedDate,
             Title = "Flood road",
             Usrn = usrn,
-            Location = new Point(Easting, Northing) { SRID = 27700 },
+            Geom = new Point(Easting, Northing) { SRID = 27700 },
             FloodReports = [.. Enumerable.Range(0, floodReportCount).Select(_ => FloodRoadFloodReportData.Create(id))],
         };
     }

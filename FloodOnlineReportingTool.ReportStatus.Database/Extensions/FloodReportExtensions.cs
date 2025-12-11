@@ -13,7 +13,7 @@ public static class FloodReportExtensions
             EligibilityCheckId = floodReport.EligibilityCheckId,
             Uprn = floodReport.Uprn,
             Usrn = floodReport.Usrn,
-            Location = floodReport.Location,
+            Geom = floodReport.Geom,
             ImpactStartUtc = floodReport.ImpactStartUtc,
             ImpactDurationHours = floodReport.ImpactDurationHours,
         };
@@ -25,7 +25,7 @@ public static class FloodReportExtensions
             floodReport.Id,
             floodReport.CreatedUtc,
             floodReport.UpdatedUtc,
-            floodReport.Location,
+            floodReport.Geom,
             floodReport.ImpactStartUtc,
             floodReport.Sources.ToSearchResults()
         );

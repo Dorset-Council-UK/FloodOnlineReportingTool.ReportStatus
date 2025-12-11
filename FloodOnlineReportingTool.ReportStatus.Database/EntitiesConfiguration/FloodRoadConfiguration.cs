@@ -15,7 +15,7 @@ internal class FloodRoadConfiguration : IEntityTypeConfiguration<FloodRoad>
             .ValueGeneratedNever();
 
         builder
-            .Property(o => o.Location)
+            .Property(o => o.Geom)
             .HasColumnType("geometry (point)");
     }
 }
