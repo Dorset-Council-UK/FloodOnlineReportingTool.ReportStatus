@@ -26,10 +26,8 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         logger.LogDebug("Retrieving all flood properties for UPRN {Uprn} from the database.", uprn);
 
         return await floodPropertyRepository
-            .GetFloodProperties()
+            .GetFloodPropertiesWithReports()
             .Where(fp => fp.Uprn.Equals(uprn))
-            .OrderBy(fp => fp.Id)
-            .Include(fp => fp.FloodReports.OrderBy(fr => fr.FloodReportId))
             .ToListAsync(ct);
     }
 
