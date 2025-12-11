@@ -172,7 +172,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
         var existing = await floodPropertyRepository
             .GetFloodProperties()
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct);
+            .FirstOrDefaultAsync(fp => fp.Id.Equals(id), ct);
 
         if (existing == null)
         {
