@@ -17,6 +17,11 @@ public static class FloodLocationFloodReportExtensions
         );
     }
 
+    public static IQueryable<SearchResultFloodLocationFloodReport> ToSearchResult(this IQueryable<FloodLocationFloodReport> floodLocationFloodReportQuery)
+    {
+        return floodLocationFloodReportQuery.Select(fr => fr.ToSearchResult());
+    }
+
     public static IReadOnlyCollection<SearchResultFloodLocationFloodReport> ToSearchResults(this ICollection<FloodLocationFloodReport> floodLocationFloodReports)
     {
         return [.. floodLocationFloodReports.Select(flfr => flfr.ToSearchResult())];
