@@ -140,17 +140,16 @@ public class FloodReportEndpointsTests
     }
 
     [Theory]
-    [MemberData(nameof(FloodReportData.Collection_Within50Metres_Three), MemberType = typeof(FloodReportData))]
-    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance(ICollection<FloodReport> testData)
+    [MemberData(nameof(FloodReportData.Four_Within50Metres), MemberType = typeof(FloodReportData))]
+    public async Task GetFloodReportsWithinMetres_ReturnsOkay_WhenWithinDistance(double easting, double northing, double metres, ICollection<FloodReport> testData)
     {
         // Arrange
-        var metres = 50.0;
         IReadOnlyCollection<FloodReport> expected = [.. testData];
         var floodReportService = Substitute.For<IFloodReportService>();
-        floodReportService.GetFloodReportsWithinMetres(Arg.Any<double>(), Arg.Any<double>(), metres, Arg.Any<CancellationToken>()).Returns(expected);
+        floodReportService.GetFloodReportsWithinMetres(easting, northing, metres, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
-        var result = await FloodReportEndpoints.GetFloodReportsWithinMetres(floodReportService, FloodReportData.Easting, FloodReportData.Northing, metres, TestContext.Current.CancellationToken);
+        var result = await FloodReportEndpoints.GetFloodReportsWithinMetres(floodReportService, easting, northing, metres, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<IReadOnlyCollection<FloodReport>>>(result.Result);
