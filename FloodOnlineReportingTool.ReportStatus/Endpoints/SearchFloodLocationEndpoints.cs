@@ -25,7 +25,7 @@ internal static class SearchFloodLocationEndpoints
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
-                { nameof(buffer), [string.Create(CultureInfo.InvariantCulture, $"Buffer must be between 0 and {ISearchFloodLocationService.MaxBuffer} metres.")] },
+                { nameof(buffer), [string.Create(CultureInfo.InvariantCulture, $"Buffer distance must be between 0 and {ISearchFloodLocationService.MaxBuffer}.")] },
             });
         }
 
