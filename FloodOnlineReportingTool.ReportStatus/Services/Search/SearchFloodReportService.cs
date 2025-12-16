@@ -21,12 +21,7 @@ internal class SearchFloodReportService(ILogger<SearchFloodReportService> logger
     {
         logger.LogInformation("Searching flood reports within {Metres} metres of coordinates (Easting: {Easting}, Northing: {Northing}) from page {PageNumber} for {PageSize} items per page.", metres, easting, northing, pageNumber, pageSize);
 
-        if (metres > ISearchFloodReportService.MaxMetres)
-        {
-            logger.LogWarning("Metres {Metres} exceeds maximum allowed metres of {MaxMetres}. Using maximum metres instead.", metres, ISearchFloodReportService.MaxMetres);
-            metres = ISearchFloodReportService.MaxMetres;
-        }
-
+        metres = Math.Clamp(metres, 0, ISearchFloodReportService.MaxMetres);
         var query = floodReportRepository
             .GetFloodReportsWithinMetres(easting, northing, metres)
             .ToSearchResult();

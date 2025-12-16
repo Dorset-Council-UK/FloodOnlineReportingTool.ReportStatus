@@ -25,11 +25,7 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
     {
         logger.LogDebug("Retrieving all flood locations within buffer {buffer} of {easting}, {northing} from the database.", buffer, easting, northing);
 
-        if (buffer > IFloodLocationService.MaxBuffer)
-        {
-            logger.LogWarning("Buffer {Buffer} exceeds maximum allowed buffer of {MaxBuffer}. Using maximum buffer instead.", buffer, IFloodLocationService.MaxBuffer);
-            buffer = IFloodLocationService.MaxBuffer;
-        }
+        buffer = Math.Clamp(buffer, 0, IFloodLocationService.MaxBuffer);
 
         return await floodLocationRepository
             .GetFloodLocationsByPoint(easting, northing, buffer)

@@ -44,14 +44,11 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Finding flood reports within {Metres} metres of Easting {Easting} and Northing {Northing}.", metres, easting, northing);
 
-        if (metres > IFloodReportService.MaxMetres)
-        {
-            logger.LogWarning("Metres {Metres} exceeds maximum allowed metres of {MaxMetres}. Using maximum metres instead.", metres, IFloodReportService.MaxMetres);
-            metres = IFloodReportService.MaxMetres;
-        }
+        metres = Math.Clamp(metres, 0, IFloodReportService.MaxMetres);
 
-        var query = floodReportRepository.GetFloodReportsWithinMetres(easting, northing, metres);
-        return await query.ToListAsync(ct);
+        return await floodReportRepository
+            .GetFloodReportsWithinMetres(easting, northing, metres)
+            .ToListAsync(ct);
     }
 
     public async Task<FloodReport> CreateFloodReport(FloodReportDto dto, CancellationToken ct)

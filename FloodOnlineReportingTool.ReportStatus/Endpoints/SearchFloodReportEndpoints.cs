@@ -15,7 +15,7 @@ internal static class SearchFloodReportEndpoints
 
     internal static async Task<Results<Ok<PagedResult<SearchResultFloodReport>>, ValidationProblem>> GetFloodReportsWithinMetres(ISearchFloodReportService searchFloodReportService, double easting, double northing, double metres = 50, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
     {
-        if (metres < 0 || metres > ISearchFloodReportService.MaxMetres)
+        if (metres is < 0 or > ISearchFloodReportService.MaxMetres)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
             {

@@ -15,7 +15,7 @@ internal static class FloodLocationEndpoints
 
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodLocation>>, ValidationProblem>> GetFloodLocationsByPoint(IFloodLocationService floodLocationService, double easting, double northing, double buffer, CancellationToken ct)
     {
-        if (buffer < 0 || buffer > IFloodLocationService.MaxBuffer)
+        if (buffer is < 0 or > IFloodLocationService.MaxBuffer)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
             {

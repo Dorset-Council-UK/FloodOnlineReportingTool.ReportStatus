@@ -33,7 +33,7 @@ internal static class FloodReportEndpoints
 
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, ValidationProblem>> GetFloodReportsWithinMetres(IFloodReportService floodReportService, double easting, double northing, double metres, CancellationToken ct)
     {
-        if (metres < 0 || metres > IFloodReportService.MaxMetres)
+        if (metres is < 0 or > IFloodReportService.MaxMetres)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
             {

@@ -21,7 +21,7 @@ internal static class SearchFloodLocationEndpoints
 
     internal static async Task<Results<Ok<PagedResult<SearchResultFloodLocation>>, ValidationProblem>> GetFloodLocationsByPoint(ISearchFloodLocationService searchFloodLocationService, double easting, double northing, double buffer, int pageNumber = 1, int pageSize = ISearchFloodLocationService.DefaultPageSize, CancellationToken ct = default)
     {
-        if (buffer < 0 || buffer > ISearchFloodLocationService.MaxBuffer)
+        if (buffer is < 0 or > ISearchFloodLocationService.MaxBuffer)
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
