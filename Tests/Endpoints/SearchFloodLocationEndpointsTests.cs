@@ -57,4 +57,25 @@ public class SearchFloodLocationEndpointsTests
         var okResult = Assert.IsType<Ok<PagedResult<SearchResultFloodLocation>>>(result.Result);
         Assert.Equal(expected, okResult.Value);
     }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(-100)]
+    [InlineData(101)]
+    [InlineData(1234)]
+    public async Task GetFloodLocationsByPoint_ReturnsValidationProblem_WhenMetresOutsideRange(double buffer)
+    {
+        // Arrange
+        var service = Substitute.For<ISearchFloodLocationService>();
+        double easting = 368991.12;
+        double northing = 90881.94;
+
+        // Act
+        var result = await SearchFloodLocationEndpoints.GetFloodLocationsByPoint(service, easting, northing, buffer, ct: TestContext.Current.CancellationToken);
+
+        // Assert
+        var validationResult = Assert.IsType<ValidationProblem>(result.Result);
+        Assert.Contains(nameof(buffer), validationResult.ProblemDetails.Errors.Keys);
+        await service.DidNotReceive().GetFloodLocationsByPoint(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+    }
 }

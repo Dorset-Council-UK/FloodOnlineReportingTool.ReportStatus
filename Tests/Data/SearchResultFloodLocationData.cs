@@ -6,8 +6,9 @@ namespace Tests.Data;
 
 public static class SearchResultFloodLocationData
 {
-    public static readonly DateTimeOffset FixedDate = new(2025, 12, 11, 16, 22, 0, TimeSpan.Zero);
-
+    /// <summary>
+    /// Unit test data for flood location searches.
+    /// </summary>
     public static IEnumerable<TheoryDataRow<ICollection<FloodLocation>, PagedResult<SearchResultFloodLocation>>> Four
     {
         get
@@ -54,6 +55,9 @@ public static class SearchResultFloodLocationData
         }
     }
 
+    /// <summary>
+    /// Unit test data for flood location searches with flood reports.
+    /// </summary>
     public static IEnumerable<TheoryDataRow<ICollection<FloodLocation>, PagedResult<SearchResultFloodLocation>>> Four_WithReports
     {
         get
