@@ -78,10 +78,8 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Updating flood report with ID {FloodReportId} in the database.", id);
 
-        var existing = await context.FloodReports
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+        var existing = await floodReportRepository
+            .GetFloodReports()
             .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct);
 
         if (existing == null)
