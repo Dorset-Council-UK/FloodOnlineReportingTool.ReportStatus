@@ -178,6 +178,7 @@ public class FloodLocationServiceTests
         Assert.Equal(expected.Title, result.Title);
         Assert.Equal(expected.Notes, result.Notes);
         Assert.Equal(expected.Geom, result.Geom);
+        await context.Received(1).SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     // CreateFromEligibilityCheckCreated GOES HERE
@@ -205,6 +206,7 @@ public class FloodLocationServiceTests
         Assert.Equal(expected.Title, result.Title);
         Assert.Equal(expected.Notes, result.Notes);
         Assert.Equal(expected.Geom, result.Geom);
+        await context.Received(1).SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -226,6 +228,7 @@ public class FloodLocationServiceTests
 
         // Assert
         Assert.Null(result);
+        await context.DidNotReceive().SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -254,6 +257,7 @@ public class FloodLocationServiceTests
 
         // Assert
         Assert.True(result);
+        await context.Received(1).SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -281,6 +285,7 @@ public class FloodLocationServiceTests
 
         // Assert
         Assert.False(result);
+        await context.DidNotReceive().SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     [Theory]
