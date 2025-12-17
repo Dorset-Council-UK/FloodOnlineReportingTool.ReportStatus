@@ -14,8 +14,7 @@ internal static class ContractsExtensions
             EligibilityCheckId = eligibilityCheckCreated.Id,
             Uprn = eligibilityCheckCreated.Uprn,
             Usrn = eligibilityCheckCreated.Usrn,
-            Easting = eligibilityCheckCreated.Easting,
-            Northing = eligibilityCheckCreated.Northing,
+            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing) { SRID = 27700 },
             ImpactStartUtc = eligibilityCheckCreated.ImpactStartUTC,
             ImpactDurationHours = eligibilityCheckCreated.ImpactDurationHours,
         };
@@ -44,7 +43,7 @@ internal static class ContractsExtensions
         {
             Title = locationDescription,
             Uprn = eligibilityCheckCreated.Uprn.Value,
-            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
         };
     }
 
@@ -63,7 +62,7 @@ internal static class ContractsExtensions
         {
             Title = locationDescription,
             Usrn = eligibilityCheckCreated.Usrn.Value,
-            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
         };
     }
 
@@ -76,7 +75,7 @@ internal static class ContractsExtensions
         return new()
         {
             Title = locationDescription,
-            Location = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
         };
     }
 }

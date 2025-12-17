@@ -35,7 +35,7 @@ public class SearchUtilityTests
         var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Empty(pagedResult.Results);
@@ -60,7 +60,7 @@ public class SearchUtilityTests
         var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
@@ -86,7 +86,7 @@ public class SearchUtilityTests
         var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
@@ -113,7 +113,7 @@ public class SearchUtilityTests
         var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
@@ -139,7 +139,7 @@ public class SearchUtilityTests
         var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedResults.Count, pagedResult.Results.Count);
@@ -166,7 +166,7 @@ public class SearchUtilityTests
         var query = data.BuildMock();
 
         // Act
-        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize);
+        var pagedResult = await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, defaultPageSize, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedResults.Count, pagedResult.Results.Count);

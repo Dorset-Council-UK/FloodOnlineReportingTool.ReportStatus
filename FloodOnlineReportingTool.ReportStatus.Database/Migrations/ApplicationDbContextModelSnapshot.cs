@@ -33,7 +33,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Point>("Location")
+                    b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 
@@ -94,7 +94,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Point>("Location")
+                    b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 
@@ -158,20 +158,18 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<double>("Easting")
-                        .HasColumnType("double precision");
-
                     b.Property<Guid>("EligibilityCheckId")
                         .HasColumnType("uuid");
+
+                    b.Property<Point>("Geom")
+                        .IsRequired()
+                        .HasColumnType("geometry (point)");
 
                     b.Property<int>("ImpactDurationHours")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("ImpactStartUtc")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<double>("Northing")
-                        .HasColumnType("double precision");
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
@@ -219,7 +217,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Point>("Location")
+                    b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 

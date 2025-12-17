@@ -21,7 +21,7 @@ public static class FloodPropertyData
             CreatedUtc = FixedDate,
             Title = "Flood property",
             Uprn = uprn,
-            Location = new Point(Easting, Northing) { SRID = 27700 },
+            Geom = new Point(Easting, Northing) { SRID = 27700 },
             FloodReports = [.. Enumerable.Range(0, floodReportCount).Select(_ => FloodPropertyFloodReportData.Create(id))],
         };
     }

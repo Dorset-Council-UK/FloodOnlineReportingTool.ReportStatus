@@ -22,7 +22,9 @@ internal static class EndpointExtensions
         MapFloodReportEndpoints(app);
         MapFloodReportSourceEndpoints(app);
 
+        MapSearchFloodLocationEndpoints(app);
         MapSearchFloodReportEndpoints(app);
+
         MapTestEndpoints(app);
 
         return app;
@@ -41,6 +43,11 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/", FloodLocationEndpoints.GetFloodLocations)
             .WithSummary("Flood location - All")
             .WithDescription("Gets all flood locations from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
+            .MapGet(pattern: "/by-point", FloodLocationEndpoints.GetFloodLocationsByPoint)
+            .WithSummary("Flood location - All by point")
+            .WithDescription("Gets all flood locations within a buffer of the provided easting and northing")
             .RequireAuthorization(PolicyNames.Reader);
         group
             .MapGet(pattern: "/with-floodreports/", FloodLocationEndpoints.GetFloodLocationsWithReports)
@@ -158,6 +165,11 @@ internal static class EndpointExtensions
             .WithDescription("Gets all flood properties from the database")
             .RequireAuthorization(PolicyNames.Reader);
         group
+            .MapGet(pattern: "/uprn/{uprn:long}", FloodPropertyEndpoints.GetFloodPropertiesByUprn)
+            .WithSummary("Flood properties - All by UPRN")
+            .WithDescription("Gets all flood properties for the provided UPRN from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
             .MapGet(pattern: "/with-floodreports/", FloodPropertyEndpoints.GetFloodPropertiesWithReports)
             .WithSummary("Flood properties - All with flood reports")
             .WithDescription("Gets all flood properties and related flood reports from the database")
@@ -271,6 +283,11 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/", FloodRoadEndpoints.GetFloodRoads)
             .WithSummary("Flood road - All")
             .WithDescription("Gets all flood roads from the database")
+            .RequireAuthorization(PolicyNames.Reader);
+        group
+            .MapGet(pattern: "/by-usrn/{usrn:long}", FloodRoadEndpoints.GetFloodRoadsByUsrn)
+            .WithSummary("Flood road - All by USRN")
+            .WithDescription("Gets all flood roads for the provided USRN from the database")
             .RequireAuthorization(PolicyNames.Reader);
         group
             .MapGet(pattern: "/with-floodreports/", FloodRoadEndpoints.GetFloodRoadsWithReports)
@@ -485,6 +502,34 @@ internal static class EndpointExtensions
         group
             .MapGet(pattern: "/{sourceId}/exists", FloodReportSourceEndpoints.FloodReportSourceExists)
             .WithSummary("Checks if a flood report exists for a flood location")
+            .RequireAuthorization(PolicyNames.Reader);
+    }
+
+    private static void MapSearchFloodLocationEndpoints(WebApplication app)
+    {
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/search/floodlocations")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Search - Flood Locations");
+
+        // Get all
+        group
+            .MapGet(pattern: "/", SearchFloodLocationEndpoints.GetFloodLocations)
+            .WithSummary("Search - Flood Locations")
+            .WithDescription("Searches for flood locations")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        group
+            .MapGet(pattern: "/with-floodreports", SearchFloodLocationEndpoints.GetFloodLocationsWithReports)
+            .WithSummary("Search - Flood Locations")
+            .WithDescription("Searches for flood locations")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        group
+            .MapGet(pattern: "/by-point", SearchFloodLocationEndpoints.GetFloodLocationsByPoint)
+            .WithSummary("Search - Flood Locations within Metres of Coordinates")
+            .WithDescription("Searches for flood locations within a buffer of the provided easting and northing")
             .RequireAuthorization(PolicyNames.Reader);
     }
 

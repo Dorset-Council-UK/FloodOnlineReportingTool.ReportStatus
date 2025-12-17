@@ -15,7 +15,7 @@ internal class FloodPropertyConfiguration : IEntityTypeConfiguration<FloodProper
             .ValueGeneratedNever();
 
         builder
-            .Property(o => o.Location)
+            .Property(o => o.Geom)
             .HasColumnType("geometry (point)");
     }
 }

@@ -14,17 +14,18 @@ internal class SearchFloodReportService(ILogger<SearchFloodReportService> logger
         var query = floodReportRepository
             .GetFloodReports()
             .ToSearchResult();
-        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize);
+        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize, ct);
     }
 
     public async Task<PagedResult<SearchResultFloodReport>> GetFloodReportsWithinMetres(double easting, double northing, double metres, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
     {
         logger.LogInformation("Searching flood reports within {Metres} metres of coordinates (Easting: {Easting}, Northing: {Northing}) from page {PageNumber} for {PageSize} items per page.", metres, easting, northing, pageNumber, pageSize);
 
+        metres = Math.Clamp(metres, 0, ISearchFloodReportService.MaxMetres);
         var query = floodReportRepository
             .GetFloodReportsWithinMetres(easting, northing, metres)
             .ToSearchResult();
-        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize);
+        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize, ct);
     }
 
     public async Task<PagedResult<SearchResultFloodReport>> GetFloodReportsByUprn(long uprn, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
@@ -34,7 +35,7 @@ internal class SearchFloodReportService(ILogger<SearchFloodReportService> logger
         var query = floodReportRepository
             .GetFloodReportsByUprn(uprn)
             .ToSearchResult();
-        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize);
+        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize, ct);
     }
 
     public async Task<PagedResult<SearchResultFloodReport>> GetFloodReportsByUsrn(long usrn, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
@@ -44,6 +45,6 @@ internal class SearchFloodReportService(ILogger<SearchFloodReportService> logger
         var query = floodReportRepository
             .GetFloodReportsByUsrn(usrn)
             .ToSearchResult();
-        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize);
+        return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize, ct);
     }
 }

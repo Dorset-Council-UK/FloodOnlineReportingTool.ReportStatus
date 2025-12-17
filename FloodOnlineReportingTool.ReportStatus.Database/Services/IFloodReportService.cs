@@ -4,6 +4,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public interface IFloodReportService
 {
+    const double MaxMetres = 100;
+
     /// <summary>
     /// Gets all flood reports from the database.
     /// </summary>

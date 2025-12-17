@@ -13,7 +13,7 @@ public record FloodRoad : ICreatedUpdated
     public required string Title { get; init; }
     public required long Usrn { get; init; }
     public string? Notes { get; init; }
-    public required Point Location { get; init; }
+    public required Point Geom { get; init; }
 
     public virtual ICollection<FloodRoadFloodReport> FloodReports { get; init; } = [];
 }

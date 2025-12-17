@@ -80,7 +80,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             Title = dto.Title,
             Usrn = dto.Usrn,
             Notes = dto.Notes,
-            Location = dto.Location,
+            Geom = dto.Geom,
         };
 
         context.FloodRoads.Add(creating);
@@ -109,8 +109,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             EligibilityCheckId = ecc.Id,
             Uprn = ecc.Uprn,
             Usrn = usrn,
-            Easting = ecc.Easting,
-            Northing = ecc.Northing,
+            Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
             ImpactStartUtc = ecc.ImpactStartUTC,
             ImpactDurationHours = ecc.ImpactDurationHours,
 
@@ -152,7 +151,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
                 Title = locationDescription,
                 Usrn = usrn,
                 Notes = null,
-                Location = new Point(ecc.Easting, ecc.Northing),
+                Geom = new Point(ecc.Easting, ecc.Northing),
 
                 FloodReports = [
                     new()
@@ -192,7 +191,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
             Title = dto.Title,
             Notes = dto.Notes,
-            Location = dto.Location,
+            Geom = dto.Geom,
         };
 
         context.FloodRoads.Update(updated);

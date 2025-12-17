@@ -27,18 +27,13 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
 
     public IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres)
     {
-        var geometry = new Point(easting, northing) { SRID = 27700 };
+        var searchPoint = new Point(easting, northing) { SRID = 27700 };
 
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
             .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => EF.Functions.IsWithinDistance(
-                geometry,
-                new Point(fr.Easting, fr.Northing) { SRID = 27700 },
-                metres,
-                false
-            ))
+            .Where(fr => fr.Geom.IsWithinDistance(searchPoint, metres))
             .OrderBy(fr => fr.Id);
     }
 

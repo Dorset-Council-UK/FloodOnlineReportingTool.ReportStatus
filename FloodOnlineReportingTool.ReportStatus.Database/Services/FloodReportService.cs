@@ -44,8 +44,11 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Finding flood reports within {Metres} metres of Easting {Easting} and Northing {Northing}.", metres, easting, northing);
 
-        var query = floodReportRepository.GetFloodReportsWithinMetres(easting, northing, metres);
-        return await query.ToListAsync(ct);
+        metres = Math.Clamp(metres, 0, IFloodReportService.MaxMetres);
+
+        return await floodReportRepository
+            .GetFloodReportsWithinMetres(easting, northing, metres)
+            .ToListAsync(ct);
     }
 
     public async Task<FloodReport> CreateFloodReport(FloodReportDto dto, CancellationToken ct)
@@ -60,8 +63,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Easting = dto.Easting,
-            Northing = dto.Northing,
+            Geom = dto.Geom,
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };
@@ -76,10 +78,8 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Updating flood report with ID {FloodReportId} in the database.", id);
 
-        var existing = await context.FloodReports
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+        var existing = await floodReportRepository
+            .GetFloodReports()
             .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct);
 
         if (existing == null)
@@ -94,8 +94,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Easting = dto.Easting,
-            Northing = dto.Northing,
+            Geom = dto.Geom,
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };

@@ -70,7 +70,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             Title = dto.Title,
             Uprn = dto.Uprn,
             Notes = dto.Notes,
-            Location = dto.Location,
+            Geom = dto.Geom,
         };
 
         context.FloodProperties.Add(creating);
@@ -99,8 +99,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             EligibilityCheckId = ecc.Id,
             Uprn = uprn,
             Usrn = ecc.Usrn,
-            Easting = ecc.Easting,
-            Northing = ecc.Northing,
+            Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
             ImpactStartUtc = ecc.ImpactStartUTC,
             ImpactDurationHours = ecc.ImpactDurationHours,
 
@@ -142,7 +141,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
                 Title = locationDescription,
                 Uprn = uprn,
                 Notes = null,
-                Location = new Point(ecc.Easting, ecc.Northing),
+                Geom = new Point(ecc.Easting, ecc.Northing),
 
                 FloodReports = [
                     new()
@@ -181,7 +180,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
 
             Title = dto.Title,
             Notes = dto.Notes,
-            Location = dto.Location,
+            Geom = dto.Geom,
         };
 
         context.FloodProperties.Update(updated);

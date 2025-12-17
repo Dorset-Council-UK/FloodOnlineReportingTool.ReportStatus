@@ -1,5 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using NetTopologySuite.Geometries;
 
 namespace Tests.Data;
 
@@ -30,8 +31,7 @@ public static class FloodReportData
             EligibilityCheckId = eligibilityCheckId ?? Guid.NewGuid(),
             Uprn = uprn,
             Usrn = usrn,
-            Easting = easting ?? Easting,
-            Northing = northing ?? Northing,
+            Geom = new Point(easting ?? Easting, northing ?? Northing) { SRID = 27700 },
             ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
             ImpactDurationHours = 5,
             Sources = [
@@ -88,18 +88,32 @@ public static class FloodReportData
         }
     }
 
-    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> Collection_Within50Metres_Three
+    /// <summary>
+    /// Unit test data for flood reports within 50 metres.
+    /// <see cref="double">Easting</see>, <see cref="double">Northing</see>, <see cref="double">Metres</see>,
+    /// <see cref="ICollection&lt;&gt;">Expected Flood Reports</see>,
+    /// </summary>
+    public static IEnumerable<TheoryDataRow<double, double, double, ICollection<FloodReport>>> Four_Within50Metres
     {
         get
         {
-            var floodReport1 = Create(floodReportId: "11111111-1111-0000-0000-000000000000", eligibilityCheckId: "22222222-1111-0000-0000-000000000000", easting: 368991.11, northing: 90881.11);
-            var floodReport2 = Create(floodReportId: "11111111-2222-0000-0000-000000000000", eligibilityCheckId: "22222222-2222-0000-0000-000000000000", easting: 368976.22, northing: 90779.22);
-            var floodReport3 = Create(floodReportId: "11111111-3333-0000-0000-000000000000", eligibilityCheckId: "22222222-3333-0000-0000-000000000000", easting: 368950.33, northing: 90750.33);
+            var coords = new[]
+            {
+                (Easting: 368991.12, Northing: 90881.94, Metres: 10.0),
+                (Easting: 369500.00, Northing: 91000.00, Metres: 30.0),
+                (Easting: 370000.00, Northing: 91500.00, Metres: 40.0),
+                (Easting: 370500.00, Northing: 92000.00, Metres: 50.0),
+            };
+
+            var floodReport1 = Create(floodReportId: "11111111-1111-0000-0000-000000000000", easting: coords[1].Easting, northing: coords[1].Northing);
+            var floodReport2 = Create(floodReportId: "11111111-2222-0000-0000-000000000000", easting: coords[2].Easting, northing: coords[2].Northing);
+            var floodReport3 = Create(floodReportId: "11111111-3333-0000-0000-000000000000", easting: coords[3].Easting, northing: coords[3].Northing);
 
             return [
-                new([floodReport1]),
-                new([floodReport1, floodReport2]),
-                new([floodReport1, floodReport2, floodReport3]),
+                new(coords[0].Easting, coords[0].Northing, coords[0].Metres, []),
+                new(coords[1].Easting, coords[1].Northing, coords[1].Metres, [floodReport1]),
+                new(coords[2].Easting, coords[2].Northing, coords[2].Metres, [floodReport1, floodReport2]),
+                new(coords[3].Easting, coords[3].Northing, coords[3].Metres, [floodReport1, floodReport2, floodReport3]),
             ];
         }
     }

@@ -5,6 +5,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public interface IFloodLocationService
 {
+    const double MaxBuffer = 100;
+
     /// <summary>
     /// Gets all flood locations from the database.
     /// </summary>
