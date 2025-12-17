@@ -1,4 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
@@ -6,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
 using MockQueryable.NSubstitute;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 using Tests.Data;
 
@@ -181,7 +184,113 @@ public class FloodLocationServiceTests
         await context.Received(1).SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
-    // CreateFromEligibilityCheckCreated GOES HERE
+    [Theory]
+    [MemberData(nameof(EligibilityCheckCreatedData.FloodProperty_4), MemberType = typeof(EligibilityCheckCreatedData))]
+    public async Task CreateFromEligibilityCheckCreated_AddsFloodReport_WhenSuccessful(EligibilityCheckCreated ecc, string locationDescription)
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().Options;
+        var logger = Substitute.For<ILogger<FloodLocationService>>();
+        var context = Substitute.For<ApplicationDbContext>(options);
+        var repository = Substitute.For<IFloodLocationRepository>();
+
+        ICollection<FloodLocation> duplicates = []; // We need ICollection for MockQueryable.NSubstitute
+        var mockDbSet = duplicates.BuildMockDbSet();
+        context.FloodLocations.Returns(mockDbSet);
+
+        var service = new FloodLocationService(logger, context, repository);
+
+        // Act
+        await service.CreateFromEligibilityCheckCreated(ecc, locationDescription, 50, TestContext.Current.CancellationToken);
+
+        // Assert
+        context.FloodReports.Received(1).Add(Arg.Any<FloodReport>());
+    }
+
+    [Theory]
+    [MemberData(nameof(EligibilityCheckCreatedData.FloodProperty_4), MemberType = typeof(EligibilityCheckCreatedData))]
+    public async Task CreateFromEligibilityCheckCreated_AddsFloodLocation_WhenNoDuplicates(EligibilityCheckCreated ecc, string locationDescription)
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().Options;
+        var logger = Substitute.For<ILogger<FloodLocationService>>();
+        var context = Substitute.For<ApplicationDbContext>(options);
+        var repository = Substitute.For<IFloodLocationRepository>();
+
+        ICollection<FloodLocation> duplicates = []; // We need ICollection for MockQueryable.NSubstitute
+        var mockDbSet = duplicates.BuildMockDbSet();
+        context.FloodLocations.Returns(mockDbSet);
+
+        var service = new FloodLocationService(logger, context, repository);
+
+        // Act
+        await service.CreateFromEligibilityCheckCreated(ecc, locationDescription, 50, TestContext.Current.CancellationToken);
+
+        // Assert
+        context.FloodLocations.Received(1).Add(Arg.Any<FloodLocation>());
+        context.FloodLocationFloodReports.DidNotReceive().AddRange(Arg.Any<IEnumerable<FloodLocationFloodReport>>());
+    }
+
+    [Theory]
+    [MemberData(nameof(EligibilityCheckCreatedData.FloodProperty_4), MemberType = typeof(EligibilityCheckCreatedData))]
+    public async Task CreateFromEligibilityCheckCreated_AddsFloodLocationFloodReports_WhenDuplicates(EligibilityCheckCreated ecc, string locationDescription)
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().Options;
+        var logger = Substitute.For<ILogger<FloodLocationService>>();
+        var context = Substitute.For<ApplicationDbContext>(options);
+        var repository = Substitute.For<IFloodLocationRepository>();
+
+        // Mock FindPotentialDuplicates data/tables
+        var floodLocationId = Guid.NewGuid();
+        var floodReportId = Guid.NewGuid();
+        var geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 };
+
+        FloodLocation floodLocation = new()
+        {
+            Id = floodLocationId,
+            CreatedUtc = ecc.CreatedUtc,
+            Title = "Flood location",
+            Geom = geom,
+            FloodReports = [
+                new FloodLocationFloodReport()
+                {
+                    FloodLocationId = floodLocationId,
+                    FloodReportId = floodReportId,
+                    CreatedUtc = ecc.CreatedUtc,
+                    FloodReport = new FloodReport()
+                    {
+                        Id = floodReportId,
+                        CreatedUtc = ecc.CreatedUtc,
+                        EligibilityCheckId = ecc.Id,
+                        Uprn = ecc.Uprn,
+                        Usrn = ecc.Usrn,
+                        Geom = geom,
+                        ImpactStartUtc = ecc.ImpactStartUTC,
+                        ImpactDurationHours = 5,
+                        Sources = [
+                            FloodReportSourceData.Create(floodReportId, PrimaryCauseIds.River, "River"),
+                            FloodReportSourceData.Create(floodReportId, PrimaryCauseIds.RainwaterFlowingOverTheGround, "Rainwater flowing over the ground"),
+                        ],
+                    },
+                },
+            ],
+        };
+
+        // We need ICollection for MockQueryable.NSubstitute
+        ICollection<FloodLocation> floodLocationDuplicates = [floodLocation];
+        var mockFloodLocationDbSet = floodLocationDuplicates.BuildMockDbSet();
+        context.FloodLocations.Returns(mockFloodLocationDbSet);
+
+        var service = new FloodLocationService(logger, context, repository);
+
+        // Act
+        await service.CreateFromEligibilityCheckCreated(ecc, locationDescription, 50, TestContext.Current.CancellationToken);
+
+        // Assert
+        context.FloodLocations.DidNotReceive().Add(Arg.Any<FloodLocation>());
+        context.FloodLocationFloodReports.Received(1).AddRange(Arg.Any<IEnumerable<FloodLocationFloodReport>>());
+    }
 
     [Theory]
     [MemberData(nameof(FloodLocationData.Four), MemberType = typeof(FloodLocationData))]
