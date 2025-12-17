@@ -68,7 +68,7 @@ public static class FloodPropertyData
         get
         {
             var ordered = Enumerable.Range(0, 3)
-                .Select(_ => Create())
+                .Select(i => Create(floodReportCount: i + 1))
                 .OrderBy(fp => fp.Id)
                 .ToArray();
 
