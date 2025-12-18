@@ -22,6 +22,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IGazetteerSearchService, GazetteerSearchService>();
 builder.Services.AddScoped<ISearchFloodLocationService, SearchFloodLocationService>();
+builder.Services.AddScoped<ISearchFloodPropertyService, SearchFloodPropertyService>();
 builder.Services.AddScoped<ISearchFloodReportService, SearchFloodReportService>();
 
 // json serializer options
