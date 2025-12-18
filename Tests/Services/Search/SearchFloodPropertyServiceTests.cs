@@ -25,12 +25,12 @@ public class SearchFloodPropertyServiceTests
 
     [Theory]
     [MemberData(nameof(SearchResultFloodPropertyData.Four), MemberType = typeof(SearchResultFloodPropertyData))]
-    public async Task GetFloodProperties_ReturnsPagedResult_WhenSuccessful(ICollection<FloodProperty> FloodPropertys, PagedResult<SearchResultFloodProperty> expected)
+    public async Task GetFloodProperties_ReturnsPagedResult_WhenSuccessful(ICollection<FloodProperty> floodProperties, PagedResult<SearchResultFloodProperty> expected)
     {
         // Arrange
         var logger = Substitute.For<ILogger<SearchFloodPropertyService>>();
         var repository = Substitute.For<IFloodPropertyRepository>();
-        var query = FloodPropertys.BuildMock();
+        var query = floodProperties.BuildMock();
         repository.GetFloodProperties().Returns(query);
 
         var service = new SearchFloodPropertyService(logger, repository);
@@ -77,12 +77,12 @@ public class SearchFloodPropertyServiceTests
 
     [Theory]
     [MemberData(nameof(SearchResultFloodPropertyData.Four_WithReports), MemberType = typeof(SearchResultFloodPropertyData))]
-    public async Task GetFloodPropertiesWithReports_ReturnsPagedResult_WhenSuccessful(ICollection<FloodProperty> FloodPropertys, PagedResult<SearchResultFloodProperty> expected)
+    public async Task GetFloodPropertiesWithReports_ReturnsPagedResult_WhenSuccessful(ICollection<FloodProperty> floodProperties, PagedResult<SearchResultFloodProperty> expected)
     {
         // Arrange
         var logger = Substitute.For<ILogger<SearchFloodPropertyService>>();
         var repository = Substitute.For<IFloodPropertyRepository>();
-        var query = FloodPropertys.BuildMock();
+        var query = floodProperties.BuildMock();
         repository.GetFloodPropertiesWithReports().Returns(query);
 
         var service = new SearchFloodPropertyService(logger, repository);
