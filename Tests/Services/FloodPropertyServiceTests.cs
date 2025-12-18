@@ -244,14 +244,14 @@ public class FloodPropertyServiceTests
         var repository = Substitute.For<IFloodPropertyRepository>();
 
         // Mock FindPotentialDuplicates data/tables
-        var FloodPropertyId = Guid.NewGuid();
+        var floodPropertyId = Guid.NewGuid();
         var floodReportId = Guid.NewGuid();
         var geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 };
         var uprn = ecc.Uprn!.Value;
 
-        FloodProperty FloodProperty = new()
+        FloodProperty floodProperty = new()
         {
-            Id = FloodPropertyId,
+            Id = floodPropertyId,
             CreatedUtc = ecc.CreatedUtc,
             Title = locationDescription,
             Uprn = uprn,
@@ -259,7 +259,7 @@ public class FloodPropertyServiceTests
             FloodReports = [
                 new FloodPropertyFloodReport()
                 {
-                    FloodPropertyId = FloodPropertyId,
+                    FloodPropertyId = floodPropertyId,
                     FloodReportId = floodReportId,
                     CreatedUtc = ecc.CreatedUtc,
                     FloodReport = new FloodReport()
@@ -282,7 +282,7 @@ public class FloodPropertyServiceTests
         };
 
         // We need ICollection for MockQueryable.NSubstitute
-        ICollection<FloodProperty> FloodPropertyDuplicates = [FloodProperty];
+        ICollection<FloodProperty> FloodPropertyDuplicates = [floodProperty];
         var mockFloodPropertyDbSet = FloodPropertyDuplicates.BuildMockDbSet();
         context.FloodProperties.Returns(mockFloodPropertyDbSet);
 
