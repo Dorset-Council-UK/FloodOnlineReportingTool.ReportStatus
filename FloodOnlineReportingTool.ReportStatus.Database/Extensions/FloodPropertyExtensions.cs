@@ -32,11 +32,11 @@ public static class FloodPropertyExtensions
 
     public static IQueryable<SearchResultFloodProperty> ToSearchResult(this IQueryable<FloodProperty> floodPropertyQuery)
     {
-        return floodPropertyQuery.Select(fr => fr.ToSearchResult());
+        return floodPropertyQuery.Select(fp => fp.ToSearchResult());
     }
 
     public static IReadOnlyCollection<SearchResultFloodProperty> ToSearchResults(this ICollection<FloodProperty> floodProperties)
     {
-        return [.. floodProperties.Select(fr => fr.ToSearchResult())];
+        return [.. floodProperties.Select(fp => fp.ToSearchResult())];
     }
 }
