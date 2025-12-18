@@ -1,4 +1,6 @@
 ﻿#pragma warning disable IDE0130 // Namespace does not match folder structure
+using FloodOnlineReportingTool.Contracts.Shared.Search;
+
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
@@ -13,5 +15,28 @@ public static class FloodPropertyExtensions
             Notes = floodProperty.Notes,
             Geom = floodProperty.Geom,
         };
+    }
+
+    public static SearchResultFloodProperty ToSearchResult(this FloodProperty floodProperty)
+    {
+        return new(
+            floodProperty.Id,
+            floodProperty.CreatedUtc,
+            floodProperty.UpdatedUtc,
+            floodProperty.Title,
+            floodProperty.Uprn,
+            floodProperty.Geom,
+            floodProperty.FloodReports.ToSearchResults()
+        );
+    }
+
+    public static IQueryable<SearchResultFloodProperty> ToSearchResult(this IQueryable<FloodProperty> floodPropertyQuery)
+    {
+        return floodPropertyQuery.Select(fr => fr.ToSearchResult());
+    }
+
+    public static IReadOnlyCollection<SearchResultFloodProperty> ToSearchResults(this ICollection<FloodProperty> floodProperties)
+    {
+        return [.. floodProperties.Select(fr => fr.ToSearchResult())];
     }
 }
