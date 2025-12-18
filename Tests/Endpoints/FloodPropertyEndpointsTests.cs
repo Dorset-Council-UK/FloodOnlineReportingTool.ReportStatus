@@ -28,7 +28,7 @@ public class FloodPropertyEndpointsTests
 
     [Theory]
     [MemberData(nameof(FloodPropertyData.Collection_Four_WithUprn), MemberType = typeof(FloodPropertyData))]
-    public async Task GetFloodPropertiesByUprn_ReturnsOkay_WhenSuccessful(long uprn, ICollection<FloodProperty> testData)
+    public async Task GetFloodPropertiesByUprn_ReturnsOkay_WhenSuccessful(long uprn, ICollection<FloodProperty> _, ICollection<FloodProperty> testData)
     {
         // Arrange
         IReadOnlyCollection<FloodProperty> expected = [.. testData];
