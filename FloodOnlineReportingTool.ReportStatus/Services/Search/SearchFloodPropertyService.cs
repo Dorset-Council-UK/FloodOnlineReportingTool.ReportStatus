@@ -18,7 +18,7 @@ internal class SearchFloodPropertyService(ILogger<SearchFloodPropertyService> lo
 
     public async Task<PagedResult<SearchResultFloodProperty>> GetFloodPropertiesWithReports(int pageNumber = 1, int pageSize = ISearchFloodPropertyService.DefaultPageSize, CancellationToken ct = default)
     {
-        logger.LogInformation("Searching flood properties from page {PageNumber} for {PageSize} items per page.", pageNumber, pageSize);
+        logger.LogInformation("Searching flood properties with their flood reports from page {PageNumber} for {PageSize} items per page.", pageNumber, pageSize);
 
         var query = floodPropertyRepository
             .GetFloodPropertiesWithReports()
