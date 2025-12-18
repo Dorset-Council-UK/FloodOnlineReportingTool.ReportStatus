@@ -190,6 +190,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             UpdatedUtc = DateTimeOffset.UtcNow,
 
             Title = dto.Title,
+            Usrn = dto.Usrn,
             Notes = dto.Notes,
             Geom = dto.Geom,
         };
