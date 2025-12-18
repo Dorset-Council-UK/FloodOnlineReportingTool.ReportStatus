@@ -179,6 +179,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             UpdatedUtc = DateTimeOffset.UtcNow,
 
             Title = dto.Title,
+            Uprn = dto.Uprn,
             Notes = dto.Notes,
             Geom = dto.Geom,
         };
