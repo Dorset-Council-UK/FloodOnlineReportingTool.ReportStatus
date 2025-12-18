@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
 using MockQueryable.NSubstitute;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 using Tests.Data;
 
@@ -171,7 +172,19 @@ public class FloodReportServiceTests
         var logger = Substitute.For<ILogger<FloodReportService>>();
         var context = Substitute.For<ApplicationDbContext>(options);
         var repository = Substitute.For<IFloodReportRepository>();
-        ICollection<FloodReport> testData = [expected]; // We need ICollection for MockQueryable.NSubstitute
+
+        // We need ICollection for MockQueryable.NSubstitute
+        var existing = expected with
+        {
+            UpdatedUtc = null,
+            EligibilityCheckId = Guid.Empty,
+            Uprn = expected.Uprn + 1,
+            Usrn = expected.Usrn + 1,
+            Geom = new Point(expected.Geom.X + 10, expected.Geom.Y + 10) { SRID = 27700 },
+            ImpactStartUtc = expected.ImpactStartUtc?.AddHours(1),
+            ImpactDurationHours = expected.ImpactDurationHours + 1,
+        };
+        ICollection<FloodReport> testData = [existing];
         repository.GetFloodReports().Returns(testData.BuildMock());
 
         var service = new FloodReportService(logger, repository, context);
@@ -182,7 +195,12 @@ public class FloodReportServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.NotNull(result.UpdatedUtc);
-        Assert.EquivalentWithExclusions(expected, result, nameof(expected.UpdatedUtc));
+        Assert.Equal(expected.EligibilityCheckId, result.EligibilityCheckId);
+        Assert.Equal(expected.Uprn, result.Uprn);
+        Assert.Equal(expected.Usrn, result.Usrn);
+        Assert.Equal(expected.Geom, result.Geom);
+        Assert.Equal(expected.ImpactStartUtc, result.ImpactStartUtc);
+        Assert.Equal(expected.ImpactDurationHours, result.ImpactDurationHours);
         await context.Received(1).SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 

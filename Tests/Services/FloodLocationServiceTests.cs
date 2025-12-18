@@ -301,7 +301,16 @@ public class FloodLocationServiceTests
         var logger = Substitute.For<ILogger<FloodLocationService>>();
         var context = Substitute.For<ApplicationDbContext>(options);
         var repository = Substitute.For<IFloodLocationRepository>();
-        ICollection<FloodLocation> testData = [expected]; // We need ICollection for MockQueryable.NSubstitute
+
+        // We need ICollection for MockQueryable.NSubstitute
+        var existing = expected with
+        {
+            UpdatedUtc = null,
+            Title = "Old Title",
+            Notes = "Old Notes",
+            Geom = new Point(expected.Geom.X + 10, expected.Geom.Y + 10) { SRID = 27700 },
+        };
+        ICollection<FloodLocation> testData = [existing];
         repository.GetFloodLocations().Returns(testData.BuildMock());
 
         var service = new FloodLocationService(logger, context, repository);

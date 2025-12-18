@@ -82,24 +82,27 @@ public static class FloodPropertyData
     }
 
     /// <summary>
-    /// <see cref="long">UPRN</see>, <see cref="ICollection&lt;&gt;">Expected Flood Properties</see> with matching <see cref="Point"/>
+    /// <see cref="long">UPRN</see>, 
+    /// <see cref="ICollection&lt;&gt;">All flood properties</see>, 
+    /// <see cref="ICollection&lt;&gt;">Expected flood properties</see> with matching <see cref="Point"/>
     /// </summary>
-    public static IEnumerable<TheoryDataRow<long, ICollection<FloodProperty>>> Collection_Four_WithUprn
+    public static IEnumerable<TheoryDataRow<long, ICollection<FloodProperty>, ICollection<FloodProperty>>> Collection_Four_WithUprn
     {
         get
         {
-            long[] uprn = [100040634390, 10013290693, 10023242411, 10002062622];
+            var property1 = Create(uprn: 10013290693);
+            var property2 = Create(uprn: 10023242411);
+            var property3 = Create(uprn: 10002062622);
 
-            var ordered = Enumerable.Range(1, 3)
-                .Select(i => Create(uprn: uprn[i]))
+            var allProperties = new[] { property1, property2, property3 }
                 .OrderBy(fp => fp.Id)
                 .ToArray();
 
             return [
-                new(uprn[0], []),
-                new(uprn[1], [ordered[0]]),
-                new(uprn[2], [ordered[0], ordered[1]]),
-                new(uprn[3], [ordered[0], ordered[1], ordered[2]]),
+                new(100040634390, allProperties, []),
+                new(10013290693, allProperties, [property1]),
+                new(10023242411, allProperties, [property2]),
+                new(10002062622, allProperties, [property3]),
             ];
         }
     }
