@@ -211,9 +211,8 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     {
         logger.LogDebug("Checking if flood property with ID {FloodPropertyId} exists in the database.", id);
 
-        return await context.FloodProperties
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
+        return await floodPropertyRepository
+            .GetFloodProperties()
             .AnyAsync(o => o.Id.Equals(id), ct);
     }
 

@@ -32,7 +32,8 @@ internal static class DatabaseExtensions
         builder.Services
             .AddScoped<IFloodLocationRepository, FloodLocationRepository>()
             .AddScoped<IFloodPropertyRepository, FloodPropertyRepository>()
-            .AddScoped<IFloodReportRepository, FloodReportRepository>();
+            .AddScoped<IFloodReportRepository, FloodReportRepository>()
+            .AddScoped<IFloodRoadRepository, FloodRoadRepository>();
 
         // Database services
         builder.Services

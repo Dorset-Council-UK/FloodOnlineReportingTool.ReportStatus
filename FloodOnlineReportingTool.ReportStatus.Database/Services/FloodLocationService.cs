@@ -205,9 +205,8 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
     {
         logger.LogDebug("Checking if flood location with ID {FloodLocationId} exists in the database.", id);
 
-        return await context.FloodLocations
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
+        return await floodLocationRepository
+            .GetFloodLocations()
             .AnyAsync(o => o.Id.Equals(id), ct);
     }
 
