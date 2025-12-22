@@ -167,17 +167,17 @@ public static class EligibilityCheckCreatedData
         ]
     );
 
-    public static IEnumerable<object[]> FloodProperty_4 => [
-        [ Property1, "Test location description 1" ],
-        [ Property2, "Test location description 2" ],
-        [ Property3, "Test location description 3" ],
-        [ Property4, "Test location description 4" ],
+    public static IEnumerable<TheoryDataRow<EligibilityCheckCreated, string>> FloodProperty_4 => [
+        new(Property1, "Test location description 1"),
+        new(Property2, "Test location description 2"),
+        new(Property3, "Test location description 3"),
+        new(Property4, "Test location description 4"),
     ];
 
-    public static IEnumerable<object[]> FloodRoad_4 => [
-        [ Road1, "Test road description 1" ],
-        [ Road2, "Test road description 2" ],
-        [ Road3, "Test road description 3" ],
-        [ Road4, "Test road description 4" ],
+    public static IEnumerable<TheoryDataRow<EligibilityCheckCreated, string>> FloodRoad_4 => [
+        new(Road1, "Test road description 1"),
+        new(Road2, "Test road description 2"),
+        new(Road3, "Test road description 3"),
+        new(Road4, "Test road description 4"),
     ];
 }
