@@ -2,6 +2,7 @@
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
@@ -9,15 +10,14 @@ using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbContext context) : IFloodRoadService
+public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbContext context, IFloodRoadRepository floodRoadRepository) : IFloodRoadService
 {
     public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoads(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood roads from the database.");
 
-        return await context.FloodRoads
-            .AsNoTracking()
-            .OrderBy(fr => fr.Id)
+        return await floodRoadRepository
+            .GetFloodRoads()
             .ToListAsync(ct);
     }
 
@@ -25,11 +25,9 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
     {
         logger.LogDebug("Retrieving all flood roads for USRN {Usrn} from the database.", usrn);
 
-        return await context.FloodRoads
-            .AsNoTracking()
+        return await floodRoadRepository
+            .GetFloodRoadsWithReports()
             .Where(fr => fr.Usrn.Equals(usrn))
-            .OrderBy(fr => fr.Id)
-            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
             .ToListAsync(ct);
     }
 
@@ -37,10 +35,8 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
     {
         logger.LogDebug("Retrieving all flood roads and their flood reports from the database.");
 
-        return await context.FloodRoads
-            .AsNoTracking()
-            .OrderBy(fr => fr.Id)
-            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
+        return await floodRoadRepository
+            .GetFloodRoadsWithReports()
             .ToListAsync(ct);
     }
 
@@ -48,17 +44,17 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
     {
         logger.LogDebug("Retrieving flood road with ID {FloodRoadId} from the database.", id);
 
-        return await context.FloodRoads.FindAsync([id], ct);
+        return await floodRoadRepository
+            .GetFloodRoads()
+            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct);
     }
 
     public async Task<FloodRoad?> GetFloodRoadWithReports(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving flood road and its flood reports with ID {FloodRoadId} from the database.", id);
 
-        return await context.FloodRoads
-            .AsNoTracking()
-            .OrderBy(fr => fr.Id)
-            .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
+        return await floodRoadRepository
+            .GetFloodRoadsWithReports()
             .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct);
     }
 
@@ -169,8 +165,8 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
     {
         logger.LogDebug("Updating flood road with ID {FloodRoadId} in the database.", id);
 
-        var existing = await context.FloodRoads
-            .AsNoTracking()
+        var existing = await floodRoadRepository
+            .GetFloodRoads()
             .FirstOrDefaultAsync(o => o.Id.Equals(id), ct);
 
         if (existing == null)
