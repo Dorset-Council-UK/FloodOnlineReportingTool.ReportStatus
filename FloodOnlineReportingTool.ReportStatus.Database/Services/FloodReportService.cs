@@ -126,9 +126,8 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Checking if flood report with ID {FloodReportId} exists in the database.", id);
 
-        return await context.FloodReports
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
+        return await floodReportRepository
+            .GetFloodReports()
             .AnyAsync(o => o.Id.Equals(id), ct);
     }
 }

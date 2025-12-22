@@ -215,9 +215,8 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
     {
         logger.LogDebug("Checking if flood road with ID {FloodRoadId} exists in the database.", id);
 
-        return await context.FloodRoads
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
+        return await floodRoadRepository
+            .GetFloodRoads()
             .AnyAsync(o => o.Id.Equals(id), ct);
     }
 
