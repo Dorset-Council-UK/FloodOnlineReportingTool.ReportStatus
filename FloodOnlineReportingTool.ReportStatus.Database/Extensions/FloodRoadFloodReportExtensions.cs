@@ -19,7 +19,7 @@ public static class FloodRoadFloodReportExtensions
 
     public static IQueryable<SearchResultFloodRoadFloodReport> ToSearchResult(this IQueryable<FloodRoadFloodReport> floodRoadFloodReportQuery)
     {
-        return floodRoadFloodReportQuery.Select(fr => fr.ToSearchResult());
+        return floodRoadFloodReportQuery.Select(frfr => frfr.ToSearchResult());
     }
 
     public static IReadOnlyCollection<SearchResultFloodRoadFloodReport> ToSearchResults(this ICollection<FloodRoadFloodReport> floodRoadFloodReports)
