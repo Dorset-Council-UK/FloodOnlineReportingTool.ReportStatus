@@ -117,7 +117,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
         }
 
         context.FloodReports.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }

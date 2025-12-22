@@ -18,8 +18,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         return await context.FloodRoads
             .AsNoTracking()
             .OrderBy(fr => fr.Id)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsByUsrn(long usrn, CancellationToken ct)
@@ -31,8 +30,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             .Where(fr => fr.Usrn.Equals(usrn))
             .OrderBy(fr => fr.Id)
             .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyCollection<FloodRoad>> GetFloodRoadsWithReports(CancellationToken ct)
@@ -43,17 +41,14 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             .AsNoTracking()
             .OrderBy(fr => fr.Id)
             .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 
     public async Task<FloodRoad?> GetFloodRoad(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Retrieving flood road with ID {FloodRoadId} from the database.", id);
 
-        return await context.FloodRoads
-            .FindAsync([id], ct)
-            .ConfigureAwait(false);
+        return await context.FloodRoads.FindAsync([id], ct);
     }
 
     public async Task<FloodRoad?> GetFloodRoadWithReports(Guid id, CancellationToken ct)
@@ -64,8 +59,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             .AsNoTracking()
             .OrderBy(fr => fr.Id)
             .Include(fr => fr.FloodReports.OrderBy(frfr => frfr.FloodReportId))
-            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct);
     }
 
     public async Task<FloodRoad> CreateFloodRoad(FloodRoadDto dto, CancellationToken ct)
@@ -84,7 +78,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         };
 
         context.FloodRoads.Add(creating);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return creating;
     }
@@ -124,7 +118,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             ],
         };
 
-        var potentialDuplicates = await FindPotentialDuplicates(usrn, ecc, ct).ConfigureAwait(false);
+        var potentialDuplicates = await FindPotentialDuplicates(usrn, ecc, ct);
 
         FloodRoad? floodRoad = null;
         ICollection<FloodRoadFloodReport> floodRoadFloodReports = [];
@@ -168,7 +162,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         if (floodRoad is not null) context.FloodRoads.Add(floodRoad);
         if (floodRoadFloodReports.Count > 0) context.FloodRoadFloodReports.AddRange(floodRoadFloodReports);
 
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
     }
 
     public async Task<FloodRoad?> UpdateFloodRoad(Guid id, FloodRoadDto dto, CancellationToken ct)
@@ -177,8 +171,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
 
         var existing = await context.FloodRoads
             .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(o => o.Id.Equals(id), ct);
 
         if (existing == null)
         {
@@ -196,7 +189,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         };
 
         context.FloodRoads.Update(updated);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return updated;
     }
@@ -205,9 +198,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
     {
         logger.LogDebug("Delete flood road with ID {FloodRoadId} from the database.", id);
 
-        var existing = await context.FloodRoads
-            .FindAsync([id], ct)
-            .ConfigureAwait(false);
+        var existing = await context.FloodRoads.FindAsync([id], ct);
 
         if (existing == null)
         {
@@ -215,7 +206,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         }
 
         context.FloodRoads.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }
@@ -227,8 +218,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
         return await context.FloodRoads
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .AnyAsync(o => o.Id.Equals(id), ct)
-            .ConfigureAwait(false);
+            .AnyAsync(o => o.Id.Equals(id), ct);
     }
 
     /// <summary>
@@ -267,7 +257,6 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
                     .ThenBy(frfr => frfr.FloodReportId)
             )
             .Select(frfr => frfr.FloodRoadId)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 }
