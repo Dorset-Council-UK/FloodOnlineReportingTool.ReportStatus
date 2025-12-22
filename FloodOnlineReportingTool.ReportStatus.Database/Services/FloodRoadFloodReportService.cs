@@ -16,17 +16,14 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
             .Where(frfr => frfr.FloodRoadId.Equals(floodRoadId))
             .OrderBy(frfr => frfr.FloodRoadId)
             .ThenBy(frfr => frfr.FloodReportId)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 
     public async Task<FloodRoadFloodReport?> GetFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, CancellationToken ct)
     {
         logger.LogDebug("Retrieving the flood report relationship for the flood road with IDs {FloodRoadId}/{FloodReportId} from the database.", floodRoadId, floodReportId);
 
-        return await context.FloodRoadFloodReports
-            .FindAsync([floodRoadId, floodReportId], ct)
-            .ConfigureAwait(false);
+        return await context.FloodRoadFloodReports.FindAsync([floodRoadId, floodReportId], ct);
     }
 
     public async Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, CancellationToken ct)
@@ -41,7 +38,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         };
 
         context.FloodRoadFloodReports.Add(creating);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return creating;
     }
@@ -63,7 +60,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         };
 
         context.FloodRoadFloodReports.Add(creating);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return creating;
     }
@@ -74,8 +71,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
 
         var existing = await context.FloodRoadFloodReports
             .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.FloodRoadId.Equals(floodRoadId) && o.FloodReportId.Equals(floodReportId), ct)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(o => o.FloodRoadId.Equals(floodRoadId) && o.FloodReportId.Equals(floodReportId), ct);
 
         if (existing == null)
         {
@@ -93,7 +89,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         };
 
         context.FloodRoadFloodReports.Update(updated);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return updated;
     }
@@ -102,9 +98,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
     {
         logger.LogDebug("Delete flood report for the flood road with IDs {FloodRoadId}/{FloodReportId} from the database.", floodRoadId, floodReportId);
 
-        var existing = await context.FloodRoadFloodReports
-            .FindAsync([floodRoadId, floodReportId], ct)
-            .ConfigureAwait(false);
+        var existing = await context.FloodRoadFloodReports.FindAsync([floodRoadId, floodReportId], ct);
 
         if (existing == null)
         {
@@ -112,7 +106,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         }
 
         context.FloodRoadFloodReports.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }
@@ -124,7 +118,6 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         return await context.FloodRoadFloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .AnyAsync(o => o.FloodRoadId.Equals(floodRoadId) && o.FloodReportId.Equals(floodReportId), ct)
-            .ConfigureAwait(false);
+            .AnyAsync(o => o.FloodRoadId.Equals(floodRoadId) && o.FloodReportId.Equals(floodReportId), ct);
     }
 }

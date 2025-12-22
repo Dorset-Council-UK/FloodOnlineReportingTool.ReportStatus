@@ -415,10 +415,8 @@ public class FloodLocationServiceTests
         var logger = Substitute.For<ILogger<FloodLocationService>>();
         var context = Substitute.For<ApplicationDbContext>(options);
         var repository = Substitute.For<IFloodLocationRepository>();
-
         ICollection<FloodLocation> testData = [expected]; // We need ICollection for MockQueryable.NSubstitute
-        var mockDbSet = testData.BuildMockDbSet();
-        context.FloodLocations.Returns(mockDbSet);
+        repository.GetFloodLocations().Returns(testData.BuildMock());
 
         var service = new FloodLocationService(logger, context, repository);
 
@@ -440,8 +438,7 @@ public class FloodLocationServiceTests
         var repository = Substitute.For<IFloodLocationRepository>();
 
         ICollection<FloodLocation> testData = []; // We need ICollection for MockQueryable.NSubstitute
-        var mockDbSet = testData.BuildMockDbSet();
-        context.FloodLocations.Returns(mockDbSet);
+        repository.GetFloodLocations().Returns(testData.BuildMock());
 
         var service = new FloodLocationService(logger, context, repository);
 

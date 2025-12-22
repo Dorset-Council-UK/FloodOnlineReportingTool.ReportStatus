@@ -17,17 +17,14 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
             .Where(frs => frs.FloodReportId.Equals(floodReportId))
             .OrderBy(frs => frs.FloodReportId)
             .ThenBy(frs => frs.SourceId)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct);
     }
 
     public async Task<FloodReportSource?> GetFloodReportSource(Guid floodReportId, Guid sourceId, CancellationToken ct)
     {
         logger.LogDebug("Retrieving flood report source with ID {FloodReportId}/{SourceId} from the database.", floodReportId, sourceId);
 
-        return await context.FloodReportSources
-            .FindAsync([floodReportId, sourceId], ct)
-            .ConfigureAwait(false);
+        return await context.FloodReportSources.FindAsync([floodReportId, sourceId], ct);
     }
 
     public async Task<FloodReportSource> CreateFloodReportSource(Guid floodReportId, Guid sourceId, FloodReportSourceDto dto, CancellationToken ct)
@@ -43,7 +40,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         };
 
         context.FloodReportSources.Add(newFloodReportSource);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return newFloodReportSource;
     }
@@ -62,7 +59,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         });
 
         context.FloodReportSources.AddRange(newFloodReportSources);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
     }
 
     public async Task<FloodReportSource?> UpdateFloodReportSource(Guid floodReportId, Guid sourceId, FloodReportSourceDto dto, CancellationToken ct)
@@ -71,8 +68,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
 
         var existing = await context.FloodReportSources
             .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.FloodReportId.Equals(floodReportId) && o.SourceId.Equals(sourceId), ct)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(o => o.FloodReportId.Equals(floodReportId) && o.SourceId.Equals(sourceId), ct);
 
         if (existing == null)
         {
@@ -86,7 +82,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         };
 
         context.FloodReportSources.Update(updated);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await context.SaveChangesAsync(ct);
 
         return updated;
     }
@@ -95,9 +91,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
     {
         logger.LogDebug("Delete flood report source with ID {FloodReportId}/{SourceId} from the database.", floodReportId, sourceId);
 
-        var existing = await context.FloodReportSources
-            .FindAsync([floodReportId, sourceId], ct)
-            .ConfigureAwait(false);
+        var existing = await context.FloodReportSources.FindAsync([floodReportId, sourceId], ct);
 
         if (existing == null)
         {
@@ -105,7 +99,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         }
 
         context.FloodReportSources.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }
@@ -117,7 +111,6 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         return await context.FloodReportSources
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .AnyAsync(o => o.FloodReportId.Equals(floodReportId) && o.SourceId.Equals(sourceId), ct)
-            .ConfigureAwait(false);
+            .AnyAsync(o => o.FloodReportId.Equals(floodReportId) && o.SourceId.Equals(sourceId), ct);
     }
 }

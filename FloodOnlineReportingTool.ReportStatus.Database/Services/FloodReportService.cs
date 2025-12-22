@@ -117,7 +117,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
         }
 
         context.FloodReports.Remove(existing);
-        var changes = await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        var changes = await context.SaveChangesAsync(ct);
 
         return changes > 0;
     }
@@ -126,9 +126,8 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
     {
         logger.LogDebug("Checking if flood report with ID {FloodReportId} exists in the database.", id);
 
-        return await context.FloodReports
-            .AsNoTracking()
-            .IgnoreAutoIncludes()
+        return await floodReportRepository
+            .GetFloodReports()
             .AnyAsync(o => o.Id.Equals(id), ct);
     }
 }
