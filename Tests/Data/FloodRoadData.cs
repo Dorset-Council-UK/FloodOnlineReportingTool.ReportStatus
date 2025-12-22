@@ -16,6 +16,11 @@ public static class FloodRoadData
     public static FloodRoad Create(Guid? floodRoadId = null, long usrn = 20023242411, int floodReportCount = 0)
     {
         var id = floodRoadId ?? Guid.NewGuid();
+        var floodReports = Enumerable.Range(0, floodReportCount)
+            .Select(_ => FloodRoadFloodReportData.Create(id))
+            .OrderBy(fr => fr.FloodReportId)
+            .ToList();
+
         return new()
         {
             Id = id,
@@ -23,7 +28,7 @@ public static class FloodRoadData
             Title = "Flood road",
             Usrn = usrn,
             Geom = new Point(Easting, Northing) { SRID = 27700 },
-            FloodReports = [.. Enumerable.Range(0, floodReportCount).Select(_ => FloodRoadFloodReportData.Create(id))],
+            FloodReports = floodReports,
         };
     }
 
@@ -41,24 +46,65 @@ public static class FloodRoadData
         new(Create(floodReportCount: 3)),
     ];
 
-    public static IEnumerable<TheoryDataRow<ICollection<FloodRoad>>> Collection_Four => [
-        new([]),
-        new([Create()]),
-        new([Create(), Create()]),
-        new([Create(), Create(), Create()]),
-    ];
+    public static IEnumerable<TheoryDataRow<ICollection<FloodRoad>>> Collection_Four
+    {
+        get
+        {
+            var ordered = Enumerable.Range(0, 3)
+                .Select(_ => Create())
+                .OrderBy(fr => fr.Id)
+                .ToArray();
 
-    public static IEnumerable<TheoryDataRow<ICollection<FloodRoad>>> Collection_Four_WithReports => [
-        new([]),
-        new([Create(floodReportCount: 1)]),
-        new([Create(floodReportCount: 1), Create(floodReportCount: 2)]),
-        new([Create(floodReportCount: 1), Create(floodReportCount: 2), Create(floodReportCount: 3)]),
-    ];
+            return [
+                new([]),
+                new([ordered[0]]),
+                new([ordered[0], ordered[1]]),
+                new([ordered[0], ordered[1], ordered[2]]),
+            ];
+        }
+    }
 
-    public static IEnumerable<TheoryDataRow<long, ICollection<FloodRoad>>> Collection_Four_WithUsrn => [
-        new(20023242411, []),
-        new(43201527, [Create(usrn: 43201527)]),
-        new(43201524, [Create(usrn: 43201524), Create(usrn: 43201524)]),
-        new(81100003, [Create(usrn: 81100003), Create(usrn: 81100003), Create(usrn: 81100003)]),
-    ];
+    public static IEnumerable<TheoryDataRow<ICollection<FloodRoad>>> Collection_Four_WithReports
+    {
+        get
+        {
+            var ordered = Enumerable.Range(0, 3)
+                .Select(i => Create(floodReportCount: i + 1))
+                .OrderBy(fr => fr.Id)
+                .ToArray();
+
+            return [
+                new([]),
+                new([ordered[0]]),
+                new([ordered[0], ordered[1]]),
+                new([ordered[0], ordered[1], ordered[2]]),
+            ];
+        }
+    }
+
+    /// <summary>
+    /// <see cref="long">USRN</see>, 
+    /// <see cref="ICollection&lt;&gt;">All flood roads</see>, 
+    /// <see cref="ICollection&lt;&gt;">Expected flood roads</see> with matching <see cref="Point"/>
+    /// </summary>
+    public static IEnumerable<TheoryDataRow<long, ICollection<FloodRoad>, ICollection<FloodRoad>>> Collection_Four_WithUsrn
+    {
+        get
+        {
+            var road1 = Create(usrn: 43201527);
+            var road2 = Create(usrn: 43201524);
+            var road3 = Create(usrn: 81100003);
+
+            var allRoads = new[] { road1, road2, road3 }
+                .OrderBy(fr => fr.Id)
+                .ToArray();
+
+            return [
+                new(20023242411, allRoads, []),
+                new(43201527, allRoads, [road1]),
+                new(43201524, allRoads, [road2]),
+                new(81100003, allRoads, [road3]),
+            ];
+        }
+    }
 }

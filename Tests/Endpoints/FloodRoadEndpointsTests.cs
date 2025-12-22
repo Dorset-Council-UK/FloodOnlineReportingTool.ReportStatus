@@ -28,7 +28,7 @@ public class FloodRoadEndpointsTests
 
     [Theory]
     [MemberData(nameof(FloodRoadData.Collection_Four_WithUsrn), MemberType = typeof(FloodRoadData))]
-    public async Task GetFloodRoadsByUsrn_ReturnsOkay_WhenSuccessful(long usrn, ICollection<FloodRoad> testData)
+    public async Task GetFloodRoadsByUsrn_ReturnsOkay_WhenSuccessful(long usrn, ICollection<FloodRoad> _, ICollection<FloodRoad> testData)
     {
         // Arrange
         IReadOnlyCollection<FloodRoad> expected = [.. testData];
