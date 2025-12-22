@@ -282,8 +282,8 @@ public class FloodRoadServiceTests
         };
 
         // We need ICollection for MockQueryable.NSubstitute
-        ICollection<FloodRoad> FloodRoadDuplicates = [floodRoad];
-        var mockFloodRoadDbSet = FloodRoadDuplicates.BuildMockDbSet();
+        ICollection<FloodRoad> floodRoadDuplicates = [floodRoad];
+        var mockFloodRoadDbSet = floodRoadDuplicates.BuildMockDbSet();
         context.FloodRoads.Returns(mockFloodRoadDbSet);
 
         var service = new FloodRoadService(logger, context, repository);
