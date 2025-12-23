@@ -1,7 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
 using FloodOnlineReportingTool.ReportStatus.Services.Search;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Globalization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
