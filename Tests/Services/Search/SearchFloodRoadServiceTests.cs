@@ -11,11 +11,11 @@ using Tests.Data;
 
 namespace Tests.Services.Search;
 
-public class SearchFloodRoadserviceTests
+public class SearchFloodRoadServiceTests
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-    public SearchFloodRoadserviceTests()
+    public SearchFloodRoadServiceTests()
     {
         _jsonSerializerOptions = new(JsonSerializerDefaults.Web)
         {
