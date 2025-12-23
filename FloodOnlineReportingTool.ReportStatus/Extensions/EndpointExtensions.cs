@@ -24,6 +24,7 @@ internal static class EndpointExtensions
 
         MapSearchFloodLocationEndpoints(app);
         MapSearchFloodPropertyEndpoints(app);
+        MapSearchFloodRoadEndpoints(app);
         MapSearchFloodReportEndpoints(app);
 
         MapTestEndpoints(app);
@@ -553,6 +554,28 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/with-floodreports", SearchFloodPropertyEndpoints.GetFloodPropertiesWithReports)
             .WithSummary("Search - Flood Properties with Reports")
             .WithDescription("Searches for flood properties with reports")
+            .RequireAuthorization(PolicyNames.Reader);
+    }
+
+    private static void MapSearchFloodRoadEndpoints(WebApplication app)
+    {
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/search/floodroads")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Search - Flood Roads");
+
+        // Get all
+        group
+            .MapGet(pattern: "/", SearchFloodRoadEndpoints.GetFloodRoads)
+            .WithSummary("Search - Flood Roads")
+            .WithDescription("Searches for flood roads")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        group
+            .MapGet(pattern: "/with-floodreports", SearchFloodRoadEndpoints.GetFloodRoadsWithReports)
+            .WithSummary("Search - Flood Roads with Reports")
+            .WithDescription("Searches for flood roads with reports")
             .RequireAuthorization(PolicyNames.Reader);
     }
 
