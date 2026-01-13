@@ -37,6 +37,16 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .IsRequired()
                         .HasColumnType("geometry (point)");
 
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
+
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
@@ -97,6 +107,16 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
+
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
@@ -171,6 +191,16 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("ImpactStartUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
+
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -220,6 +250,16 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point)");
+
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
