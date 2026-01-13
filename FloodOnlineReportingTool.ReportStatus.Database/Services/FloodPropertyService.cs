@@ -70,7 +70,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             Title = dto.Title,
             Uprn = dto.Uprn,
             Notes = dto.Notes,
-            Geom = dto.Geom,
+            Geom = new Point(dto.Geom.X, dto.Geom.Y) { SRID = 27700 },
         };
 
         context.FloodProperties.Add(creating);
@@ -141,7 +141,7 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
                 Title = locationDescription,
                 Uprn = uprn,
                 Notes = null,
-                Geom = new Point(ecc.Easting, ecc.Northing),
+                Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
 
                 FloodReports = [
                     new()

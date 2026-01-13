@@ -3,6 +3,7 @@ using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -63,7 +64,7 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             EligibilityCheckId = dto.EligibilityCheckId,
             Uprn = dto.Uprn,
             Usrn = dto.Usrn,
-            Geom = dto.Geom,
+            Geom = new Point(dto.Geom.X, dto.Geom.Y) { SRID = 27700 },
             ImpactStartUtc = dto.ImpactStartUtc,
             ImpactDurationHours = dto.ImpactDurationHours,
         };
