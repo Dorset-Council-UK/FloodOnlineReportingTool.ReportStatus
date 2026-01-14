@@ -24,6 +24,8 @@ public static class FloodLocationExtensions
             floodLocation.UpdatedUtc,
             floodLocation.Title,
             floodLocation.Geom,
+            floodLocation.Latitude,
+            floodLocation.Longitude,
             floodLocation.FloodReports.ToSearchResults()
         );
     }

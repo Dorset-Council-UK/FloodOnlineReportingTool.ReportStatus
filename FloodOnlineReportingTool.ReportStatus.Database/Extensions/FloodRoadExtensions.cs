@@ -26,6 +26,8 @@ public static class FloodRoadExtensions
             floodRoad.Title,
             floodRoad.Usrn,
             floodRoad.Geom,
+            floodRoad.Latitude,
+            floodRoad.Longitude,
             floodRoad.FloodReports.ToSearchResults()
         );
     }

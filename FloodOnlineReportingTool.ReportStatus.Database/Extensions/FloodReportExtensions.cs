@@ -26,6 +26,8 @@ public static class FloodReportExtensions
             floodReport.CreatedUtc,
             floodReport.UpdatedUtc,
             floodReport.Geom,
+            floodReport.Latitude,
+            floodReport.Longitude,
             floodReport.ImpactStartUtc,
             floodReport.Sources.ToSearchResults()
         );

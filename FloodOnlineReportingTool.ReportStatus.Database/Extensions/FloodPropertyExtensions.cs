@@ -26,6 +26,8 @@ public static class FloodPropertyExtensions
             floodProperty.Title,
             floodProperty.Uprn,
             floodProperty.Geom,
+            floodProperty.Latitude,
+            floodProperty.Longitude,
             floodProperty.FloodReports.ToSearchResults()
         );
     }
