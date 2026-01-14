@@ -159,7 +159,12 @@ public class FloodReportServiceTests
         // Assert
         Assert.NotEqual(Guid.Empty, result.Id);
         Assert.NotEqual(default, result.CreatedUtc);
-        Assert.EquivalentWithExclusions(expected, result, nameof(expected.Id), nameof(expected.CreatedUtc), nameof(expected.Sources));
+        Assert.Equal(expected.EligibilityCheckId, result.EligibilityCheckId);
+        Assert.Equal(expected.Uprn, result.Uprn);
+        Assert.Equal(expected.Usrn, result.Usrn);
+        Assert.Equal(expected.Geom, result.Geom);
+        Assert.Equal(expected.ImpactStartUtc, result.ImpactStartUtc);
+        Assert.Equal(expected.ImpactDurationHours, result.ImpactDurationHours);
         await context.Received(1).SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
