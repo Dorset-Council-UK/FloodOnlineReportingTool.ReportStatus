@@ -17,5 +17,13 @@ internal class FloodRoadConfiguration : IEntityTypeConfiguration<FloodRoad>
         builder
             .Property(o => o.Geom)
             .HasColumnType("geometry (point)");
+
+        builder
+            .Property(o => o.Latitude)
+            .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", stored: true);
+
+        builder
+            .Property(o => o.Longitude)
+            .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", stored: true);
     }
 }

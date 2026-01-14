@@ -70,7 +70,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
             Title = dto.Title,
             Usrn = dto.Usrn,
             Notes = dto.Notes,
-            Geom = dto.Geom,
+            Geom = new Point(dto.Geom.X, dto.Geom.Y) { SRID = 27700 },
         };
 
         context.FloodRoads.Add(creating);
@@ -141,7 +141,7 @@ public class FloodRoadService(ILogger<FloodRoadService> logger, ApplicationDbCon
                 Title = locationDescription,
                 Usrn = usrn,
                 Notes = null,
-                Geom = new Point(ecc.Easting, ecc.Northing),
+                Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
 
                 FloodReports = [
                     new()

@@ -14,6 +14,8 @@ public record FloodReport : ICreatedUpdated
     public long? Uprn { get; init; }
     public long? Usrn { get; init; }
     public required Point Geom { get; init; }
+    public decimal Latitude { get; }
+    public decimal Longitude { get; }
     public DateTimeOffset? ImpactStartUtc { get; init; }
     public int ImpactDurationHours { get; init; }
 

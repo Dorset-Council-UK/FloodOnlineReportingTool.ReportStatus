@@ -13,6 +13,8 @@ public record FloodLocation : ICreatedUpdated
     public required string Title { get; init; }
     public string? Notes { get; init; }
     public required Point Geom { get; init; }
+    public decimal Latitude { get; }
+    public decimal Longitude { get; }
 
     public virtual ICollection<FloodLocationFloodReport> FloodReports { get; init; } = [];
 }

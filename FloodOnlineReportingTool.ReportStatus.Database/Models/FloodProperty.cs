@@ -14,6 +14,8 @@ public record FloodProperty : ICreatedUpdated
     public required long Uprn { get; init; }
     public string? Notes { get; init; }
     public required Point Geom { get; init; }
+    public decimal Latitude { get; }
+    public decimal Longitude { get; }
 
     public virtual ICollection<FloodPropertyFloodReport> FloodReports { get; init; } = [];
 }
