@@ -10,5 +10,5 @@ public interface IFloodReportRepository
     IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres);
     IQueryable<FloodReport> GetFloodReportsByUprn(long uprn);
     IQueryable<FloodReport> GetFloodReportsByUsrn(long usrn);
-    IQueryable<FloodReport> SearchFloodReports(DateTimeOffset? resultsFrom, DateTimeOffset? resultsTo, ICollection<Guid> floodSources, long? uprn, long? usrn, MultiPolygon? geom);
+    IQueryable<FloodReport> SearchFloodReports(DateTimeOffset? resultsFrom, DateTimeOffset? resultsTo, ICollection<Guid> floodSources, long? uprn, long? usrn, string? postcode, MultiPolygon? geom);
 }

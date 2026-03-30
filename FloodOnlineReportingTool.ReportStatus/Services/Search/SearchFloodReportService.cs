@@ -49,12 +49,12 @@ internal class SearchFloodReportService(ILogger<SearchFloodReportService> logger
         return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize, ct);
     }
 
-    public async Task<PagedResult<SearchResultFloodReport>> SearchFloodReports(DateTimeOffset? resultsFrom, DateTimeOffset? resultsTo, ICollection<Guid> floodSources, long? uprn, long? usrn, MultiPolygon? geom, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
+    public async Task<PagedResult<SearchResultFloodReport>> SearchFloodReports(DateTimeOffset? resultsFrom, DateTimeOffset? resultsTo, ICollection<Guid> floodSources, long? uprn, long? usrn, string? postcode, MultiPolygon? geom, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
     {
         logger.LogInformation("Searching flood reports with general search criteria from page {PageNumber} for {PageSize} items per page.", pageNumber, pageSize);
 
         var query = floodReportRepository
-            .SearchFloodReports(resultsFrom, resultsTo, floodSources, uprn, usrn, geom)
+            .SearchFloodReports(resultsFrom, resultsTo, floodSources, uprn, usrn, postcode, geom)
             .ToSearchResult();
         return await SearchUtility.CreatePagedResult(query, pageNumber, pageSize, ISearchFloodReportService.DefaultPageSize, ct);
     }

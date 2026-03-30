@@ -57,7 +57,13 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
             .OrderBy(fr => fr.Id);
     }
 
-    public IQueryable<FloodReport> SearchFloodReports(DateTimeOffset? resultsFrom, DateTimeOffset? resultsTo, ICollection<Guid> floodSources, long? uprn, long? usrn, MultiPolygon? geom)
+    public IQueryable<FloodReport> SearchFloodReports(DateTimeOffset? resultsFrom,
+                                                      DateTimeOffset? resultsTo,
+                                                      ICollection<Guid> floodSources,
+                                                      long? uprn,
+                                                      long? usrn,
+                                                      string? postcode,
+                                                      MultiPolygon? geom)
     {
         IQueryable<FloodReport> query = context.FloodReports
             .AsNoTracking()
@@ -89,6 +95,12 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         if (usrn.HasValue)
         {
             query = query.Where(fr => fr.Usrn.Equals(usrn.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(postcode))
+        {
+            //TODO implement this (for now, use a placeholder that returns all results)
+            query = query.Where(fr => true);
         }
 
         if (geom is not null)

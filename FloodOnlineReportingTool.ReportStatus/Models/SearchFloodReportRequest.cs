@@ -18,5 +18,6 @@ public record SearchFloodReportRequest
         FloodSources.Count > 0 ||
         Uprn.HasValue ||
         Usrn.HasValue ||
+        !string.IsNullOrWhiteSpace(Postcode) ||
         Geom is not null;
 }

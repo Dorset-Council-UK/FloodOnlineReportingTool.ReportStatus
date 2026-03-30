@@ -51,7 +51,7 @@ internal static class SearchFloodReportEndpoints
             });
         }
 
-        var reports = await searchFloodReportService.SearchFloodReports(request.ResultsFrom, request.ResultsTo, request.FloodSources, request.Uprn, request.Usrn, request.Geom, pageNumber, pageSize, ct);
+        var reports = await searchFloodReportService.SearchFloodReports(request.ResultsFrom, request.ResultsTo, request.FloodSources, request.Uprn, request.Usrn, request.Postcode, request.Geom, pageNumber, pageSize, ct);
         return TypedResults.Ok(reports);
     }
 }
