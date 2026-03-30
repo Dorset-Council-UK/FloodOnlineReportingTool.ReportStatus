@@ -1,8 +1,10 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Endpoints;
+using FloodOnlineReportingTool.ReportStatus.Models;
 using FloodOnlineReportingTool.ReportStatus.Services.Search;
 using Microsoft.AspNetCore.Http.HttpResults;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 using Tests.Data;
 
@@ -20,6 +22,38 @@ public class SearchFloodReportEndpointsTests
 
         // Act
         var result = await SearchFloodReportEndpoints.GetFloodReports(service, 1, expected.PageSize, TestContext.Current.CancellationToken);
+
+        // Assert
+        var okResult = Assert.IsType<Ok<PagedResult<SearchResultFloodReport>>>(result.Result);
+        Assert.Equal(expected, okResult.Value);
+    }
+
+    [Fact]
+    public async Task SearchFloodReports_ReturnsValidationProblem_WhenNoSearchCriteria()
+    {
+        // Arrange
+        var service = Substitute.For<ISearchFloodReportService>();
+        var request = new SearchFloodReportRequest();
+
+        // Act
+        var result = await SearchFloodReportEndpoints.SearchFloodReports(service, request, ct: TestContext.Current.CancellationToken);
+
+        // Assert
+        var validationResult = Assert.IsType<ValidationProblem>(result.Result);
+        Assert.Contains(nameof(request), validationResult.ProblemDetails.Errors.Keys);
+    }
+
+    [Theory]
+    [MemberData(nameof(SearchResultFloodReportData.Four_WithUprn), MemberType = typeof(SearchResultFloodReportData))]
+    public async Task SearchFloodReports_ReturnsOkay_WhenSuccessful(long uprn, ICollection<FloodReport> _, PagedResult<SearchResultFloodReport> expected)
+    {
+        // Arrange
+        var service = Substitute.For<ISearchFloodReportService>();
+        var request = new SearchFloodReportRequest { Uprn = uprn };
+        service.SearchFloodReports(null, null, Arg.Any<ICollection<Guid>>(), uprn, null, "", null, 1, expected.PageSize, Arg.Any<CancellationToken>()).Returns(expected);
+
+        // Act
+        var result = await SearchFloodReportEndpoints.SearchFloodReports(service, request, 1, expected.PageSize, TestContext.Current.CancellationToken);
 
         // Assert
         var okResult = Assert.IsType<Ok<PagedResult<SearchResultFloodReport>>>(result.Result);
