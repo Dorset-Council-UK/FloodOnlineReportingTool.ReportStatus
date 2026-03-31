@@ -35,7 +35,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<Point>("Geom")
                         .IsRequired()
-                        .HasColumnType("geometry (point)");
+                        .HasColumnType("geometry (point, 27700)");
 
                     b.Property<decimal>("Latitude")
                         .ValueGeneratedOnAddOrUpdate()
@@ -106,7 +106,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<Point>("Geom")
                         .IsRequired()
-                        .HasColumnType("geometry (point)");
+                        .HasColumnType("geometry (point, 27700)");
 
                     b.Property<decimal>("Latitude")
                         .ValueGeneratedOnAddOrUpdate()
@@ -183,7 +183,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<Point>("Geom")
                         .IsRequired()
-                        .HasColumnType("geometry (point)");
+                        .HasColumnType("geometry (point, 27700)");
 
                     b.Property<int>("ImpactDurationHours")
                         .HasColumnType("integer");
@@ -249,7 +249,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.Property<Point>("Geom")
                         .IsRequired()
-                        .HasColumnType("geometry (point)");
+                        .HasColumnType("geometry (point, 27700)");
 
                     b.Property<decimal>("Latitude")
                         .ValueGeneratedOnAddOrUpdate()

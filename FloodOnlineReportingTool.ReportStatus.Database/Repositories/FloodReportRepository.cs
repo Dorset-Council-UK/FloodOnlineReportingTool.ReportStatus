@@ -56,4 +56,59 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
             .Where(fr => fr.Usrn.Equals(usrn))
             .OrderBy(fr => fr.Id);
     }
+
+    public IQueryable<FloodReport> SearchFloodReports(DateTimeOffset? resultsFrom,
+                                                      DateTimeOffset? resultsTo,
+                                                      ICollection<Guid> floodSources,
+                                                      long? uprn,
+                                                      long? usrn,
+                                                      string? postcode,
+                                                      MultiPolygon? geom)
+    {
+        IQueryable<FloodReport> query = context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId));
+
+        if (resultsFrom.HasValue)
+        {
+            query = query.Where(fr => fr.ImpactStartUtc.HasValue &&
+                fr.ImpactStartUtc.Value.AddHours(fr.ImpactDurationHours) >= resultsFrom.Value);
+        }
+
+        if (resultsTo.HasValue)
+        {
+            query = query.Where(fr => fr.ImpactStartUtc.HasValue &&
+                fr.ImpactStartUtc.Value <= resultsTo.Value);
+        }
+
+        if (floodSources.Count > 0)
+        {
+            query = query.Where(fr => fr.Sources.Any(s => floodSources.Contains(s.SourceId)));
+        }
+
+        if (uprn.HasValue)
+        {
+            query = query.Where(fr => fr.Uprn.Equals(uprn.Value));
+        }
+
+        if (usrn.HasValue)
+        {
+            query = query.Where(fr => fr.Usrn.Equals(usrn.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(postcode))
+        {
+            //TODO implement this (for now, use a placeholder that returns all results)
+            query = query.Where(fr => true);
+        }
+
+        if (geom is not null)
+        {
+            geom.SRID = 27700;
+            query = query.Where(fr => fr.Geom.Within(geom));
+        }
+
+        return query.OrderBy(fr => fr.Id);
+    }
 }
