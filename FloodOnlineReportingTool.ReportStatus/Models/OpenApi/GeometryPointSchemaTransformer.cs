@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
+using System.Text.Json.Nodes;
 
 namespace FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 
@@ -13,18 +13,18 @@ internal class GeometryPointSchemaTransformer : IOpenApiSchemaTransformer
     {
         if (context.JsonTypeInfo.Type == typeof(NetTopologySuite.Geometries.Point))
         {
-            schema.Type = "object";
+            schema.Type = JsonSchemaType.Object;
             schema.Properties.Clear();
             schema.Properties["type"] = new OpenApiSchema
             {
-                Type = "string",
-                Example = new OpenApiString("Point"),
+                Type = JsonSchemaType.String,
+                Example = JsonValue.Create("Point"),
             };
             schema.Properties["coordinates"] = new OpenApiSchema
             {
-                Type = "array",
+                Type = JsonSchemaType.Array,
                 Items = new OpenApiSchema {
-                    Type = "number",
+                    Type = JsonSchemaType.Number,
                     Format = "double",
                 },
                 MinItems = 2,
