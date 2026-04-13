@@ -14,22 +14,23 @@ internal class GeometryPointSchemaTransformer : IOpenApiSchemaTransformer
         if (context.JsonTypeInfo.Type == typeof(NetTopologySuite.Geometries.Point))
         {
             schema.Type = JsonSchemaType.Object;
-            schema.Properties.Clear();
-            schema.Properties["type"] = new OpenApiSchema
+            schema.Properties ??= new Dictionary<string, IOpenApiSchema>(StringComparer.OrdinalIgnoreCase);
+            schema.Properties.Add("type", new OpenApiSchema
             {
                 Type = JsonSchemaType.String,
                 Example = JsonValue.Create("Point"),
-            };
-            schema.Properties["coordinates"] = new OpenApiSchema
+            });
+            schema.Properties.Add("coordinates", new OpenApiSchema
             {
                 Type = JsonSchemaType.Array,
-                Items = new OpenApiSchema {
+                Items = new OpenApiSchema
+                {
                     Type = JsonSchemaType.Number,
                     Format = "double",
                 },
                 MinItems = 2,
                 MaxItems = 2,
-            };
+            });
             schema.Required = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "type", "coordinates" };
         }
 

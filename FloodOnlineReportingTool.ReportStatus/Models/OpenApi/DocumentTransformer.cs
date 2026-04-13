@@ -60,6 +60,8 @@ internal sealed class DocumentTransformer(ApiVersion version, MicrosoftIdentityO
         var tokenUrl = new Uri(baseEndpoint, "oauth2/v2.0/token");
 
         document.Components ??= new();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>(StringComparer.OrdinalIgnoreCase);
+
         document.Components.SecuritySchemes.Add(Constants.Bearer, new OpenApiSecurityScheme
         {
             Name = "Authorization",
