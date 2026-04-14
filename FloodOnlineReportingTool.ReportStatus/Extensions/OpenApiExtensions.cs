@@ -70,7 +70,6 @@ internal static class OpenApiExtensions
         {
             options
                 .WithTitle("Report Status API")
-                .WithOperationSorter(OperationSorter.Alpha)
                 .AddDocuments(documentNames)
                 .AddPreferredSecuritySchemes(Constants.Bearer)
                 .AddOAuth2Flows(Constants.Bearer, flows =>
@@ -82,27 +81,6 @@ internal static class OpenApiExtensions
                         options.SelectedScopes = [ $"api://{identityOptions.ClientId}/access_as_user" ];
                     });
                 });
-        });
-
-        return app;
-    }
-
-    /// <summary>
-    /// Add the Swagger UI <see href="https://localhost:7065/swagger" />
-    /// </summary>
-    internal static WebApplication UseSwagger(this WebApplication app, MicrosoftIdentityOptions identityOptions)
-    {
-        app.UseSwaggerUI(options =>
-        {
-            options.DocumentTitle = "Report Status API";
-            options.EnableTryItOutByDefault();
-            foreach (var versionInfo in Versions.All)
-            {
-                options.SwaggerEndpoint($"/openapi/{versionInfo.DocumentName}.json", $"Report Status API | {versionInfo.DocumentName}");
-            }
-            options.OAuthClientId(identityOptions.ClientId);
-            options.OAuthUsePkce();
-            options.OAuthScopes($"api://{identityOptions.ClientId}/access_as_user");
         });
 
         return app;

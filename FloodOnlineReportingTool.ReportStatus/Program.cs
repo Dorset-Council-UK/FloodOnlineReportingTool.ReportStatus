@@ -39,7 +39,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseScalarUI(identityOptions);
-    app.UseSwagger(identityOptions);
 }
 
 app.UseHttpsRedirection();
