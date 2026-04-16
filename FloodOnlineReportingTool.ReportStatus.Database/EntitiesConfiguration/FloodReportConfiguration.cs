@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.EntitiesConfiguration;
 
-internal class FloodReportConfiguration : IEntityTypeConfiguration<FloodReport>
+internal class FloodReportConfiguration : IEntityTypeConfiguration<FloodReportSource>
 {
-    public void Configure(EntityTypeBuilder<FloodReport> builder)
+    public void Configure(EntityTypeBuilder<FloodReportSource> builder)
     {
         builder.HasKey(o => o.Id);
 
@@ -17,6 +17,14 @@ internal class FloodReportConfiguration : IEntityTypeConfiguration<FloodReport>
         builder
             .Property(o => o.Geom)
             .HasColumnType("geometry (point, 27700)");
+
+        builder
+            .Property(o => o.Easting)
+            .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 27700))", stored: true);
+
+        builder
+            .Property(o => o.Northing)
+            .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 27700))", stored: true);
 
         builder
             .Property(o => o.Latitude)

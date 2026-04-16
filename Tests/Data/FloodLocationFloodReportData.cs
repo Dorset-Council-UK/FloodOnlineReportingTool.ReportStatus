@@ -9,22 +9,24 @@ public static class FloodLocationFloodReportData
     public static readonly string TestConfirmedUserId = "550e8400-e29b-41d4-a716-446655440000";
     public static readonly string TestConfirmedUserName = "Test User";
 
-    public static FloodLocationFloodReport Create(Guid? floodLocationId = null, Guid? floodReportId = null)
+    public static FloodLocationFloodReport Create(Guid? floodLocationId = null, Guid? floodReportId = null, Guid? floodReportSourceId = null)
     {
         return new()
         {
             FloodLocationId = floodLocationId ?? Guid.NewGuid(),
             FloodReportId = floodReportId ?? Guid.NewGuid(),
+            FloodReportSourceId = floodReportSourceId ?? Guid.NewGuid(),
             CreatedUtc = TestCreatedDate,
         };
     }
 
-    public static FloodLocationFloodReport CreateConfirmed(Guid? floodLocationId = null, Guid? floodReportId = null)
+    public static FloodLocationFloodReport CreateConfirmed(Guid? floodLocationId = null, Guid? floodReportId = null, Guid? floodReportSourceId = null)
     {
         return new()
         {
             FloodLocationId = floodLocationId ?? Guid.NewGuid(),
             FloodReportId = floodReportId ?? Guid.NewGuid(),
+            FloodReportSourceId = floodReportSourceId ?? Guid.NewGuid(),
             CreatedUtc = TestCreatedDate,
             ConfirmedUtc = TestConfirmedDate,
             ConfirmedByUserId = TestConfirmedUserId,

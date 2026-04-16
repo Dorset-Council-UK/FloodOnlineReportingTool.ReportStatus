@@ -43,7 +43,7 @@ public interface IFloodRoadService
     /// <para>Sometimes add the road + linked flood report</para>
     /// <para>Sometimes just link the road flood report(s)</para>
     /// </summary>
-    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct);
+    //Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood road in the database.
@@ -59,4 +59,6 @@ public interface IFloodRoadService
     /// Checks if a flood road exists
     /// </summary>
     Task<bool> FloodRoadExists(Guid id, CancellationToken ct);
+
+    Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(long usrn, EligibilityCheckRecord ecr, CancellationToken ct);
 }

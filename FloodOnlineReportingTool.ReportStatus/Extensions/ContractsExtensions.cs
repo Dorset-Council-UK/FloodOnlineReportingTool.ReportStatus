@@ -1,26 +1,26 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using NetTopologySuite.Geometries;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
+#pragma warning disable IDE0130 // Namespace does not match fFloodReportSourceer structure
 namespace FloodOnlineReportingTool.Contracts;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
+#pragma warning restore IDE0130 // Namespace does not match fFloodReportSourceer structure
 
 internal static class ContractsExtensions
 {
-    internal static FloodReportDto ToFloodReportDto(this EligibilityCheckCreated eligibilityCheckCreated)
-    {
-        return new()
-        {
-            EligibilityCheckId = eligibilityCheckCreated.Id,
-            Uprn = eligibilityCheckCreated.Uprn,
-            Usrn = eligibilityCheckCreated.Usrn,
-            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing) { SRID = 27700 },
-            ImpactStartUtc = eligibilityCheckCreated.ImpactStartUTC,
-            ImpactDurationHours = eligibilityCheckCreated.ImpactDurationHours,
-        };
-    }
+    //internal static FloodReportDto ToFloodReportDto(this FloodReportSourceCreated floodReportSourceCreated)
+    //{
+    //    return new()
+    //    {
+    //        EligibilityCheckId = floodReportSourceCreated.Id,
+    //        Uprn = floodReportSourceCreated.Uprn,
+    //        Usrn = floodReportSourceCreated.Usrn,
+    //        Geom = new Point(floodReportSourceCreated.Easting, floodReportSourceCreated.Northing) { SRID = 27700 },
+    //        ImpactStartUtc = floodReportSourceCreated.ImpactStartUTC,
+    //        ImpactDurationHours = floodReportSourceCreated.ImpactDurationHours,
+    //    };
+    //}
 
-    internal static FloodReportSourceDto ToFloodReportSourceDto(this EligibilityCheckFloodSource eligibilityCheckFloodSource)
+    internal static FloodReportNameDto ToFloodReportSourceDto(this EligibilityCheckFloodSource eligibilityCheckFloodSource)
     {
         return new()
         {
@@ -28,13 +28,13 @@ internal static class ContractsExtensions
         };
     }
 
-    internal static FloodPropertyDto ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    //internal static FloodPropertyDto ToFloodPropertyDto(this FloodReportSourceCreated floodReportSourceCreated)
+    //{
+    //    return floodReportSourceCreated.EligibilityCheckRecord.ToFloodPropertyDto(floodReportSourceCreated.EligibilityCheckRecord.LocationDescription ?? "No address provided");
+    //}
+    internal static FloodPropertyDto ToFloodPropertyDto(this FloodReportSourceCreated floodReportSourceCreated, string locationDescription)
     {
-        return eligibilityCheckCreated.ToFloodPropertyDto(eligibilityCheckCreated.LocationDescription ?? "No address provided");
-    }
-    internal static FloodPropertyDto ToFloodPropertyDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
-    {
-        if (eligibilityCheckCreated.Uprn is null)
+        if (floodReportSourceCreated.EligibilityCheckRecord.Uprn is null)
         {
             throw new InvalidOperationException("Cannot create Flood Property DTO without a UPRN.");
         }
@@ -42,18 +42,18 @@ internal static class ContractsExtensions
         return new()
         {
             Title = locationDescription,
-            Uprn = eligibilityCheckCreated.Uprn.Value,
-            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+            Uprn = floodReportSourceCreated.EligibilityCheckRecord.Uprn.Value,
+            Geom = new Point(floodReportSourceCreated.EligibilityCheckRecord.Easting, floodReportSourceCreated.EligibilityCheckRecord.Northing),
         };
     }
 
-    internal static FloodRoadDto ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    internal static FloodRoadDto ToFloodRoadDto(this FloodReportSourceCreated floodReportSourceCreated)
     {
-        return eligibilityCheckCreated.ToFloodRoadDto(eligibilityCheckCreated.LocationDescription ?? "No road name provided");
+        return floodReportSourceCreated.ToFloodRoadDto(floodReportSourceCreated.EligibilityCheckRecord.LocationDescription ?? "No road name provided");
     }
-    internal static FloodRoadDto ToFloodRoadDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
+    internal static FloodRoadDto ToFloodRoadDto(this FloodReportSourceCreated floodReportSourceCreated, string locationDescription)
     {
-        if (eligibilityCheckCreated.Usrn is null)
+        if (floodReportSourceCreated.EligibilityCheckRecord.Usrn is null)
         {
             throw new InvalidOperationException("Cannot create Flood Road DTO without a USRN.");
         }
@@ -61,21 +61,21 @@ internal static class ContractsExtensions
         return new()
         {
             Title = locationDescription,
-            Usrn = eligibilityCheckCreated.Usrn.Value,
-            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+            Usrn = floodReportSourceCreated.EligibilityCheckRecord.Usrn.Value,
+            Geom = new Point(floodReportSourceCreated.EligibilityCheckRecord.Easting, floodReportSourceCreated.EligibilityCheckRecord.Northing),
         };
     }
 
-    internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated)
+    internal static FloodLocationDto ToFloodLocationDto(this FloodReportSourceCreated floodReportSourceCreated)
     {
-        return eligibilityCheckCreated.ToFloodLocationDto(eligibilityCheckCreated.LocationDescription ?? "No description provided");
+        return floodReportSourceCreated.ToFloodLocationDto(floodReportSourceCreated.EligibilityCheckRecord.LocationDescription ?? "No description provided");
     }
-    internal static FloodLocationDto ToFloodLocationDto(this EligibilityCheckCreated eligibilityCheckCreated, string locationDescription)
+    internal static FloodLocationDto ToFloodLocationDto(this FloodReportSourceCreated floodReportSourceCreated, string locationDescription)
     {
         return new()
         {
             Title = locationDescription,
-            Geom = new Point(eligibilityCheckCreated.Easting, eligibilityCheckCreated.Northing),
+            Geom = new Point(floodReportSourceCreated.EligibilityCheckRecord.Easting, floodReportSourceCreated.EligibilityCheckRecord.Northing),
         };
     }
 }

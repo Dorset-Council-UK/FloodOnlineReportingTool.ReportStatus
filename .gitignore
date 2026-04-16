@@ -74,8 +74,8 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# ASP.NET Scaffolding
-ScaffoldingReadMe.txt
+# ASP.NET ScaffFloodReportSourceing
+ScaffFloodReportSourceingReadMe.txt
 
 # StyleCop
 StyleCopReport.xml
@@ -179,7 +179,7 @@ AutoTest.Net/
 # Web workbench (sass)
 .sass-cache/
 
-# Installshield output folder
+# Installshield output fFloodReportSourceer
 [Ee]xpress/
 
 # DocProject is a documentation generator add-in
@@ -212,7 +212,7 @@ PublishScripts/
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
-# The packages folder can be ignored because of Package Restore
+# The packages fFloodReportSourceer can be ignored because of Package Restore
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
@@ -267,7 +267,7 @@ orleans.codegen.cs
 # RIA/Silverlight projects
 Generated_Code/
 
-# Backup & report files from converting an old project file
+# Backup & report files from converting an FloodReportSource project file
 # to a newer Visual Studio version. Backup files are not needed,
 # because we have git ;-)
 _UpgradeReport_Files/
@@ -369,13 +369,13 @@ ASALocalRun/
 *.binlog
 MSBuild_Logs/
 
-# AWS SAM Build and Temporary Artifacts folder
+# AWS SAM Build and Temporary Artifacts fFloodReportSourceer
 .aws-sam
 
 # NVidia Nsight GPU debugger configuration file
 *.nvuser
 
-# MFractors (Xamarin productivity tool) working folder
+# MFractors (Xamarin productivity tool) working fFloodReportSourceer
 **/.mfractor/
 
 # Local History for Visual Studio
@@ -387,10 +387,10 @@ MSBuild_Logs/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
-# Backup folder for Package Reference Convert tool in Visual Studio 2017
+# Backup fFloodReportSourceer for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-# Ionide (cross platform F# VS Code tools) working folder
+# Ionide (cross platform F# VS Code tools) working fFloodReportSourceer
 **/.ionide/
 
 # Fody - auto-generated XML schema

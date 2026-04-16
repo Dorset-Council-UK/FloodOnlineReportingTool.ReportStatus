@@ -26,7 +26,7 @@ public class FloodLocationFloodReportService(ILogger<FloodLocationFloodReportSer
         return await context.FloodLocationFloodReports.FindAsync([floodLocationId, floodReportId], ct);
     }
 
-    public async Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, CancellationToken ct)
+    public async Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct)
     {
         logger.LogDebug("Creating a new unconfirmed flood report relationship for the flood location with IDs {FloodLocationId}/{FloodReportId} from the database.", floodLocationId, floodReportId);
 
@@ -34,6 +34,7 @@ public class FloodLocationFloodReportService(ILogger<FloodLocationFloodReportSer
         {
             FloodLocationId = floodLocationId,
             FloodReportId = floodReportId,
+            FloodReportSourceId = floodReportSourceId,
             CreatedUtc = DateTimeOffset.UtcNow,
         };
 
@@ -43,7 +44,7 @@ public class FloodLocationFloodReportService(ILogger<FloodLocationFloodReportSer
         return creating;
     }
 
-    public async Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, string userId, string userName, CancellationToken ct)
+    public async Task<FloodLocationFloodReport> CreateFloodLocationFloodReport(Guid floodLocationId, Guid floodReportId, Guid floodReportSourceId, string userId, string userName, CancellationToken ct)
     {
         logger.LogDebug("Creating a new confirmed flood report relationship for the flood location with IDs {FloodLocationId}/{FloodReportId} from the database.", floodLocationId, floodReportId);
 
@@ -52,6 +53,7 @@ public class FloodLocationFloodReportService(ILogger<FloodLocationFloodReportSer
         {
             FloodLocationId = floodLocationId,
             FloodReportId = floodReportId,
+            FloodReportSourceId = floodReportSourceId,
             CreatedUtc = now,
 
             ConfirmedUtc = now,

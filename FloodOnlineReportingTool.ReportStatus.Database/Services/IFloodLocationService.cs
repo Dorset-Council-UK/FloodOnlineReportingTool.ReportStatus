@@ -47,7 +47,7 @@ public interface IFloodLocationService
     /// <para>Sometimes add the location + linked flood report</para>
     /// <para>Sometimes just link the location flood report(s)</para>
     /// </summary>
-    Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, double buffer, CancellationToken ct);
+    //Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, double buffer, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood location in the database.
@@ -63,4 +63,6 @@ public interface IFloodLocationService
     /// Checks if a flood location exists
     /// </summary>
     Task<bool> FloodLocationExists(Guid id, CancellationToken ct);
+
+    Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(double buffer, EligibilityCheckRecord ecr, CancellationToken ct);
 }

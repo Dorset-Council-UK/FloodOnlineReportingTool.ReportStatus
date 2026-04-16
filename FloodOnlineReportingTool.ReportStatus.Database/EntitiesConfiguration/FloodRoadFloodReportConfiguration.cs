@@ -8,24 +8,26 @@ internal class FloodRoadFloodReportConfiguration : IEntityTypeConfiguration<Floo
 {
     public void Configure(EntityTypeBuilder<FloodRoadFloodReport> builder)
     {
-        builder.HasKey(o => new { o.FloodRoadId, o.FloodReportId });
+        builder.HasKey(o => new { o.FloodRoadId, o.FloodReportId, o.FloodReportSourceId });
 
-        builder
-            .Property(o => o.FloodRoadId)
-            .ValueGeneratedNever();
-
-        builder
-            .Property(o => o.FloodReportId)
-            .ValueGeneratedNever();
+        builder.Property(o => o.FloodRoadId).ValueGeneratedNever();
+        builder.Property(o => o.FloodReportId).ValueGeneratedNever();
+        builder.Property(o => o.FloodReportSourceId).ValueGeneratedNever();
 
         builder.HasIndex(o => o.ConfirmedByUserId);
+        builder.Property(o => o.ConfirmedByUserId).HasMaxLength(200);
+        builder.Property(o => o.ConfirmedUserName).HasMaxLength(2000);
 
         builder
-            .Property(o => o.ConfirmedByUserId)
-            .HasMaxLength(200);
+            .HasOne(o => o.FloodRoad)
+            .WithMany(fr => fr.FloodReports)
+            .HasForeignKey(o => o.FloodRoadId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .Property(o => o.ConfirmedUserName)
-            .HasMaxLength(2000);
+            .HasOne(o => o.FloodReport)
+            .WithMany()
+            .HasForeignKey(o => new { o.FloodReportId, o.FloodReportSourceId })
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

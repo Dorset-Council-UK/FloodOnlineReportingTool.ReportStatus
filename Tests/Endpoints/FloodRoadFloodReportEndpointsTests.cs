@@ -66,10 +66,10 @@ public class FloodRoadFloodReportEndpointsTests
     {
         // Arrange
         var service = Substitute.For<IFloodRoadFloodReportService>();
-        service.CreateFloodRoadFloodReport(expected.FloodRoadId, expected.FloodReportId, Arg.Any<CancellationToken>()).Returns(expected);
+        service.CreateFloodRoadFloodReport(expected.FloodRoadId, expected.FloodReportId, expected.FloodReportSourceId, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
-        var result = await FloodRoadFloodReportEndpoints.CreateFloodReport(service, expected.FloodRoadId, expected.FloodReportId, TestContext.Current.CancellationToken);
+        var result = await FloodRoadFloodReportEndpoints.CreateFloodReport(service, expected.FloodRoadId, expected.FloodReportId, expected.FloodReportSourceId, TestContext.Current.CancellationToken);
 
         // Assert
         var createdResult = Assert.IsType<Created<FloodRoadFloodReport>>(result.Result);
@@ -87,10 +87,10 @@ public class FloodRoadFloodReportEndpointsTests
         currentUserService.Name.Returns(FloodRoadFloodReportData.TestConfirmedUserName);
 
         var service = Substitute.For<IFloodRoadFloodReportService>();
-        service.CreateFloodRoadFloodReport(expected.FloodRoadId, expected.FloodReportId, FloodRoadFloodReportData.TestConfirmedUserId, FloodRoadFloodReportData.TestConfirmedUserName, Arg.Any<CancellationToken>()).Returns(expected);
+        service.CreateFloodRoadFloodReport(expected.FloodRoadId, expected.FloodReportId, expected.FloodReportSourceId, FloodRoadFloodReportData.TestConfirmedUserId, FloodRoadFloodReportData.TestConfirmedUserName, Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
-        var result = await FloodRoadFloodReportEndpoints.CreateFloodReportConfirmed(service, currentUserService, expected.FloodRoadId, expected.FloodReportId, TestContext.Current.CancellationToken);
+        var result = await FloodRoadFloodReportEndpoints.CreateFloodReportConfirmed(service, currentUserService, expected.FloodRoadId, expected.FloodReportId, expected.FloodReportSourceId, TestContext.Current.CancellationToken);
 
         // Assert
         var createdResult = Assert.IsType<Created<FloodRoadFloodReport>>(result.Result);

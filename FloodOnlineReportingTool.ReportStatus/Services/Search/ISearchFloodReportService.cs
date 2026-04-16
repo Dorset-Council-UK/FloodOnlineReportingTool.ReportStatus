@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared.Search;
 using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Services.Search;

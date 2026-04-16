@@ -2,9 +2,9 @@
 using FloodOnlineReportingTool.ReportStatus.Endpoints;
 using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
+#pragma warning disable IDE0130 // Namespace does not match fFloodReportSourceer structure
 namespace Microsoft.AspNetCore.Builder;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
+#pragma warning restore IDE0130 // Namespace does not match fFloodReportSourceer structure
 
 internal static class EndpointExtensions
 {
@@ -488,23 +488,23 @@ internal static class EndpointExtensions
             .RequireAuthorization(PolicyNames.Writer);
 
         // Update
-        group
-            .MapPut(pattern: "/{sourceId}", FloodReportSourceEndpoints.UpdateReportSource)
-            .WithSummary("Updates a flood source for a flood report")
-            .WithDescription("Updates a flood source for a flood report")
-            .RequireAuthorization(PolicyNames.Writer);
+        //group
+        //    .MapPut(pattern: "/{sourceId}", FloodReportSourceEndpoints.UpdateReportSource)
+        //    .WithSummary("Updates a flood source for a flood report")
+        //    .WithDescription("Updates a flood source for a flood report")
+        //    .RequireAuthorization(PolicyNames.Writer);
 
-        // Delete
-        group
-            .MapDelete(pattern: "/{sourceId}", FloodReportSourceEndpoints.DeleteReportSource)
-            .WithSummary("Deletes a flood source for a flood report")
-            .RequireAuthorization(PolicyNames.Writer);
+        //// Delete
+        //group
+        //    .MapDelete(pattern: "/{sourceId}", FloodReportSourceEndpoints.DeleteReportSource)
+        //    .WithSummary("Deletes a flood source for a flood report")
+        //    .RequireAuthorization(PolicyNames.Writer);
 
-        // Exists
-        group
-            .MapGet(pattern: "/{sourceId}/exists", FloodReportSourceEndpoints.FloodReportSourceExists)
-            .WithSummary("Checks if a flood report exists for a flood location")
-            .RequireAuthorization(PolicyNames.Reader);
+        //// Exists
+        //group
+        //    .MapGet(pattern: "/{sourceId}/exists", FloodReportSourceEndpoints.FloodReportSourceExists)
+        //    .WithSummary("Checks if a flood report exists for a flood location")
+        //    .RequireAuthorization(PolicyNames.Reader);
     }
 
     private static void MapSearchFloodLocationEndpoints(WebApplication app)
@@ -639,9 +639,9 @@ internal static class EndpointExtensions
             .RequireAuthorization(PolicyNames.Admin);
 
         group
-            .MapGet(pattern: "/consumer/property", TestEndpoints.TestFloodPropertyMessage)
-            .WithSummary("Test the consumer flood property message")
-            .WithDescription("Test the consumer flood property message functionality in the flood property service")
+            .MapGet(pattern: "/consumer/property", TestEndpoints.TestFloodReportMessage)
+            .WithSummary("Test the consumer flood report message")
+            .WithDescription("Test the consumer flood report message functionality in the flood report service")
             .RequireAuthorization(PolicyNames.Admin);
     }
 }

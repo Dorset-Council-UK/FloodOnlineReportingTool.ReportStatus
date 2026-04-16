@@ -6,6 +6,7 @@ public record FloodPropertyFloodReport : ICreatedUpdated, IConfirmed
 {
     public required Guid FloodPropertyId { get; init; }
     public required Guid FloodReportId { get; init; }
+    public required Guid FloodReportSourceId { get; init; }
 
     // ICreatedUpdated implementation
     public DateTimeOffset CreatedUtc { get; init; }
@@ -19,5 +20,5 @@ public record FloodPropertyFloodReport : ICreatedUpdated, IConfirmed
     [JsonIgnore]
     public virtual FloodProperty FloodProperty { get; init; } = default!;
     [JsonIgnore]
-    public virtual FloodReport FloodReport { get; init; } = default!;
+    public virtual FloodReportSource FloodReport { get; init; } = default!;
 }

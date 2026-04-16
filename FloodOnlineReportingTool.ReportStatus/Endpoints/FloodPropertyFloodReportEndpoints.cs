@@ -23,18 +23,18 @@ internal static class FloodPropertyFloodReportEndpoints
         return floodPropertyFloodReport is null ? TypedResults.NotFound() : TypedResults.Ok(floodPropertyFloodReport);
     }
 
-    internal static async Task<Results<Created<FloodPropertyFloodReport>, BadRequest>> CreateFloodReport(IFloodPropertyFloodReportService floodPropertyFloodReportService, Guid floodPropertyId, Guid floodReportId, CancellationToken ct)
+    internal static async Task<Results<Created<FloodPropertyFloodReport>, BadRequest>> CreateFloodReport(IFloodPropertyFloodReportService floodPropertyFloodReportService, Guid floodPropertyId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct)
     {
         var floodPropertyFloodReport = await floodPropertyFloodReportService
-            .CreateFloodPropertyFloodReport(floodPropertyId, floodReportId, ct)
+            .CreateFloodPropertyFloodReport(floodPropertyId, floodReportId, floodReportSourceId, ct)
             .ConfigureAwait(false);
         return TypedResults.Created($"/api/flood/property/{floodPropertyFloodReport.FloodPropertyId}/reports/{floodPropertyFloodReport.FloodReportId}", floodPropertyFloodReport);
     }
 
-    internal static async Task<Results<Created<FloodPropertyFloodReport>, BadRequest>> CreateFloodReportConfirmed(IFloodPropertyFloodReportService floodPropertyFloodReportService, ICurrentUserService currentUserService, Guid floodPropertyId, Guid floodReportId, CancellationToken ct)
+    internal static async Task<Results<Created<FloodPropertyFloodReport>, BadRequest>> CreateFloodReportConfirmed(IFloodPropertyFloodReportService floodPropertyFloodReportService, ICurrentUserService currentUserService, Guid floodPropertyId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct)
     {
         var floodPropertyFloodReport = await floodPropertyFloodReportService
-            .CreateFloodPropertyFloodReport(floodPropertyId, floodReportId, currentUserService.UserId, currentUserService.Name, ct)
+            .CreateFloodPropertyFloodReport(floodPropertyId, floodReportId, floodReportSourceId, currentUserService.UserId, currentUserService.Name, ct)
             .ConfigureAwait(false);
         return TypedResults.Created($"/api/flood/property/{floodPropertyFloodReport.FloodPropertyId}/reports/{floodPropertyFloodReport.FloodReportId}", floodPropertyFloodReport);
     }

@@ -26,7 +26,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         return await context.FloodRoadFloodReports.FindAsync([floodRoadId, floodReportId], ct);
     }
 
-    public async Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, CancellationToken ct)
+    public async Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct)
     {
         logger.LogDebug("Creating a new unconfirmed flood report relationship for the flood road with IDs {FloodRoadId}/{FloodReportId} from the database.", floodRoadId, floodReportId);
 
@@ -34,6 +34,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         {
             FloodRoadId = floodRoadId,
             FloodReportId = floodReportId,
+            FloodReportSourceId = floodReportSourceId,
             CreatedUtc = DateTimeOffset.UtcNow,
         };
 
@@ -43,7 +44,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         return creating;
     }
 
-    public async Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, string userId, string userName, CancellationToken ct)
+    public async Task<FloodRoadFloodReport> CreateFloodRoadFloodReport(Guid floodRoadId, Guid floodReportId, Guid floodReportSourceId, string userId, string userName, CancellationToken ct)
     {
         logger.LogDebug("Creating a new confirmed flood report relationship for the flood road with IDs {FloodRoadId}/{FloodReportId} from the database.", floodRoadId, floodReportId);
 
@@ -52,6 +53,7 @@ public class FloodRoadFloodReportService(ILogger<FloodRoadFloodReportService> lo
         {
             FloodRoadId = floodRoadId,
             FloodReportId = floodReportId,
+            FloodReportSourceId = floodReportSourceId,
             CreatedUtc = now,
 
             ConfirmedUtc = now,

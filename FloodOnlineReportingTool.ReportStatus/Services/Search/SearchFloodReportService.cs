@@ -1,12 +1,17 @@
-﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared.Search;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Services.Search;
 
-internal class SearchFloodReportService(ILogger<SearchFloodReportService> logger, IFloodReportRepository floodReportRepository) : ISearchFloodReportService
+internal class SearchFloodReportService(
+    ILogger<SearchFloodReportService> logger, 
+    IFloodReportRepository floodReportRepository
+    ) : ISearchFloodReportService
 {
+
     public async Task<PagedResult<SearchResultFloodReport>> GetFloodReports(int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
     {
         logger.LogInformation("Searching flood reports from page {PageNumber} for {PageSize} items per page.", pageNumber, pageSize);

@@ -17,12 +17,12 @@ public interface IFloodPropertyFloodReportService
     /// <summary>
     /// Creates a new unconfirmed flood report relationship for a flood property.
     /// </summary>
-    Task<FloodPropertyFloodReport> CreateFloodPropertyFloodReport(Guid floodPropertyId, Guid floodReportId, CancellationToken ct);
+    Task<FloodPropertyFloodReport> CreateFloodPropertyFloodReport(Guid floodPropertyId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct);
 
     /// <summary>
     /// Creates a new confirmed flood report relationship for a flood property.
     /// </summary>
-    Task<FloodPropertyFloodReport> CreateFloodPropertyFloodReport(Guid floodPropertyId, Guid floodReportId, string userId, string userName, CancellationToken ct);
+    Task<FloodPropertyFloodReport> CreateFloodPropertyFloodReport(Guid floodPropertyId, Guid floodReportId, Guid floodReportSourceId, string userId, string userName, CancellationToken ct);
 
     /// <summary>
     /// Confirm the flood report is correctly related to the flood property.

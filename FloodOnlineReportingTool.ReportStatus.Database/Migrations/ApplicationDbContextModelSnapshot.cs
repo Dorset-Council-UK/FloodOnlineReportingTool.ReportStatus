@@ -19,7 +19,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("fortreportstatus")
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
@@ -70,6 +70,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("FloodReportId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("FloodReportSourceId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ConfirmedByUserId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -87,11 +90,11 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("FloodLocationId", "FloodReportId");
+                    b.HasKey("FloodLocationId", "FloodReportId", "FloodReportSourceId");
 
                     b.HasIndex("ConfirmedByUserId");
 
-                    b.HasIndex("FloodReportId");
+                    b.HasIndex("FloodReportId", "FloodReportSourceId");
 
                     b.ToTable("FloodLocationFloodReports", "fortreportstatus");
                 });
@@ -144,6 +147,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("FloodReportId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("FloodReportSourceId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ConfirmedByUserId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -161,11 +167,11 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("FloodPropertyId", "FloodReportId");
+                    b.HasKey("FloodPropertyId", "FloodReportId", "FloodReportSourceId");
 
                     b.HasIndex("ConfirmedByUserId");
 
-                    b.HasIndex("FloodReportId");
+                    b.HasIndex("FloodReportId", "FloodReportSourceId");
 
                     b.ToTable("FloodPropertyReports", "fortreportstatus");
                 });
@@ -173,42 +179,17 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("EligibilityCheckId")
+                    b.Property<Guid>("RecordStatus")
                         .HasColumnType("uuid");
-
-                    b.Property<Point>("Geom")
-                        .IsRequired()
-                        .HasColumnType("geometry (point, 27700)");
-
-                    b.Property<int>("ImpactDurationHours")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset?>("ImpactStartUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("Latitude")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("numeric")
-                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
-
-                    b.Property<decimal>("Longitude")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("numeric")
-                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
 
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("Uprn")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("Usrn")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -220,23 +201,129 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("FloodReportId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SourceId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Easting")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("double precision")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 27700))", true);
+
+                    b.Property<Guid?>("EligibilityCheckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Point>("Geom")
+                        .IsRequired()
+                        .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<int?>("ImpactDurationHours")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("ImpactStartUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsOnGoing")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUninhabitable")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<string>("LocationDescription")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<double>("Northing")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("double precision")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 27700))", true);
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("Uprn")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("Usrn")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ViewUri")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("VulnerableCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("FloodReportId", "Id");
+
+                    b.ToTable("FloodReportSources", "fortreportstatus");
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceFloodCause", b =>
+                {
+                    b.Property<Guid>("FloodReportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FloodReportSourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CauseId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<DateTimeOffset?>("UpdatedUtc")
-                        .HasColumnType("timestamp with time zone");
+                    b.HasKey("FloodReportId", "FloodReportSourceId", "CauseId");
 
-                    b.HasKey("FloodReportId", "SourceId");
+                    b.ToTable("FloodReportSourceFloodCause", "fortreportstatus");
+                });
 
-                    b.ToTable("FloodReportSources", "fortreportstatus");
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceOrganisation", b =>
+                {
+                    b.Property<Guid>("FloodReportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FloodReportSourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrganisationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FloodAuthorityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FloodAuthorityName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("OrganisationName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("FloodReportId", "FloodReportSourceId", "OrganisationId", "FloodAuthorityId");
+
+                    b.HasIndex("FloodReportId", "OrganisationId");
+
+                    b.ToTable("FloodReportSourceOrganisation", "fortreportstatus");
                 });
 
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodRoad", b =>
@@ -287,6 +374,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("FloodReportId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("FloodReportSourceId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ConfirmedByUserId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -304,11 +394,11 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("FloodRoadId", "FloodReportId");
+                    b.HasKey("FloodRoadId", "FloodReportId", "FloodReportSourceId");
 
                     b.HasIndex("ConfirmedByUserId");
 
-                    b.HasIndex("FloodReportId");
+                    b.HasIndex("FloodReportId", "FloodReportSourceId");
 
                     b.ToTable("FloodRoadFloodReports", "fortreportstatus");
                 });
@@ -457,6 +547,10 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BusName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp with time zone");
 
@@ -478,6 +572,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasIndex("Created");
 
+                    b.HasIndex("BusName", "Created");
+
                     b.ToTable("OutboxState", "fortreportstatus");
                 });
 
@@ -489,9 +585,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", "FloodReport")
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", "FloodReport")
                         .WithMany()
-                        .HasForeignKey("FloodReportId")
+                        .HasForeignKey("FloodReportId", "FloodReportSourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -508,9 +604,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", "FloodReport")
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", "FloodReport")
                         .WithMany()
-                        .HasForeignKey("FloodReportId")
+                        .HasForeignKey("FloodReportId", "FloodReportSourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -522,7 +618,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", b =>
                 {
                     b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", "FloodReport")
-                        .WithMany("Sources")
+                        .WithMany("SourceRecords")
                         .HasForeignKey("FloodReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -530,17 +626,35 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Navigation("FloodReport");
                 });
 
-            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodRoadFloodReport", b =>
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceFloodCause", b =>
                 {
-                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", "FloodReport")
-                        .WithMany()
-                        .HasForeignKey("FloodReportId")
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", null)
+                        .WithMany("FloodCauses")
+                        .HasForeignKey("FloodReportId", "FloodReportSourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceOrganisation", b =>
+                {
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", null)
+                        .WithMany("Organisations")
+                        .HasForeignKey("FloodReportId", "OrganisationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodRoadFloodReport", b =>
+                {
                     b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodRoad", "FloodRoad")
                         .WithMany("FloodReports")
                         .HasForeignKey("FloodRoadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", "FloodReport")
+                        .WithMany()
+                        .HasForeignKey("FloodReportId", "FloodReportSourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -573,7 +687,14 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", b =>
                 {
-                    b.Navigation("Sources");
+                    b.Navigation("SourceRecords");
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", b =>
+                {
+                    b.Navigation("FloodCauses");
+
+                    b.Navigation("Organisations");
                 });
 
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodRoad", b =>

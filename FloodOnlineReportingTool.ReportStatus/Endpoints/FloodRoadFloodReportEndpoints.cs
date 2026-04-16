@@ -23,18 +23,18 @@ internal static class FloodRoadFloodReportEndpoints
         return floodRoadFloodReport is null ? TypedResults.NotFound() : TypedResults.Ok(floodRoadFloodReport);
     }
 
-    internal static async Task<Results<Created<FloodRoadFloodReport>, BadRequest>> CreateFloodReport(IFloodRoadFloodReportService floodRoadFloodReportService, Guid floodRoadId, Guid floodReportId, CancellationToken ct)
+    internal static async Task<Results<Created<FloodRoadFloodReport>, BadRequest>> CreateFloodReport(IFloodRoadFloodReportService floodRoadFloodReportService, Guid floodRoadId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct)
     {
         var floodRoadFloodReport = await floodRoadFloodReportService
-            .CreateFloodRoadFloodReport(floodRoadId, floodReportId, ct)
+            .CreateFloodRoadFloodReport(floodRoadId, floodReportId, floodReportSourceId, ct)
             .ConfigureAwait(false);
         return TypedResults.Created($"/api/flood/road/{floodRoadFloodReport.FloodRoadId}/reports/{floodRoadFloodReport.FloodReportId}", floodRoadFloodReport);
     }
 
-    internal static async Task<Results<Created<FloodRoadFloodReport>, BadRequest>> CreateFloodReportConfirmed(IFloodRoadFloodReportService floodRoadFloodReportService, ICurrentUserService currentUserService, Guid floodRoadId, Guid floodReportId, CancellationToken ct)
+    internal static async Task<Results<Created<FloodRoadFloodReport>, BadRequest>> CreateFloodReportConfirmed(IFloodRoadFloodReportService floodRoadFloodReportService, ICurrentUserService currentUserService, Guid floodRoadId, Guid floodReportId, Guid floodReportSourceId, CancellationToken ct)
     {
         var floodRoadFloodReport = await floodRoadFloodReportService
-            .CreateFloodRoadFloodReport(floodRoadId, floodReportId, currentUserService.UserId, currentUserService.Name, ct)
+            .CreateFloodRoadFloodReport(floodRoadId, floodReportId, floodReportSourceId, currentUserService.UserId, currentUserService.Name, ct)
             .ConfigureAwait(false);
         return TypedResults.Created($"/api/flood/road/{floodRoadFloodReport.FloodRoadId}/reports/{floodRoadFloodReport.FloodReportId}", floodRoadFloodReport);
     }

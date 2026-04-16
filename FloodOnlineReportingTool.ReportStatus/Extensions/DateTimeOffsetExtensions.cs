@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
+#pragma warning disable IDE0130 // Namespace does not match fFloodReportSourceer structure
 namespace System;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
+#pragma warning restore IDE0130 // Namespace does not match fFloodReportSourceer structure
 
 internal static class DateTimeOffsetExtensions
 {

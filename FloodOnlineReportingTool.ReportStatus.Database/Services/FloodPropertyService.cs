@@ -10,7 +10,11 @@ using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class FloodPropertyService(ILogger<FloodPropertyService> logger, ApplicationDbContext context, IFloodPropertyRepository floodPropertyRepository) : IFloodPropertyService
+public class FloodPropertyService(
+    ILogger<FloodPropertyService> logger, 
+    ApplicationDbContext context, 
+    IFloodPropertyRepository floodPropertyRepository
+    ) : IFloodPropertyService
 {
     public async Task<IReadOnlyCollection<FloodProperty>> GetFloodProperties(CancellationToken ct)
     {
@@ -79,87 +83,73 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
         return creating;
     }
 
-    public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct)
-    {
-        if (ecc.Uprn is null)
-        {
-            throw new InvalidOperationException("Cannot create Flood Property without a UPRN.");
-        }
+//#pragma warning disable MA0051 // Method is too long
+//    public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, CancellationToken ct)
+//#pragma warning restore MA0051 // Method is too long
+//    {
+//        var floodReport = await floodReportService.GetFloodReportByReference(ecc.FloodReportReference, ct);
+//        if (floodReport is null)
+//        {
+//            throw new InvalidOperationException("Cannot create Flood Road without a Flood Report.");
+//        }
 
-        var createdUtc = DateTimeOffset.UtcNow;
-        var floodReportId = Guid.CreateVersion7();
-        var uprn = ecc.Uprn.Value;
+//        if (ecc.Uprn is null)
+//        {
+//            throw new InvalidOperationException("Cannot create Flood Property without a UPRN.");
+//        }
+//        var uprn = ecc.Uprn.Value;
 
-        // Build the flood report and sources
-        var floodReport = new FloodReport()
-        {
-            Id = floodReportId,
-            CreatedUtc = createdUtc,
+//        // Build the flood report and sources
+//        var updatedFloodReport = new FloodReportSource()
+//        {
+//            Id = floodReport.Id,
+//            Reference = floodReport.Reference,
+//            ViewUri = floodReport.ViewUri,
+//            CreatedUtc = floodReport.CreatedUtc,
 
-            EligibilityCheckId = ecc.Id,
-            Uprn = uprn,
-            Usrn = ecc.Usrn,
-            Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
-            ImpactStartUtc = ecc.ImpactStartUTC,
-            ImpactDurationHours = ecc.ImpactDurationHours,
+//            EligibilityCheckId = ecc.Id,
+//            Uprn = uprn,
+//            Usrn = ecc.Usrn,
+//            Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
+//            ImpactStartUtc = ecc.ImpactStartUTC,
+//            ImpactDurationHours = ecc.ImpactDurationHours,
 
-            Sources = [.. ecc.FloodSources.Select(ecfs =>
-                new FloodReportSource()
-                {
-                    FloodReportId = floodReportId,
-                    SourceId = ecfs.Id,
-                    CreatedUtc = createdUtc,
-                    Name = ecfs.Name,
-                }),
-            ],
-        };
+//            Sources = [.. ecc.FloodSources.Select(ecfs =>
+//                new FloodReportSource()
+//                {
+//                    FloodReportId = floodReport.Id,
+//                    SourceId = ecfs.Id,
+//                    CreatedUtc = floodReport.CreatedUtc,
+//                    Name = ecfs.Name,
+//                }),
+//            ],
+//        };
 
-        var potentialDuplicates = await FindPotentialDuplicates(uprn, ecc, ct);
+//        // TODO - handle this logic
+//        var potentialDuplicates = await FindPotentialDuplicates(uprn, ecc, ct);
 
-        FloodProperty? floodProperty = null;
-        ICollection<FloodPropertyFloodReport> floodPropertyFloodReports = [];
-        if (potentialDuplicates.Count > 0)
-        {
-            foreach (var duplicateFloodPropertyId in potentialDuplicates)
-            {
-                floodPropertyFloodReports.Add(new FloodPropertyFloodReport()
-                {
-                    FloodPropertyId = duplicateFloodPropertyId,
-                    FloodReportId = floodReportId,
-                    CreatedUtc = createdUtc,
-                });
-            }
-        }
-        else
-        {
-            var floodPropertyId = Guid.CreateVersion7();
-            floodProperty = new FloodProperty()
-            {
-                Id = floodPropertyId,
-                CreatedUtc = createdUtc,
+//        FloodProperty? floodProperty = null;
+//        ICollection<FloodPropertyFloodReport> floodPropertyFloodReports = [];
+//        if (potentialDuplicates.Count > 0)
+//        {
+//            foreach (var duplicateFloodPropertyId in potentialDuplicates)
+//            {
+//                floodPropertyFloodReports.Add(new FloodPropertyFloodReport()
+//                {
+//                    FloodPropertyId = duplicateFloodPropertyId,
+//                    FloodReportId = floodReport.Id,
+//                    CreatedUtc = floodReport.CreatedUtc,
+//                });
+//            }
+//        }
+        
 
-                Title = locationDescription,
-                Uprn = uprn,
-                Notes = null,
-                Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
+//        context.FloodReports.Update(updatedFloodReport);
+//        if (floodProperty is not null) context.FloodProperties.Add(floodProperty);
+//        if (floodPropertyFloodReports.Count > 0) context.FloodPropertyReports.AddRange(floodPropertyFloodReports);
 
-                FloodReports = [
-                    new()
-                    {
-                        FloodPropertyId = floodPropertyId,
-                        FloodReportId = floodReportId,
-                        CreatedUtc = createdUtc,
-                    },
-                ],
-            };
-        }
-
-        context.FloodReports.Add(floodReport);
-        if (floodProperty is not null) context.FloodProperties.Add(floodProperty);
-        if (floodPropertyFloodReports.Count > 0) context.FloodPropertyReports.AddRange(floodPropertyFloodReports);
-
-        await context.SaveChangesAsync(ct);
-    }
+//        await context.SaveChangesAsync(ct);
+//    }
 
     public async Task<FloodProperty?> UpdateFloodProperty(Guid id, FloodPropertyDto dto, CancellationToken ct)
     {
@@ -222,17 +212,17 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
     /// and its impact period overlaps with the new flood report's impact period (with a buffer).
     /// </summary>
     /// <param name="uprn">The UPRN of the property to search for existing flood reports.</param>
-    /// <param name="ecc">The <see cref="EligibilityCheckCreated"/> message containing details of the new flood report.</param>
+    /// <param name="ecr">The <see cref="EligibilityCheckCreated"/> message containing details of the new flood report.</param>
     /// <returns>
     /// A read-only collection of Flood property <see cref="Guid"/>'s that are potential duplicates based on source and date overlap criteria.
     /// </returns>
-    private async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(long uprn, EligibilityCheckCreated ecc, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(long uprn, EligibilityCheckRecord ecr, CancellationToken ct)
     {
-        ImmutableHashSet<Guid> newSourceIds = [.. ecc.FloodSources.Select(s => s.Id)];
+        ImmutableHashSet<Guid> newSourceIds = [.. ecr.FloodSources.Select(s => s.Id)];
         var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
-        var incomingStart = ecc.ImpactStartUTC?.AddDays(-bufferDays);
-        var incomingEnd = ecc.IsOnGoing ? DateTimeOffset.UtcNow : ecc.ImpactStartUTC?.AddHours(ecc.ImpactDurationHours);
+        var incomingStart = ecr.ImpactStartUTC?.AddDays(-bufferDays);
+        var incomingEnd = ecr.IsOnGoing ? DateTimeOffset.UtcNow : ecr.ImpactStartUTC?.AddHours(ecr.ImpactDurationHours);
 
         return await context.FloodProperties
             .AsNoTracking()
@@ -240,13 +230,13 @@ public class FloodPropertyService(ILogger<FloodPropertyService> logger, Applicat
             .SelectMany(fp => fp.FloodReports
                 .Where(fpfr =>
                     // At least one matching source
-                    fpfr.FloodReport.Sources.Any(src => newSourceIds.Contains(src.SourceId))
+                    fpfr.FloodReport.FloodCauses.Any(src => newSourceIds.Contains(src.CauseId))
                     // Date overlap
                     && fpfr.FloodReport.ImpactStartUtc != null
                     && incomingStart != null
                     && incomingEnd != null
                     && fpfr.FloodReport.ImpactStartUtc <= incomingEnd
-                    && fpfr.FloodReport.ImpactStartUtc.Value.AddHours(fpfr.FloodReport.ImpactDurationHours) >= incomingStart
+                    && fpfr.FloodReport.ImpactStartUtc.Value.AddHours(fpfr.FloodReport.ImpactDurationHours ?? 1) >= incomingStart
                 )
                 .OrderBy(fpfr => fpfr.FloodPropertyId)
                     .ThenBy(fpfr => fpfr.FloodReportId)

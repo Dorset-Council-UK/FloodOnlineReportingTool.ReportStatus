@@ -10,7 +10,11 @@ using System.Collections.Immutable;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class FloodLocationService(ILogger<FloodLocationService> logger, ApplicationDbContext context, IFloodLocationRepository floodLocationRepository) : IFloodLocationService
+public class FloodLocationService(
+    ILogger<FloodLocationService> logger, 
+    ApplicationDbContext context, 
+    IFloodLocationRepository floodLocationRepository
+    ) : IFloodLocationService
 {
     public async Task<IReadOnlyCollection<FloodLocation>> GetFloodLocations(CancellationToken ct)
     {
@@ -81,80 +85,65 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
         return creating;
     }
 
-    public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, double buffer, CancellationToken ct)
-    {
-        var createdUtc = DateTimeOffset.UtcNow;
-        var floodReportId = Guid.CreateVersion7();
+    //public async Task CreateFromEligibilityCheckCreated(EligibilityCheckCreated ecc, string locationDescription, double buffer, CancellationToken ct)
+    //{
+    //    var floodReport = await floodReportService.GetFloodReportByReference(ecc.FloodReportReference, ct);
+    //    if (floodReport is null)
+    //    {
+    //        throw new InvalidOperationException("Cannot create Flood Road without a Flood Report.");
+    //    }
 
-        // Build the flood report and sources
-        var floodReport = new FloodReport()
-        {
-            Id = floodReportId,
-            CreatedUtc = createdUtc,
+    //    // Build the flood report and sources
+    //    var updatedFloodReport = new FloodReportSource()
+    //    {
+    //        Id = floodReport.Id,
+    //        Reference = floodReport.Reference,
+    //        ViewUri = floodReport.ViewUri,
+    //        CreatedUtc = floodReport.CreatedUtc,
 
-            EligibilityCheckId = ecc.Id,
-            Uprn = ecc.Uprn,
-            Usrn = ecc.Usrn,
-            Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
-            ImpactStartUtc = ecc.ImpactStartUTC,
-            ImpactDurationHours = ecc.ImpactDurationHours,
+    //        EligibilityCheckId = ecc.Id,
+    //        Uprn = ecc.Uprn,
+    //        Usrn = ecc.Usrn,
+    //        Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
+    //        ImpactStartUtc = ecc.ImpactStartUTC,
+    //        ImpactDurationHours = ecc.ImpactDurationHours,
 
-            Sources = [.. ecc.FloodSources.Select(ecfs =>
-                new FloodReportSource()
-                {
-                    FloodReportId = floodReportId,
-                    SourceId = ecfs.Id,
-                    CreatedUtc = createdUtc,
-                    Name = ecfs.Name,
-                }),
-            ],
-        };
+    //        Sources = [.. ecc.FloodSources.Select(ecfs =>
+    //            new FloodReportSource()
+    //            {
+    //                FloodReportId = floodReport.Id,
+    //                SourceId = ecfs.Id,
+    //                CreatedUtc = floodReport.CreatedUtc,
+    //                Name = ecfs.Name,
+    //            }),
+    //        ],
+    //    };
 
-        var potentialDuplicates = await FindPotentialDuplicates(buffer, ecc, ct);
+    //    // TODO - handle this logic
+    //    var potentialDuplicates = await FindPotentialDuplicates(buffer, ecc, ct);
 
-        FloodLocation? floodLocation = null;
-        ICollection<FloodLocationFloodReport> floodLocationFloodReports = [];
-        if (potentialDuplicates.Count > 0)
-        {
-            foreach (var duplicateFloodLocationId in potentialDuplicates)
-            {
-                floodLocationFloodReports.Add(new FloodLocationFloodReport()
-                {
-                    FloodLocationId = duplicateFloodLocationId,
-                    FloodReportId = floodReportId,
-                    CreatedUtc = createdUtc,
-                });
-            }
-        }
-        else
-        {
-            var floodLocationId = Guid.CreateVersion7();
-            floodLocation = new FloodLocation()
-            {
-                Id = floodLocationId,
-                CreatedUtc = createdUtc,
+    //    FloodLocation? floodLocation = null;
+    //    ICollection<FloodLocationFloodReport> floodLocationFloodReports = [];
+    //    if (potentialDuplicates.Count > 0)
+    //    {
+    //        foreach (var duplicateFloodLocationId in potentialDuplicates)
+    //        {
+    //            floodLocationFloodReports.Add(new FloodLocationFloodReport()
+    //            {
+    //                FloodLocationId = duplicateFloodLocationId,
+    //                FloodReportId = floodReport.Id,
+    //                CreatedUtc = floodReport.CreatedUtc,
+    //            });
+    //        }
+    //    }
+        
 
-                Title = locationDescription,
-                Notes = null,
-                Geom = new Point(ecc.Easting, ecc.Northing) { SRID = 27700 },
+    //    context.FloodReports.Update(updatedFloodReport);
+    //    if (floodLocation is not null) context.FloodLocations.Add(floodLocation);
+    //    if (floodLocationFloodReports.Count > 0) context.FloodLocationFloodReports.AddRange(floodLocationFloodReports);
 
-                FloodReports = [
-                    new()
-                    {
-                        FloodLocationId = floodLocationId,
-                        FloodReportId = floodReportId,
-                        CreatedUtc = createdUtc,
-                    },
-                ],
-            };
-        }
-
-        context.FloodReports.Add(floodReport);
-        if (floodLocation is not null) context.FloodLocations.Add(floodLocation);
-        if (floodLocationFloodReports.Count > 0) context.FloodLocationFloodReports.AddRange(floodLocationFloodReports);
-
-        await context.SaveChangesAsync(ct);
-    }
+    //    await context.SaveChangesAsync(ct);
+    //}
 
     public async Task<FloodLocation?> UpdateFloodLocation(Guid id, FloodLocationDto dto, CancellationToken ct)
     {
@@ -216,31 +205,31 @@ public class FloodLocationService(ILogger<FloodLocationService> logger, Applicat
     /// and its impact period overlaps with the new flood report's impact period (with a buffer).
     /// </summary>
     /// <param name="buffer">The distance buffer (in metres) around the Easting and Northing coordinates to include in the search.</param>
-    /// <param name="ecc">The <see cref="EligibilityCheckCreated"/> message containing details of the new flood report.</param>
+    /// <param name="ecr">The <see cref="EligibilityCheckCreated"/> message containing details of the new flood report.</param>
     /// <returns>
     /// A read-only collection of Flood location <see cref="Guid"/>'s that are potential duplicates based on source and date overlap criteria.
     /// </returns>
-    private async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(double buffer, EligibilityCheckCreated ecc, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(double buffer, EligibilityCheckRecord ecr, CancellationToken ct)
     {
-        ImmutableHashSet<Guid> newSourceIds = [.. ecc.FloodSources.Select(s => s.Id)];
+        ImmutableHashSet<Guid> newSourceIds = [.. ecr.FloodSources.Select(s => s.Id)];
         var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
-        var incomingStart = ecc.ImpactStartUTC?.AddDays(-bufferDays);
-        var incomingEnd = ecc.IsOnGoing ? DateTimeOffset.UtcNow : ecc.ImpactStartUTC?.AddHours(ecc.ImpactDurationHours);
+        var incomingStart = ecr.ImpactStartUTC?.AddDays(-bufferDays);
+        var incomingEnd = ecr.IsOnGoing ? DateTimeOffset.UtcNow : ecr.ImpactStartUTC?.AddHours(ecr.ImpactDurationHours);
 
         return await context.FloodLocations
             .AsNoTracking()
-            .Where(fl => fl.Geom.Intersects(new Point(ecc.Easting, ecc.Northing) { SRID = 27700 }.Buffer(buffer)))
+            .Where(fl => fl.Geom.Intersects(new Point(ecr.Easting, ecr.Northing) { SRID = 27700 }.Buffer(buffer)))
             .SelectMany(fl => fl.FloodReports
                 .Where(flfr =>
                     // At least one matching source
-                    flfr.FloodReport.Sources.Any(src => newSourceIds.Contains(src.SourceId))
+                    flfr.FloodReport.FloodCauses.Any(src => newSourceIds.Contains(src.CauseId))
                     // Date overlap
                     && flfr.FloodReport.ImpactStartUtc != null
                     && incomingStart != null
                     && incomingEnd != null
                     && flfr.FloodReport.ImpactStartUtc <= incomingEnd
-                    && flfr.FloodReport.ImpactStartUtc.Value.AddHours(flfr.FloodReport.ImpactDurationHours) >= incomingStart
+                    && flfr.FloodReport.ImpactStartUtc.Value.AddHours(flfr.FloodReport.ImpactDurationHours ?? 1) >= incomingStart
                 )
                 .OrderBy(flfr => flfr.FloodLocationId)
                     .ThenBy(flfr => flfr.FloodReportId)

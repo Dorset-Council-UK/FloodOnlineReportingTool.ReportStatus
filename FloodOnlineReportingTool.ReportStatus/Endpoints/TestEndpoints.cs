@@ -29,32 +29,42 @@ internal static class TestEndpoints
         }
     }
 
-    internal static async Task<Results<Ok, BadRequest>> TestFloodPropertyMessage(IFloodPropertyService floodPropertyService, CancellationToken cancellationToken = default)
+    internal static async Task<Results<Ok, BadRequest>> TestFloodReportMessage(IFloodReportService floodReportService, CancellationToken cancellationToken = default)
     {
         try
         {
             var now = DateTimeOffset.UtcNow;
-            var ecc = new EligibilityCheckCreated(
+            var ecc = new EligibilityCheckRecord(
                 Guid.CreateVersion7(),
-                "Test1234",
-                now,
-                10023242411,
-                null,         
+                null,
+                null,
                 368991.12,
                 90881.94,
-                now.AddDays(-7),
-                6,
+                now,
+                1,
                 false,
                 false,
-                0,
+                1,
                 "Test location description",
                 [],
                 [
                     new(PrimaryCauseIds.River, "River"),
                     new(PrimaryCauseIds.RainwaterFlowingOverTheGround, "Rainwater flowing over the ground"),
-                ]
+                ] 
             );
-            await floodPropertyService.CreateFromEligibilityCheckCreated(ecc, "Test location description", cancellationToken).ConfigureAwait(false);
+            var prsc = new FloodReportSourceCreated(
+                Guid.CreateVersion7(),
+                25,
+                "Test1234",
+                new Uri("https://example.com"),
+                now,
+                ecc,
+                false,
+                false,
+                []
+            );
+
+            await floodReportService.CreateFromFloodReportCreated(prsc, cancellationToken).ConfigureAwait(false);
             return TypedResults.Ok();
         }
         catch (Exception)

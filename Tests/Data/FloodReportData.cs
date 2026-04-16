@@ -11,50 +11,69 @@ public static class FloodReportData
     internal static double Easting = 368991.12;
     internal static double Northing = 90881.94;
 
-    private static readonly FloodReport FloodReport1 = Create(floodReportId: "11111111-1111-0000-0000-000000000000", eligibilityCheckId: "22222222-1111-0000-0000-000000000000");
-    private static readonly FloodReport FloodReport2 = Create(floodReportId: "11111111-2222-0000-0000-000000000000", eligibilityCheckId: "22222222-2222-0000-0000-000000000000");
-    private static readonly FloodReport FloodReport3 = Create(floodReportId: "11111111-3333-0000-0000-000000000000", eligibilityCheckId: "22222222-3333-0000-0000-000000000000");
+    private static readonly FloodReportSource FloodReport1 = Create(floodReportId: "11111111-1111-0000-0000-000000000000", eligibilityCheckId: "22222222-1111-0000-0000-000000000000");
+    private static readonly FloodReportSource FloodReport2 = Create(floodReportId: "11111111-2222-0000-0000-000000000000", eligibilityCheckId: "22222222-2222-0000-0000-000000000000");
+    private static readonly FloodReportSource FloodReport3 = Create(floodReportId: "11111111-3333-0000-0000-000000000000", eligibilityCheckId: "22222222-3333-0000-0000-000000000000");
 
-    public static FloodReport Create(string? floodReportId = null, string? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
+    public static FloodReportSource Create(string? floodReportId = null, string? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
     {
         Guid? floodReportGuid = floodReportId is not null ? Guid.Parse(floodReportId) : null;
         Guid? eligibilityCheckGuid = eligibilityCheckId is not null ? Guid.Parse(eligibilityCheckId) : null;
         return Create(floodReportGuid, eligibilityCheckGuid, createdUtc, uprn, usrn, easting, northing);
     }
 
-    public static FloodReport Create(Guid? floodReportId = null, Guid? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
+    public static FloodReportSource Create(Guid? floodReportId = null, Guid? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
     {
+        var reportId = floodReportId ?? Guid.NewGuid();
+        var checkId = eligibilityCheckId ?? Guid.NewGuid();
+
         return new()
         {
-            Id = floodReportId ?? Guid.NewGuid(),
+            Id = reportId,
+            Reference = "TestReference",
+            ViewUri = new Uri("https://example.com/floodreport"),
             CreatedUtc = createdUtc ?? new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            EligibilityCheckId = eligibilityCheckId ?? Guid.NewGuid(),
+            EligibilityCheckId = checkId,
             Uprn = uprn,
             Usrn = usrn,
             Geom = new Point(easting ?? Easting, northing ?? Northing) { SRID = 27700 },
             ImpactStartUtc = new DateTimeOffset(2024, 12, 10, 10, 10, 10, TimeSpan.Zero),
             ImpactDurationHours = 5,
-            Sources = [
-                FloodReportSourceData.Create(floodReportId, PrimaryCauseIds.River, "River"),
-                FloodReportSourceData.Create(floodReportId, PrimaryCauseIds.RainwaterFlowingOverTheGround, "Rainwater flowing over the ground"),
+            Organisations = [],
+            FloodCauses =
+            [
+                new FloodReportSourceFloodCause
+                {
+                    FloodReportId = reportId,
+                    FloodReportSourceId = reportId,
+                    CauseId = PrimaryCauseIds.River,
+                    Name = "River",
+                },
+                new FloodReportSourceFloodCause
+                {
+                    FloodReportId = reportId,
+                    FloodReportSourceId = reportId,
+                    CauseId = PrimaryCauseIds.RainwaterFlowingOverTheGround,
+                    Name = "Rainwater flowing over the ground",
+                },
             ],
         };
     }
 
-    public static IEnumerable<TheoryDataRow<FloodReport>> Three => [
+    public static IEnumerable<TheoryDataRow<FloodReportSource>> Three => [
         new(FloodReport1),
         new(FloodReport2),
         new(FloodReport3),
     ];
 
-    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> Collection_Four => [
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReportSource>>> Collection_Four => [
         new([]),
         new([FloodReport1]),
         new([FloodReport1, FloodReport2]),
         new([FloodReport1, FloodReport2, FloodReport3]),
     ];
 
-    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> CollectionWithUprn_Four
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReportSource>>> CollectionWithUprn_Four
     {
         get
         {
@@ -71,7 +90,7 @@ public static class FloodReportData
         }
     }
 
-    public static IEnumerable<TheoryDataRow<ICollection<FloodReport>>> CollectionWithUsrn_Four
+    public static IEnumerable<TheoryDataRow<ICollection<FloodReportSource>>> CollectionWithUsrn_Four
     {
         get
         {
@@ -93,7 +112,7 @@ public static class FloodReportData
     /// <see cref="double">Easting</see>, <see cref="double">Northing</see>, <see cref="double">Metres</see>,
     /// <see cref="ICollection&lt;&gt;">Expected Flood Reports</see>,
     /// </summary>
-    public static IEnumerable<TheoryDataRow<double, double, double, ICollection<FloodReport>>> Four_Within50Metres
+    public static IEnumerable<TheoryDataRow<double, double, double, ICollection<FloodReportSource>>> Four_Within50Metres
     {
         get
         {

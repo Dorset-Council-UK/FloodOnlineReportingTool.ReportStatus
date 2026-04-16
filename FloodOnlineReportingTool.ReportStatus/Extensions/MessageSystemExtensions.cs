@@ -1,12 +1,13 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Topics;
 using FloodOnlineReportingTool.ReportStatus.Consumers;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
+#pragma warning disable IDE0130 // Namespace does not match fFloodReportSourceer structure
 namespace Microsoft.AspNetCore.Builder;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
+#pragma warning restore IDE0130 // Namespace does not match fFloodReportSourceer structure
 
 internal static class MessageSystemExtensions
 {
@@ -24,7 +25,7 @@ internal static class MessageSystemExtensions
         {
             o.SetKebabCaseEndpointNameFormatter();
 
-            o.AddConsumer<EligibilityCheckCreatedConsumer>();
+            o.AddConsumer<FloodReportCreatedConsumer>();
 
             // Transactional Outbox Configuration https://masstransit.io/documentation/configuration/middleware/outbox
             o.AddEntityFrameworkOutbox<ApplicationDbContext>(config =>
@@ -57,10 +58,15 @@ internal static class MessageSystemExtensions
                     config.Host(new Uri(messagingSettings.ConnectionString));
                 }
 
-                // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
-                config.SubscriptionEndpoint<EligibilityCheckCreated>("floodonlinereportingtool-reportstatus", o => 
+                config.Message<FloodReportSourceCreated>(m =>
                 {
-                    o.ConfigureConsumer<EligibilityCheckCreatedConsumer>(context);
+                    m.SetEntityName(TopicNames.FloodSourceCreated);
+                });
+
+                // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
+                config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatus", o =>
+                {
+                    o.ConfigureConsumer<FloodReportCreatedConsumer>(context);
                 });
 
                 config.ConfigureEndpoints(context);

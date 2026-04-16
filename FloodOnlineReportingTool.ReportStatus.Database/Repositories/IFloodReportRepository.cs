@@ -1,11 +1,13 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 
-public interface IFloodReportRepository
+public interface    IFloodReportRepository
 {
     IQueryable<FloodReport> GetFloodReports();
+    IQueryable<FloodReport?> GetFloodReportByReference(string reference);
     IQueryable<FloodReport?> GetFloodReportById(Guid id);
     IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres);
     IQueryable<FloodReport> GetFloodReportsByUprn(long uprn);
