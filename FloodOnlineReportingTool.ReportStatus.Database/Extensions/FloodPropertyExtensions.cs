@@ -1,8 +1,8 @@
-﻿#pragma warning disable IDE0130 // Namespace does not match fFloodReportSourceer structure
+﻿#pragma warning disable IDE0130 // Namespace does not match folder structure
 using FloodOnlineReportingTool.Contracts.Shared.Search;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
-#pragma warning restore IDE0130 // Namespace does not match fFloodReportSourceer structure
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 public static class FloodPropertyExtensions
 {

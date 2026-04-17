@@ -1,9 +1,9 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using NetTopologySuite.Geometries;
 
-#pragma warning disable IDE0130 // Namespace does not match fFloodReportSourceer structure
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace FloodOnlineReportingTool.Contracts;
-#pragma warning restore IDE0130 // Namespace does not match fFloodReportSourceer structure
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 internal static class ContractsExtensions
 {

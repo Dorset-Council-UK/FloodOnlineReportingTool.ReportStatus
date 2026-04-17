@@ -108,7 +108,7 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
 
         if (!string.IsNullOrWhiteSpace(postcode))
         {
-            //TODO implement this (for now, use a placehFloodReportSourceer that returns all results)
+            //TODO implement this (for now, use a placeholder that returns all results)
             query = query.Where(fr => true);
         }
 

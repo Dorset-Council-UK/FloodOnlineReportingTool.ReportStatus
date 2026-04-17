@@ -16,7 +16,7 @@ To run this project with minimal modification, you will need the following:
 1. **Clone the repository**:
    ```shell
    git clone <repository-url>
-   cd <repository-fFloodReportSourceer>
+   cd <repository-folder>
    ```
 
 2. **Create a new branch**:
@@ -29,7 +29,7 @@ To run this project with minimal modification, you will need the following:
    If you are using GitHub Copilot you can choose to import the Dorset Council UK instruction files. 
    This ensures that code suggestions are more likely to follow the coding standards we are trying to follow at Dorset Council.
    
-   To update the standards module, navigate to the `FloodOnlineReportingTool.ReportStatus` solution fFloodReportSourceer and run:
+   To update the standards module, navigate to the `FloodOnlineReportingTool.ReportStatus` solution folder and run:
    ```shell
    git submodule update
    ```
@@ -37,7 +37,7 @@ To run this project with minimal modification, you will need the following:
    ```shell
    git submodule update --init 
    ```
-   Should you need to switch the submodule to a different branch, navigate to the `FloodOnlineReportingTool.ReportStatus` solution fFloodReportSourceer and run:
+   Should you need to switch the submodule to a different branch, navigate to the `FloodOnlineReportingTool.ReportStatus` solution folder and run:
    ```shell
    git submodule set-branch --branch {branch-name} .github/instructions
 
@@ -51,7 +51,7 @@ To run this project with minimal modification, you will need the following:
 5. **Run migrations and seed the database**:
 
    The database schema and seed data are handled by the data project.
-   Navigate to the solution fFloodReportSourceer and run the following command:
+   Navigate to the solution folder and run the following command:
    ```shell
    dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
@@ -73,7 +73,7 @@ The project requires a `ConnectionStrings` section in your user secrets. And a c
 
 ## User Secrets and Configuration
 
-You must set up user secrets for development. Run the following command in the terminal within the project fFloodReportSourceer:
+You must set up user secrets for development. Run the following command in the terminal within the project folder:
 - Using Visual Studio:
 
   Right click the project and select "Manage User Secrets".
