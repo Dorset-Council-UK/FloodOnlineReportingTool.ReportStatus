@@ -11,15 +11,16 @@ public static class FloodReportSourceData
     public static FloodReportSource Create(Guid? floodReportId = null, Guid? sourceId = null, string? name = null)
     {
         var reportId = floodReportId ?? Guid.NewGuid();
+        var checkId = sourceId ?? Guid.NewGuid();
 
         return new FloodReportSource
         {
-            Id = sourceId ?? Guid.NewGuid(),
+            Id = checkId,
             Reference = "HKFGHDSDFCW",
             ViewUri = new Uri($"https://example.com/floodreport/HKFGHDSDFCW"),
             CreatedUtc = TestCreatedDate,
             UpdatedUtc = null,
-            EligibilityCheckId = null,
+            //EligibilityCheckId = null,
             Uprn = null,
             Usrn = null,
             Geom = new Point(123456, 654321),
@@ -46,7 +47,7 @@ public static class FloodReportSourceData
                     Name = "Rainwater flowing over the ground",
                 },
             ],
-            FloodReportId = floodReportId,
+            FloodReportId = reportId,
             FloodReport = null
         };
     }

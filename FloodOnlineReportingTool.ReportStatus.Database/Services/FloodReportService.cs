@@ -25,12 +25,13 @@ public class FloodReportService(
 
         FloodReportSource messageSource = new FloodReportSource()
         {
-            Id = message.Id,
+            Id = message.EligibilityCheckRecord.Id,
+            FloodReportId = floodReportId, 
             Reference = message.Reference,
             ViewUri = message.ViewUri,
             CreatedUtc = message.CreatedUtc,
             UpdatedUtc = null,
-            EligibilityCheckId = message.EligibilityCheckRecord.Id,
+            //EligibilityCheckId = message.EligibilityCheckRecord.Id,
             Uprn = message.EligibilityCheckRecord.Uprn,
             Usrn = message.EligibilityCheckRecord.Usrn,
             Geom = new Point(message.EligibilityCheckRecord.Easting, message.EligibilityCheckRecord.Northing) { SRID = 27700 },
@@ -40,7 +41,6 @@ public class FloodReportService(
             IsUninhabitable = message.EligibilityCheckRecord.IsUninhabitable,
             VulnerableCount = message.EligibilityCheckRecord.VulnerableCount,
             LocationDescription = message.EligibilityCheckRecord.LocationDescription,
-            FloodReportId = floodReportId,
             FloodCauses = floodCauses,
             Organisations = organisations,
         };

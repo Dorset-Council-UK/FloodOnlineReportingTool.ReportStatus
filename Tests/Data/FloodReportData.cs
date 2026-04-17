@@ -29,11 +29,12 @@ public static class FloodReportData
 
         return new()
         {
-            Id = reportId,
+            Id = checkId,
+            FloodReportId = reportId,
             Reference = "TestReference",
             ViewUri = new Uri("https://example.com/floodreport"),
             CreatedUtc = createdUtc ?? new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            EligibilityCheckId = checkId,
+            //EligibilityCheckId = checkId,
             Uprn = uprn,
             Usrn = usrn,
             Geom = new Point(easting ?? Easting, northing ?? Northing) { SRID = 27700 },

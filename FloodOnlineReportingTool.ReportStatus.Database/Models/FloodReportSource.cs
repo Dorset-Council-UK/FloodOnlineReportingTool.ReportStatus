@@ -14,7 +14,7 @@ public record FloodReportSource : ICreatedUpdated
     public DateTimeOffset? UpdatedUtc { get; init; }
 
     // Other properties
-    public Guid? EligibilityCheckId { get; init; }
+    //public Guid? EligibilityCheckId { get; init; }
     public long? Uprn { get; init; }
     public long? Usrn { get; init; }
     public required Point Geom { get; init; }
