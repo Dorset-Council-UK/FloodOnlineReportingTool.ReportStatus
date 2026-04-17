@@ -26,7 +26,7 @@ internal class FloodReportSourceConfiguration : IEntityTypeConfiguration<FloodRe
 
         builder.HasMany(o => o.Organisations)
             .WithOne()
-            .HasForeignKey(org => new { org.FloodReportId, org.OrganisationId })
+            .HasForeignKey(org => new { org.FloodReportId, org.FloodReportSourceId })
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

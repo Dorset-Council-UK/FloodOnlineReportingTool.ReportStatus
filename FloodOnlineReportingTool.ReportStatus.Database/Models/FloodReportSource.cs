@@ -33,6 +33,6 @@ public record FloodReportSource : ICreatedUpdated
     public ICollection<FloodReportSourceFloodCause> FloodCauses { get; init; } = [];
     public ICollection<FloodReportSourceOrganisation> Organisations { get; init; } = [];
 
-    public Guid? FloodReportId { get; init; }
+    public required Guid FloodReportId { get; init; }
     public FloodReport? FloodReport { get; init; }
 }
