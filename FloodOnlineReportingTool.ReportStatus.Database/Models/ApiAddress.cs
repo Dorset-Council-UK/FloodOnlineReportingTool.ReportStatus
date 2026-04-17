@@ -1,7 +1,7 @@
 ﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 /// <summary>
-/// An immutable record to hFloodReportSource the Address search or Nearest address search API data
+/// An immutable record to hold the Address search or Nearest address search API data
 /// </summary>
 public record ApiAddress
 {

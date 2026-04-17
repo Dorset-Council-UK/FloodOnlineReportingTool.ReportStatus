@@ -4,7 +4,7 @@ using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 
-public interface    IFloodReportRepository
+public interface IFloodReportRepository
 {
     IQueryable<FloodReport> GetFloodReports();
     IQueryable<FloodReport?> GetFloodReportByReference(string reference);
