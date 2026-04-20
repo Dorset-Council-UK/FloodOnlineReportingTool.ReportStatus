@@ -67,4 +67,9 @@ public interface IFloodReportService
     /// Checks if the flood report exists
     /// </summary>
     Task<bool> FloodReportExists(Guid id, CancellationToken ct);
+
+    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByPoint(double easting, double northing, double buffer, CancellationToken ct);
+
+    Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType ReportType, double buffer, EligibilityCheckRecord ecr, CancellationToken ct);
+
 }

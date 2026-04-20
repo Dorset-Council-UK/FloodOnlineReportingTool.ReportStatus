@@ -1,5 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using Microsoft.Azure.Amqp.Framing;
 using NetTopologySuite.Geometries;
 
 namespace Tests.Data;
@@ -24,17 +25,18 @@ public static class FloodReportData
 
     public static FloodReportSource Create(Guid? floodReportId = null, Guid? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
     {
+        var recordId = Guid.NewGuid();
         var reportId = floodReportId ?? Guid.NewGuid();
         var checkId = eligibilityCheckId ?? Guid.NewGuid();
 
         return new()
         {
-            Id = checkId,
+            Id = recordId,
             FloodReportId = reportId,
             Reference = "TestReference",
             ViewUri = new Uri("https://example.com/floodreport"),
             CreatedUtc = createdUtc ?? new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            //EligibilityCheckId = checkId,
+            EligibilityCheckId = checkId,
             Uprn = uprn,
             Usrn = usrn,
             Geom = new Point(easting ?? Easting, northing ?? Northing) { SRID = 27700 },
@@ -45,14 +47,12 @@ public static class FloodReportData
             [
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportId = reportId,
                     FloodReportSourceId = reportId,
                     CauseId = PrimaryCauseIds.River,
                     Name = "River",
                 },
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportId = reportId,
                     FloodReportSourceId = reportId,
                     CauseId = PrimaryCauseIds.RainwaterFlowingOverTheGround,
                     Name = "Rainwater flowing over the ground",

@@ -25,7 +25,7 @@ internal static class MessageSystemExtensions
         {
             o.SetKebabCaseEndpointNameFormatter();
 
-            o.AddConsumer<FloodReportCreatedConsumer>();
+            o.AddConsumer<FloodReportSourceCreatedConsumer>();
 
             // Transactional Outbox Configuration https://masstransit.io/documentation/configuration/middleware/outbox
             o.AddEntityFrameworkOutbox<ApplicationDbContext>(config =>
@@ -66,7 +66,7 @@ internal static class MessageSystemExtensions
                 // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
                 config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatus", o =>
                 {
-                    o.ConfigureConsumer<FloodReportCreatedConsumer>(context);
+                    o.ConfigureConsumer<FloodReportSourceCreatedConsumer>(context);
                 });
 
                 config.ConfigureEndpoints(context);

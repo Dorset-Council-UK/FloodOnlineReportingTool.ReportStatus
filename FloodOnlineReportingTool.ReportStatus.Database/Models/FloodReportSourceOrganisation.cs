@@ -6,13 +6,13 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 /// </summary>
 public record FloodReportSourceOrganisation
 {
-    // Composite FK to FloodReportSource
-    public required Guid FloodReportId { get; init; }
-    public required Guid FloodReportSourceId { get; init; }
-
+    public Guid Id { get; init; }
     // The organisation - unique per FloodReportSource, not globally
     public required Guid OrganisationId { get; init; }
     public required string OrganisationName { get; init; }
     public required Guid FloodAuthorityId { get; init; }
     public required string FloodAuthorityName { get; init; }
+
+    public Guid FloodReportSourceId { get; init; }
+    public FloodReportSource FloodReportSource { get; init; }
 }

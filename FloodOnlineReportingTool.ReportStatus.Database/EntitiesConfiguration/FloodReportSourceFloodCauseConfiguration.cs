@@ -8,7 +8,9 @@ internal class FloodReportSourceFloodCauseConfiguration : IEntityTypeConfigurati
 {
     public void Configure(EntityTypeBuilder<FloodReportSourceFloodCause> builder)
     {
-        builder.HasKey(fc => new { fc.FloodReportId, fc.FloodReportSourceId, fc.CauseId });
+        builder.HasKey(o => o.Id);
+
+        builder.HasIndex(o => new { o.FloodReportSourceId, o.CauseId }).IsUnique();
 
         builder.Property(fc => fc.Name).IsRequired().HasMaxLength(200);
     }

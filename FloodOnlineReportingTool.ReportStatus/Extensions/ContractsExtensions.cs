@@ -7,19 +7,6 @@ namespace FloodOnlineReportingTool.Contracts;
 
 internal static class ContractsExtensions
 {
-    //internal static FloodReportDto ToFloodReportDto(this FloodReportSourceCreated floodReportSourceCreated)
-    //{
-    //    return new()
-    //    {
-    //        EligibilityCheckId = floodReportSourceCreated.Id,
-    //        Uprn = floodReportSourceCreated.Uprn,
-    //        Usrn = floodReportSourceCreated.Usrn,
-    //        Geom = new Point(floodReportSourceCreated.Easting, floodReportSourceCreated.Northing) { SRID = 27700 },
-    //        ImpactStartUtc = floodReportSourceCreated.ImpactStartUTC,
-    //        ImpactDurationHours = floodReportSourceCreated.ImpactDurationHours,
-    //    };
-    //}
-
     internal static FloodReportNameDto ToFloodReportSourceDto(this EligibilityCheckFloodSource eligibilityCheckFloodSource)
     {
         return new()
@@ -28,10 +15,6 @@ internal static class ContractsExtensions
         };
     }
 
-    //internal static FloodPropertyDto ToFloodPropertyDto(this FloodReportSourceCreated floodReportSourceCreated)
-    //{
-    //    return floodReportSourceCreated.EligibilityCheckRecord.ToFloodPropertyDto(floodReportSourceCreated.EligibilityCheckRecord.LocationDescription ?? "No address provided");
-    //}
     internal static FloodPropertyDto ToFloodPropertyDto(this FloodReportSourceCreated floodReportSourceCreated, string locationDescription)
     {
         if (floodReportSourceCreated.EligibilityCheckRecord.Uprn is null)

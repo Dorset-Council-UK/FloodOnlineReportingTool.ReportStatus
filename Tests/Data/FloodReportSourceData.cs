@@ -1,6 +1,7 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using NetTopologySuite.Geometries;
+using System.ComponentModel.DataAnnotations;
 
 namespace Tests.Data;
 
@@ -10,17 +11,18 @@ public static class FloodReportSourceData
 
     public static FloodReportSource Create(Guid? floodReportId = null, Guid? sourceId = null, string? name = null)
     {
+        var recordId = Guid.NewGuid();
         var reportId = floodReportId ?? Guid.NewGuid();
         var checkId = sourceId ?? Guid.NewGuid();
 
         return new FloodReportSource
         {
-            Id = checkId,
+            Id = recordId,
             Reference = "HKFGHDSDFCW",
             ViewUri = new Uri($"https://example.com/floodreport/HKFGHDSDFCW"),
             CreatedUtc = TestCreatedDate,
             UpdatedUtc = null,
-            //EligibilityCheckId = null,
+            EligibilityCheckId = checkId,
             Uprn = null,
             Usrn = null,
             Geom = new Point(123456, 654321),
@@ -34,15 +36,13 @@ public static class FloodReportSourceData
             FloodCauses = [
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportId = reportId,
-                    FloodReportSourceId = reportId,
+                    FloodReportSourceId = recordId,
                     CauseId = PrimaryCauseIds.River,
                     Name = "River",
                 },
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportId = reportId,
-                    FloodReportSourceId = reportId,
+                    FloodReportSourceId = recordId,
                     CauseId = PrimaryCauseIds.RainwaterFlowingOverTheGround,
                     Name = "Rainwater flowing over the ground",
                 },

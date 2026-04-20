@@ -6,15 +6,6 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public virtual DbSet<FloodLocation> FloodLocations { get; set; }
-    public virtual DbSet<FloodLocationFloodReport> FloodLocationFloodReports { get; set; }
-
-    public virtual DbSet<FloodProperty> FloodProperties { get; set; }
-    public virtual DbSet<FloodPropertyFloodReport> FloodPropertyReports { get; set; }
-
-    public virtual DbSet<FloodRoad> FloodRoads { get; set; }
-    public virtual DbSet<FloodRoadFloodReport> FloodRoadFloodReports { get; set; }
-
     public virtual DbSet<FloodReport> FloodReports { get; set; }
     public virtual DbSet<FloodReportSource> FloodReportSources { get; set; }
 

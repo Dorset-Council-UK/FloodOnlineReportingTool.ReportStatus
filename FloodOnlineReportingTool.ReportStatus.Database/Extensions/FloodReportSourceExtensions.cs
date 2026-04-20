@@ -63,22 +63,20 @@ public static class FloodReportSourceExtensions
         return [.. floodSources.Select(fs => fs.ToSearchResult())];
     }
 
-    public static FloodReportSourceFloodCause ToFloodCause(this EligibilityCheckFloodSource source, Guid floodReportId, Guid floodReportSourceId)
+    public static FloodReportSourceFloodCause ToFloodCause(this EligibilityCheckFloodSource source, Guid floodReportSourceId)
     {
         return new FloodReportSourceFloodCause
         {
-            FloodReportId = floodReportId,
             FloodReportSourceId = floodReportSourceId,
             CauseId = source.Id,
             Name = source.Name,
         };
     }
 
-    public static FloodReportSourceOrganisation ToOrganisation(this EligibilityCheckOrganisation source, Guid floodReportId, Guid floodReportSourceId)
+    public static FloodReportSourceOrganisation ToOrganisation(this EligibilityCheckOrganisation source, Guid floodReportSourceId)
     {
         return new FloodReportSourceOrganisation
         {
-            FloodReportId = floodReportId,
             FloodReportSourceId = floodReportSourceId,
             OrganisationId = source.Id,
             OrganisationName = source.Name,
@@ -89,15 +87,14 @@ public static class FloodReportSourceExtensions
 
     public static (ICollection<FloodReportSourceFloodCause> FloodCauses, ICollection<FloodReportSourceOrganisation> Organisations) ToSourceCollections(
         this FloodReportSourceCreated message,
-        Guid floodReportId,
         Guid floodReportSourceId)
     {
         var floodCauses = message.EligibilityCheckRecord.FloodSources
-            .Select(fs => fs.ToFloodCause(floodReportId, floodReportSourceId))
+            .Select(fs => fs.ToFloodCause(floodReportSourceId))
             .ToList();
 
         var organisations = message.EligibilityCheckRecord.Organisations
-            .Select(org => org.ToOrganisation(floodReportId, floodReportSourceId))
+            .Select(org => org.ToOrganisation(floodReportSourceId))
             .ToList();
 
         return (floodCauses, organisations);

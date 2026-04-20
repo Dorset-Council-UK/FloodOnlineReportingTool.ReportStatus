@@ -4,34 +4,37 @@ using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
+using System.Collections.Immutable;
+using System.ComponentModel.Design;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class FloodReportService(
     ILogger<FloodReportService> logger, 
     IFloodReportRepository floodReportRepository,
-    IFloodPropertyService floodPropertyService,
-    IFloodRoadService floodRoadService,
-    IFloodLocationService floodLocationService,
     ApplicationDbContext context
     ) : IFloodReportService
 {
+    int MaxBuffer = 25; // TODO - Check this
+
     public async Task CreateFromFloodReportCreated(FloodReportSourceCreated message, CancellationToken ct)
     {
         var floodReportId = Guid.CreateVersion7();
-        var (floodCauses, organisations) = message.ToSourceCollections(floodReportId, message.Id);
+        var floodSourceId = Guid.CreateVersion7();  
+        var (floodCauses, organisations) = message.ToSourceCollections(message.Id);
 
         FloodReportSource messageSource = new FloodReportSource()
         {
-            Id = message.EligibilityCheckRecord.Id,
+            Id = floodSourceId,
             FloodReportId = floodReportId, 
             Reference = message.Reference,
             ViewUri = message.ViewUri,
             CreatedUtc = message.CreatedUtc,
             UpdatedUtc = null,
-            //EligibilityCheckId = message.EligibilityCheckRecord.Id,
+            EligibilityCheckId = message.EligibilityCheckRecord.Id,
             Uprn = message.EligibilityCheckRecord.Uprn,
             Usrn = message.EligibilityCheckRecord.Usrn,
             Geom = new Point(message.EligibilityCheckRecord.Easting, message.EligibilityCheckRecord.Northing) { SRID = 27700 },
@@ -81,17 +84,22 @@ public class FloodReportService(
         // Check if this is a duplicate record
         IReadOnlyCollection<Guid> ExistingIds = [];
         FloodReport? generatedReport = null;
+        FloodReportType ReportType;
         if (messageSource.Uprn.HasValue)
         {
-            ExistingIds = await floodPropertyService.FindPotentialDuplicates(messageSource.Uprn.Value, checkRecord, ct);
+            ReportType = FloodReportType.Property;
+            ExistingIds = await FindPotentialDuplicates(ReportType, 0, checkRecord, ct);
+            
         }
         else if (messageSource.Usrn.HasValue)
         {
-            ExistingIds = await floodRoadService.FindPotentialDuplicates(messageSource.Usrn.Value, checkRecord, ct);
+            ReportType = FloodReportType.Road;
+            ExistingIds = await FindPotentialDuplicates(ReportType, 0, checkRecord, ct);
         }
         else
         {
-            ExistingIds = await floodLocationService.FindPotentialDuplicates(buffer, checkRecord, ct);
+            ReportType = FloodReportType.Location;
+            ExistingIds = await FindPotentialDuplicates(ReportType, buffer, checkRecord, ct);
         }
 
         // Build the flood report and the initial source
@@ -102,6 +110,7 @@ public class FloodReportService(
             {
                 Id = ReportStatusFloodReportId,
                 RecordStatus = RecordStatusIds.New,
+                RecordType = ReportType,
                 CreatedUtc = DateTimeOffset.UtcNow,
                 UpdatedUtc = null,
                 SourceRecords = [messageSource]
@@ -224,5 +233,51 @@ public class FloodReportService(
         return await floodReportRepository
             .GetFloodReports()
             .AnyAsync(o => o.Id.Equals(id), ct);
+    }
+
+    public async Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByPoint(double easting, double northing, double buffer, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving all flood locations within buffer {buffer} of {easting}, {northing} from the database.", buffer, easting, northing);
+
+        buffer = Math.Clamp(buffer, 0, MaxBuffer);
+
+        return await floodReportRepository
+            .GetFloodReportsWithinMetres(easting, northing, buffer)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType reportType, double buffer, EligibilityCheckRecord ecr, CancellationToken ct)
+    {
+        ImmutableHashSet<Guid> newSourceIds = [.. ecr.FloodSources.Select(s => s.Id)];
+        var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
+        var bufferDays = isGroundWaterSource ? 14 : 7;
+        var incomingStart = ecr.ImpactStartUTC?.AddDays(-bufferDays);
+        var incomingEnd = ecr.IsOnGoing ? DateTimeOffset.UtcNow : ecr.ImpactStartUTC?.AddHours(ecr.ImpactDurationHours);
+
+        // All three cases now query FloodReport directly via its SourceRecords collection,
+        // since FloodProperty / FloodRoad / FloodLocation join tables have been removed from the model.
+        var query = context.FloodReports
+            .AsNoTracking()
+            .Where(fr => fr.SourceRecords.Any(sr =>
+                // Match on flood causes — at least one cause in common
+                sr.FloodCauses.Any(fc => newSourceIds.Contains(fc.CauseId))
+                // Date overlap
+                && sr.ImpactStartUtc != null
+                && incomingStart != null
+                && incomingEnd != null
+                && sr.ImpactStartUtc <= incomingEnd
+                && sr.ImpactStartUtc.Value.AddHours(sr.ImpactDurationHours ?? 1) >= incomingStart
+                // Match on location
+                && (reportType == FloodReportType.Property
+                        ? sr.Uprn == ecr.Uprn
+                    : reportType == FloodReportType.Road
+                        ? sr.Usrn == ecr.Usrn
+                        // Location: geometry within buffer
+                        : sr.Geom.Intersects(new Point(ecr.Easting, ecr.Northing) { SRID = 27700 }.Buffer(buffer)))
+            ));
+
+        return await query
+            .Select(fr => fr.Id)
+            .ToListAsync(ct);
     }
 }

@@ -41,6 +41,7 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
+            .Where(fr => fr.RecordType == FloodReportType.Location)
             .Where(fr => fr.SourceRecords.Any(sr => sr.Geom.IsWithinDistance(searchPoint, metres)))
             .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id))
             .OrderBy(fr => fr.Id);

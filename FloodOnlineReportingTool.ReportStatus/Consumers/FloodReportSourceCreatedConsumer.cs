@@ -6,8 +6,8 @@ using Microsoft.Extensions.Options;
 
 namespace FloodOnlineReportingTool.ReportStatus.Consumers;
 
-internal class FloodReportCreatedConsumer(
-    ILogger<FloodReportCreatedConsumer> logger,
+internal class FloodReportSourceCreatedConsumer(
+    ILogger<FloodReportSourceCreatedConsumer> logger,
     IOptions<ReportStatusSettings> settings,
     IFloodReportService floodReportService
 ) : IConsumer<FloodReportSourceCreated>
