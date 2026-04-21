@@ -12,8 +12,17 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id))
             .OrderBy(fr => fr.Id);
+    }
+
+    public IQueryable<FloodReport?> GetFloodReportByReference(string reference)
+    {
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Where(fr => fr.SourceRecords.Any( sr => sr.Reference.Equals(reference)))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id));
     }
 
     public IQueryable<FloodReport?> GetFloodReportById(Guid id)
@@ -21,7 +30,7 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id))
             .Where(fr => fr.Id.Equals(id));
     }
 
@@ -32,8 +41,9 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => fr.Geom.IsWithinDistance(searchPoint, metres))
+            .Where(fr => fr.RecordType == FloodReportType.Location)
+            .Where(fr => fr.SourceRecords.Any(sr => sr.Geom.IsWithinDistance(searchPoint, metres)))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id))
             .OrderBy(fr => fr.Id);
     }
 
@@ -42,8 +52,8 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => fr.Uprn.Equals(uprn))
+            .Where(fr => fr.SourceRecords.Any(sr => sr.Uprn.Equals(uprn)))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id))
             .OrderBy(fr => fr.Id);
     }
 
@@ -52,8 +62,8 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId))
-            .Where(fr => fr.Usrn.Equals(usrn))
+            .Where(fr => fr.SourceRecords.Any(sr => sr.Usrn.Equals(usrn)))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id))
             .OrderBy(fr => fr.Id);
     }
 
@@ -68,33 +78,33 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         IQueryable<FloodReport> query = context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Include(fr => fr.Sources.OrderBy(frs => frs.SourceId));
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id));
 
         if (resultsFrom.HasValue)
         {
-            query = query.Where(fr => fr.ImpactStartUtc.HasValue &&
-                fr.ImpactStartUtc.Value.AddHours(fr.ImpactDurationHours) >= resultsFrom.Value);
+            query = query.Where(fr => fr.SourceRecords.Any(sr => sr.ImpactStartUtc.HasValue &&
+                sr.ImpactStartUtc.Value.AddHours(sr.ImpactDurationHours ?? 1) >= resultsFrom.Value));
         }
 
         if (resultsTo.HasValue)
         {
-            query = query.Where(fr => fr.ImpactStartUtc.HasValue &&
-                fr.ImpactStartUtc.Value <= resultsTo.Value);
+            query = query.Where(fr => fr.SourceRecords.Any(sr => sr.ImpactStartUtc.HasValue &&
+                sr.ImpactStartUtc.Value <= resultsTo.Value));
         }
 
         if (floodSources.Count > 0)
         {
-            query = query.Where(fr => fr.Sources.Any(s => floodSources.Contains(s.SourceId)));
+            query = query.Where(fr => fr.SourceRecords.Any(sr => sr.FloodCauses.Any(s => floodSources.Contains(s.CauseId))));
         }
 
         if (uprn.HasValue)
         {
-            query = query.Where(fr => fr.Uprn.Equals(uprn.Value));
+            query = query.Where(fr => fr.SourceRecords.Any(sr => sr.Uprn.Equals(uprn.Value)));
         }
 
         if (usrn.HasValue)
         {
-            query = query.Where(fr => fr.Usrn.Equals(usrn.Value));
+            query = query.Where(fr => fr.SourceRecords.Any(sr => sr.Usrn.Equals(usrn.Value)));
         }
 
         if (!string.IsNullOrWhiteSpace(postcode))
@@ -106,7 +116,7 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         if (geom is not null)
         {
             geom.SRID = 27700;
-            query = query.Where(fr => fr.Geom.Within(geom));
+            query = query.Where(fr => fr.SourceRecords.Any(sr => sr.Geom.Within(geom)));
         }
 
         return query.OrderBy(fr => fr.Id);

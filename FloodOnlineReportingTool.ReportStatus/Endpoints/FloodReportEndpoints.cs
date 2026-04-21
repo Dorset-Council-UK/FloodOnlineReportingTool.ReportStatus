@@ -1,6 +1,8 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.ReportStatus.Settings;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
@@ -43,12 +45,6 @@ internal static class FloodReportEndpoints
 
         var floodReports = await floodReportService.GetFloodReportsWithinMetres(easting, northing, metres, ct).ConfigureAwait(false);
         return TypedResults.Ok(floodReports);
-    }
-
-    internal static async Task<Results<Created<FloodReport>, BadRequest>> CreateFloodReport(IFloodReportService floodReportService, FloodReportDto dto, CancellationToken ct)
-    {
-        var floodReport = await floodReportService.CreateFloodReport(dto, ct).ConfigureAwait(false);
-        return TypedResults.Created($"/api/flood/reports/{floodReport.Id}", floodReport);
     }
 
     internal static async Task<Results<Ok<FloodReport>, NotFound, BadRequest>> UpdateFloodReport(IFloodReportService floodReportService, Guid id, FloodReportDto dto, CancellationToken ct)

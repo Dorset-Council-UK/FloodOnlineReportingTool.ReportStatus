@@ -1,14 +1,136 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
+using System.Collections.Immutable;
+using System.ComponentModel.Design;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
-public class FloodReportService(ILogger<FloodReportService> logger, IFloodReportRepository floodReportRepository, ApplicationDbContext context) : IFloodReportService
+public class FloodReportService(
+    ILogger<FloodReportService> logger, 
+    IFloodReportRepository floodReportRepository,
+    ApplicationDbContext context
+    ) : IFloodReportService
 {
+    int MaxBuffer = 25; // TODO - Check this
+
+    public async Task CreateFromFloodReportCreated(FloodReportSourceCreated message, CancellationToken ct)
+    {
+        var floodReportId = Guid.CreateVersion7();
+        var floodSourceId = Guid.CreateVersion7();  
+        var (floodCauses, organisations) = message.ToSourceCollections(message.Id);
+
+        FloodReportSource messageSource = new FloodReportSource()
+        {
+            Id = floodSourceId,
+            FloodReportId = floodReportId, 
+            Reference = message.Reference,
+            ViewUri = message.ViewUri,
+            CreatedUtc = message.CreatedUtc,
+            UpdatedUtc = null,
+            EligibilityCheckId = message.EligibilityCheckRecord.Id,
+            Uprn = message.EligibilityCheckRecord.Uprn,
+            Usrn = message.EligibilityCheckRecord.Usrn,
+            Geom = new Point(message.EligibilityCheckRecord.Easting, message.EligibilityCheckRecord.Northing) { SRID = 27700 },
+            ImpactStartUtc = message.EligibilityCheckRecord.ImpactStartUTC,
+            ImpactDurationHours = message.EligibilityCheckRecord.ImpactDurationHours,
+            IsOnGoing = message.EligibilityCheckRecord.IsOnGoing,
+            IsUninhabitable = message.EligibilityCheckRecord.IsUninhabitable,
+            VulnerableCount = message.EligibilityCheckRecord.VulnerableCount,
+            LocationDescription = message.EligibilityCheckRecord.LocationDescription,
+            FloodCauses = floodCauses,
+            Organisations = organisations,
+        };
+
+        await GenerateFromSource(messageSource, message.EligibilityCheckRecord, message.Buffer, ct);
+    }
+
+    public async Task<FloodReport?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
+    {
+        // Reverse-map wrapper types back to contract types for EligibilityCheckRecord
+        IReadOnlyCollection<EligibilityCheckOrganisation> organisations = [.. dto.Organisations
+            .Select(org => new EligibilityCheckOrganisation(org.OrganisationId, org.OrganisationName, org.FloodAuthorityId, org.FloodAuthorityName))];
+
+        IReadOnlyCollection<EligibilityCheckFloodSource> floodSources = [.. dto.FloodCauses
+            .Select(fc => new EligibilityCheckFloodSource(fc.CauseId, fc.Name))];
+
+        EligibilityCheckRecord eligibilityCheckRecord = new EligibilityCheckRecord(
+            dto.Id,
+            dto.Uprn,
+            dto.Usrn,
+            dto.Easting,
+            dto.Northing,
+            dto.ImpactStartUtc,
+            dto.ImpactDurationHours ?? 1,
+            dto.IsOnGoing,
+            dto.IsUninhabitable,
+            dto.VulnerableCount,
+            dto.LocationDescription,
+            organisations,
+            floodSources
+        );
+
+        return await GenerateFromSource(dto, eligibilityCheckRecord, buffer, ct);
+    }
+
+    private async Task<FloodReport?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
+    {
+        // Check if this is a duplicate record
+        IReadOnlyCollection<Guid> ExistingIds = [];
+        FloodReport? generatedReport = null;
+        FloodReportType ReportType;
+        if (messageSource.Uprn.HasValue)
+        {
+            ReportType = FloodReportType.Property;
+            ExistingIds = await FindPotentialDuplicates(ReportType, 0, checkRecord, ct);
+            
+        }
+        else if (messageSource.Usrn.HasValue)
+        {
+            ReportType = FloodReportType.Road;
+            ExistingIds = await FindPotentialDuplicates(ReportType, 0, checkRecord, ct);
+        }
+        else
+        {
+            ReportType = FloodReportType.Location;
+            ExistingIds = await FindPotentialDuplicates(ReportType, buffer, checkRecord, ct);
+        }
+
+        // Build the flood report and the initial source
+        if (ExistingIds.Count == 0)
+        {
+            var ReportStatusFloodReportId = Guid.CreateVersion7();
+            generatedReport = new FloodReport()
+            {
+                Id = ReportStatusFloodReportId,
+                RecordStatus = RecordStatusIds.New,
+                RecordType = ReportType,
+                CreatedUtc = DateTimeOffset.UtcNow,
+                UpdatedUtc = null,
+                SourceRecords = [messageSource]
+            };
+
+            context.FloodReports.Add(generatedReport);
+            await context.SaveChangesAsync(ct);
+        }
+        else
+        {
+            // Get and update the existing records - We add new duplicates to all matches for a user to review.
+
+
+            //context.FloodReports.Update(generatedReport);
+            //await context.SaveChangesAsync(ct);
+        }
+
+        return generatedReport;
+    }
+
     public async Task<IReadOnlyCollection<FloodReport>> GetFloodReports(CancellationToken ct)
     {
         logger.LogDebug("Retrieving all flood reports from the database.");
@@ -17,9 +139,17 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
         return await query.ToListAsync(ct);
     }
 
+    public async Task<FloodReport?> GetFloodReportByReference(string reference, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving flood report from the database by reference.");
+
+        var query = floodReportRepository.GetFloodReportByReference(reference);
+        return await query.FirstOrDefaultAsync(ct);
+    }
+
     public async Task<FloodReport?> GetFloodReportById(Guid id, CancellationToken ct)
     {
-        logger.LogDebug("Retrieving flood report with ID {FloodReportId} from the database.", id);
+        logger.LogDebug("Retrieving flood report from the database by ID.");
 
         var query = floodReportRepository.GetFloodReportById(id);
         return await query.FirstOrDefaultAsync(ct);
@@ -52,29 +182,6 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
             .ToListAsync(ct);
     }
 
-    public async Task<FloodReport> CreateFloodReport(FloodReportDto dto, CancellationToken ct)
-    {
-        logger.LogDebug("Creating a new flood report with EligibilityCheckId {EligibilityCheckId}.", dto.EligibilityCheckId);
-
-        var creating = new FloodReport()
-        {
-            Id = Guid.CreateVersion7(),
-            CreatedUtc = DateTimeOffset.UtcNow,
-
-            EligibilityCheckId = dto.EligibilityCheckId,
-            Uprn = dto.Uprn,
-            Usrn = dto.Usrn,
-            Geom = new Point(dto.Geom.X, dto.Geom.Y) { SRID = 27700 },
-            ImpactStartUtc = dto.ImpactStartUtc,
-            ImpactDurationHours = dto.ImpactDurationHours,
-        };
-
-        context.FloodReports.Add(creating);
-        await context.SaveChangesAsync(ct);
-
-        return creating;
-    }
-
     public async Task<FloodReport?> UpdateFloodReport(Guid id, FloodReportDto dto, CancellationToken ct)
     {
         logger.LogDebug("Updating flood report with ID {FloodReportId} in the database.", id);
@@ -91,13 +198,9 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
         var updated = existing with
         {
             UpdatedUtc = DateTimeOffset.UtcNow,
+            RecordStatus = dto.RecordStatus,
 
-            EligibilityCheckId = dto.EligibilityCheckId,
-            Uprn = dto.Uprn,
-            Usrn = dto.Usrn,
-            Geom = dto.Geom,
-            ImpactStartUtc = dto.ImpactStartUtc,
-            ImpactDurationHours = dto.ImpactDurationHours,
+            SourceRecords = dto.SourceRecords
         };
 
         context.FloodReports.Update(updated);
@@ -130,5 +233,51 @@ public class FloodReportService(ILogger<FloodReportService> logger, IFloodReport
         return await floodReportRepository
             .GetFloodReports()
             .AnyAsync(o => o.Id.Equals(id), ct);
+    }
+
+    public async Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByPoint(double easting, double northing, double buffer, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving all flood locations within buffer {buffer} of {easting}, {northing} from the database.", buffer, easting, northing);
+
+        buffer = Math.Clamp(buffer, 0, MaxBuffer);
+
+        return await floodReportRepository
+            .GetFloodReportsWithinMetres(easting, northing, buffer)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType reportType, double buffer, EligibilityCheckRecord ecr, CancellationToken ct)
+    {
+        ImmutableHashSet<Guid> newSourceIds = [.. ecr.FloodSources.Select(s => s.Id)];
+        var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
+        var bufferDays = isGroundWaterSource ? 14 : 7;
+        var incomingStart = ecr.ImpactStartUTC?.AddDays(-bufferDays);
+        var incomingEnd = ecr.IsOnGoing ? DateTimeOffset.UtcNow : ecr.ImpactStartUTC?.AddHours(ecr.ImpactDurationHours);
+
+        // All three cases now query FloodReport directly via its SourceRecords collection,
+        // since FloodProperty / FloodRoad / FloodLocation join tables have been removed from the model.
+        var query = context.FloodReports
+            .AsNoTracking()
+            .Where(fr => fr.SourceRecords.Any(sr =>
+                // Match on flood causes — at least one cause in common
+                sr.FloodCauses.Any(fc => newSourceIds.Contains(fc.CauseId))
+                // Date overlap
+                && sr.ImpactStartUtc != null
+                && incomingStart != null
+                && incomingEnd != null
+                && sr.ImpactStartUtc <= incomingEnd
+                && sr.ImpactStartUtc.Value.AddHours(sr.ImpactDurationHours ?? 1) >= incomingStart
+                // Match on location
+                && (reportType == FloodReportType.Property
+                        ? sr.Uprn == ecr.Uprn
+                    : reportType == FloodReportType.Road
+                        ? sr.Usrn == ecr.Usrn
+                        // Location: geometry within buffer
+                        : sr.Geom.Intersects(new Point(ecr.Easting, ecr.Northing) { SRID = 27700 }.Buffer(buffer)))
+            ));
+
+        return await query
+            .Select(fr => fr.Id)
+            .ToListAsync(ct);
     }
 }

@@ -8,18 +8,29 @@ internal class FloodReportSourceConfiguration : IEntityTypeConfiguration<FloodRe
 {
     public void Configure(EntityTypeBuilder<FloodReportSource> builder)
     {
-        builder.HasKey(o => new { o.FloodReportId, o.SourceId });
+        builder.HasKey(o => o.Id);
+
+        builder.HasIndex(o => o.EligibilityCheckId);
+        builder.HasIndex(o => new { o.FloodReportId, o.EligibilityCheckId });
 
         builder
-            .Property(o => o.FloodReportId)
-            .ValueGeneratedNever();
+            .Property(o => o.Geom)
+            .HasColumnType("geometry (point, 27700)");
 
         builder
-            .Property(o => o.SourceId)
-            .ValueGeneratedNever();
+            .Property(o => o.Easting)
+            .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 27700))", stored: true);
 
         builder
-            .Property(o => o.Name)
-            .HasMaxLength(200);
+            .Property(o => o.Northing)
+            .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 27700))", stored: true);
+
+        builder
+            .Property(o => o.Latitude)
+            .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", stored: true);
+
+        builder
+            .Property(o => o.Longitude)
+            .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", stored: true);
     }
 }

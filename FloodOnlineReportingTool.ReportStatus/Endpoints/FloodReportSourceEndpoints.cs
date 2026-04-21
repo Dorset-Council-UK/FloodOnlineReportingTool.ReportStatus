@@ -18,27 +18,21 @@ internal static class FloodReportSourceEndpoints
         return floodReportSource == null ? TypedResults.NotFound() : TypedResults.Ok(floodReportSource);
     }
 
-    internal static async Task<Results<Created<FloodReportSource>, BadRequest>> CreateReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, FloodReportSourceDto dto, CancellationToken ct)
+    internal static async Task<Results<Ok<bool>, BadRequest>> CreateReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, string name, CancellationToken ct)
     {
-        var floodReportSource = await floodReportSourceService.CreateFloodReportSource(floodReportId, sourceId, dto, ct).ConfigureAwait(false);
-        return TypedResults.Created($"/api/flood/reports/{floodReportSource.FloodReportId}/sources/{floodReportSource.SourceId}", floodReportSource);
+        var floodReportSource = await floodReportSourceService.AddFloodReportFloodSource(floodReportId, sourceId, name, ct).ConfigureAwait(false);
+        return TypedResults.Ok(floodReportSource);
     }
 
-    internal static async Task<Results<Ok<FloodReportSource>, NotFound, BadRequest>> UpdateReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, FloodReportSourceDto dto, CancellationToken ct)
+    internal static async Task<Results<NoContent, NotFound, BadRequest>> DeleteReportFloodSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, CancellationToken ct)
     {
-        var floodReportSource = await floodReportSourceService.UpdateFloodReportSource(floodReportId, sourceId, dto, ct).ConfigureAwait(false);
-        return floodReportSource == null ? TypedResults.NotFound() : TypedResults.Ok(floodReportSource);
-    }
-
-    internal static async Task<Results<NoContent, NotFound, BadRequest>> DeleteReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, CancellationToken ct)
-    {
-        var deleted = await floodReportSourceService.DeleteFloodReportSource(floodReportId, sourceId, ct).ConfigureAwait(false);
+        var deleted = await floodReportSourceService.DeleteFloodReportFloodSource(floodReportId, sourceId, ct).ConfigureAwait(false);
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
     }
 
-    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportSourceExists(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, CancellationToken ct)
+    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportFloodSourceExists(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, CancellationToken ct)
     {
-        var exists = await floodReportSourceService.FloodReportSourceExists(floodReportId, sourceId, ct).ConfigureAwait(false);
+        var exists = await floodReportSourceService.FloodReportFloodSourceExists(floodReportId, sourceId, ct).ConfigureAwait(false);
         return TypedResults.Ok(exists);
     }
 }

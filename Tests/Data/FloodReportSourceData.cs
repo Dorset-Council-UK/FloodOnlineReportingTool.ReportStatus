@@ -1,4 +1,7 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using NetTopologySuite.Geometries;
+using System.ComponentModel.DataAnnotations;
 
 namespace Tests.Data;
 
@@ -8,12 +11,44 @@ public static class FloodReportSourceData
 
     public static FloodReportSource Create(Guid? floodReportId = null, Guid? sourceId = null, string? name = null)
     {
-        return new()
+        var recordId = Guid.NewGuid();
+        var reportId = floodReportId ?? Guid.NewGuid();
+        var checkId = sourceId ?? Guid.NewGuid();
+
+        return new FloodReportSource
         {
-            FloodReportId = floodReportId ?? Guid.NewGuid(),
-            SourceId = sourceId ?? Guid.NewGuid(),
+            Id = recordId,
+            Reference = "HKFGHDSDFCW",
+            ViewUri = new Uri($"https://example.com/floodreport/HKFGHDSDFCW"),
             CreatedUtc = TestCreatedDate,
-            Name = name ?? "Test Source",
+            UpdatedUtc = null,
+            EligibilityCheckId = checkId,
+            Uprn = null,
+            Usrn = null,
+            Geom = new Point(123456, 654321),
+            ImpactStartUtc = TestCreatedDate,
+            ImpactDurationHours = 1,
+            IsOnGoing = false,
+            IsUninhabitable = false,
+            VulnerableCount = 6,
+            LocationDescription = "Test location description",
+            Organisations = [],
+            FloodCauses = [
+                new FloodReportSourceFloodCause
+                {
+                    FloodReportSourceId = recordId,
+                    CauseId = PrimaryCauseIds.River,
+                    Name = "River",
+                },
+                new FloodReportSourceFloodCause
+                {
+                    FloodReportSourceId = recordId,
+                    CauseId = PrimaryCauseIds.RainwaterFlowingOverTheGround,
+                    Name = "Rainwater flowing over the ground",
+                },
+            ],
+            FloodReportId = reportId,
+            FloodReport = null
         };
     }
 
