@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
+using System.Text.Json.Serialization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 public record FloodReport : ICreatedUpdated
@@ -12,5 +13,6 @@ public record FloodReport : ICreatedUpdated
     public DateTimeOffset? UpdatedUtc { get; init; }
 
     // Other properties
+    [JsonIgnore]
     public ICollection<FloodReportSource> SourceRecords { get; init; }
 }

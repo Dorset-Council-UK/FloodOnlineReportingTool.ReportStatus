@@ -126,7 +126,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasIndex("EligibilityCheckId");
 
-                    b.HasIndex("FloodReportId");
+                    b.HasIndex("FloodReportId", "EligibilityCheckId");
 
                     b.ToTable("FloodReportSources", "fortreportstatus");
                 });

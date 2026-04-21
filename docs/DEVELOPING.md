@@ -8,7 +8,7 @@ Thank you for your interest in contributing to the Flood Online Reporting Tool -
 To run this project with minimal modification, you will need the following:
 
 - **PostgreSQL 13+ with PostGIS extension**: This is the default database provider. The project uses Entity Framework, making it adaptable to other providers with minimal effort.
-- **.NET 9**: Ensure you have the .NET 9 SDK installed.
+- **.NET 10**: Ensure you have the .NET 10 SDK installed.
 - **Message system (optional)**: The project includes a messaging system using Azure Service Bus. You can enable or disable this system through the `Messaging:Enabled` setting in your configuration.
 
 ## Getting Started

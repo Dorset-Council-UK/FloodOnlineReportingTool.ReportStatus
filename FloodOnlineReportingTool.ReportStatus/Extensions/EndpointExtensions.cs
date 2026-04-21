@@ -57,12 +57,7 @@ internal static class EndpointExtensions
             .WithDescription("Gets a flood report by id from the database")
             .RequireAuthorization(PolicyNames.Reader);
 
-        // Create
-        group
-            .MapPost(pattern: "/", FloodReportEndpoints.CreateFloodReport)
-            .WithSummary("Flood report - Create")
-            .WithDescription("Creates a new flood report in the database")
-            .RequireAuthorization(PolicyNames.Writer);
+        // Create - not currently available as done via messages instead
 
         // Update
         group

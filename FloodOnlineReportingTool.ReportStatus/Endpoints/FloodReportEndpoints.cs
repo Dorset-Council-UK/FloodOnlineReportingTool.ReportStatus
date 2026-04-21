@@ -47,12 +47,6 @@ internal static class FloodReportEndpoints
         return TypedResults.Ok(floodReports);
     }
 
-    internal static async Task<Results<Created<FloodReport>, NoContent, BadRequest>> CreateFloodReport(IFloodReportService floodReportService, IOptions<ReportStatusSettings> options, FloodReportSource dto, CancellationToken ct)
-    {
-        var floodReport = await floodReportService.CreateFloodReport(dto, options.Value.LocationBufferMetres, ct).ConfigureAwait(false);
-        return floodReport == null ? TypedResults.NoContent() : TypedResults.Created($"/api/flood/reports/{floodReport.Id}", floodReport);
-    }
-
     internal static async Task<Results<Ok<FloodReport>, NotFound, BadRequest>> UpdateFloodReport(IFloodReportService floodReportService, Guid id, FloodReportDto dto, CancellationToken ct)
     {
         var floodReport = await floodReportService.UpdateFloodReport(id, dto, ct).ConfigureAwait(false);

@@ -12,8 +12,6 @@ internal class FloodReportSourceCreatedConsumer(
     IFloodReportService floodReportService
 ) : IConsumer<FloodReportSourceCreated>
 {
-    private readonly ReportStatusSettings _settings = settings.Value;
-
     public async Task Consume(ConsumeContext<FloodReportSourceCreated> context)
     {
         logger.LogInformation("Consuming contract: {Contract}", nameof(FloodReportSourceCreated));

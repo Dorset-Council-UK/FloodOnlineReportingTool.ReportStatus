@@ -24,7 +24,10 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
     {
         logger.LogDebug("Retrieving flood report source with ID {FloodReportId}/{SourceId} from the database.", floodReportId, sourceId);
 
-        return await context.FloodReportSources.FindAsync([floodReportId, sourceId], ct);
+        return await context.FloodReportSources
+        .AsNoTracking()
+        .Where(frs => frs.FloodReportId == floodReportId && frs.EligibilityCheckId == sourceId)
+        .FirstOrDefaultAsync(ct);
     }
 
     public async Task<bool> AddFloodReportFloodSource(Guid floodReportId, Guid sourceId, FloodReportNameDto dto, CancellationToken ct)
