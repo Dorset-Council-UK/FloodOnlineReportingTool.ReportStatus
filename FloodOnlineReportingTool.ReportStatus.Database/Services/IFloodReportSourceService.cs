@@ -18,7 +18,7 @@ public interface IFloodReportSourceService
     /// <summary>
     /// Adds a new flood cause to a flood report source in the database.
     /// </summary>
-    Task<bool> AddFloodReportFloodSource(Guid floodReportId, Guid sourceId, FloodReportNameDto dto, CancellationToken ct);
+    Task<bool> AddFloodReportFloodSource(Guid floodReportId, Guid sourceId, string name, CancellationToken ct);
 
     /// <summary>
     /// Adds multiple flood causes to a flood report source at once using the message data.

@@ -18,9 +18,9 @@ internal static class FloodReportSourceEndpoints
         return floodReportSource == null ? TypedResults.NotFound() : TypedResults.Ok(floodReportSource);
     }
 
-    internal static async Task<Results<Ok<bool>, BadRequest>> CreateReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, FloodReportNameDto dto, CancellationToken ct)
+    internal static async Task<Results<Ok<bool>, BadRequest>> CreateReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, string name, CancellationToken ct)
     {
-        var floodReportSource = await floodReportSourceService.AddFloodReportFloodSource(floodReportId, sourceId, dto, ct).ConfigureAwait(false);
+        var floodReportSource = await floodReportSourceService.AddFloodReportFloodSource(floodReportId, sourceId, name, ct).ConfigureAwait(false);
         return TypedResults.Ok(floodReportSource);
     }
 

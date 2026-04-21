@@ -30,7 +30,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<bool> AddFloodReportFloodSource(Guid floodReportId, Guid sourceId, FloodReportNameDto dto, CancellationToken ct)
+    public async Task<bool> AddFloodReportFloodSource(Guid floodReportId, Guid sourceId, string name, CancellationToken ct)
     {
         logger.LogDebug("Adding a new flood source to report.");
         var currentSource = await GetFloodReportSource(floodReportId, sourceId, ct);
@@ -41,10 +41,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
             return false;
         }
 
-        var newFloodReportSource = new EligibilityCheckFloodSource(
-            sourceId,
-            dto.Name
-        );
+        var newFloodReportSource = new EligibilityCheckFloodSource(sourceId, name);
 
         // TODO - look at this function
         //currentSource.FloodCauses.Add(newFloodReportSource);

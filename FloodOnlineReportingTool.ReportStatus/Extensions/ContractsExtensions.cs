@@ -7,14 +7,6 @@ namespace FloodOnlineReportingTool.Contracts;
 
 internal static class ContractsExtensions
 {
-    internal static FloodReportNameDto ToFloodReportSourceDto(this EligibilityCheckFloodSource eligibilityCheckFloodSource)
-    {
-        return new()
-        {
-            Name = eligibilityCheckFloodSource.Name,
-        };
-    }
-
     internal static FloodPropertyDto ToFloodPropertyDto(this FloodReportSourceCreated floodReportSourceCreated, string locationDescription)
     {
         if (floodReportSourceCreated.EligibilityCheckRecord.Uprn is null)
