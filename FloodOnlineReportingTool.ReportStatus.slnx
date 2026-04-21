@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="docs/docs.csproj">
+    <Build Project="false" />
+  </Project>
+  <Project Path="FloodOnlineReportingTool.ReportStatus.Database/FloodOnlineReportingTool.ReportStatus.Database.csproj" />
+  <Project Path="FloodOnlineReportingTool.ReportStatus/FloodOnlineReportingTool.ReportStatus.csproj" />
+  <Project Path="Tests/Tests.csproj" />
+</Solution>
