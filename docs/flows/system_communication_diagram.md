@@ -23,10 +23,10 @@ sequenceDiagram
 
     rect rgb(0, 0, 0)
         Note over L,R: Report Update
-        Public->>ASB: FloodSourceUpdated (1)
-        ASB->>RS: Reads message (2)
+        Public->>ASB: FloodReportSourceUpdated (1)
+        ASB->>RS: Read FloodReportSourceUpdated (2)
         Note over RS: Record updated
-        RS->>ASB: FloodReportUpdated (3)
+        RS->>ASB: FloodReportSourceUpdated (3)
     end
 
     rect rgb(0, 0, 0)
