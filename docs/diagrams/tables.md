@@ -3,5 +3,5 @@
 ## Simple relationship diagrams
 ```mermaid
 erDiagram
-   FloodReport ||--o{ FloodReportSource : "has one or many"
+   FloodReport ||--o{ FloodReportSource : "has zero or many"
 ```

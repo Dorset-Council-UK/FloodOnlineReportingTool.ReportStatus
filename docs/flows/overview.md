@@ -2,9 +2,9 @@
 
 ## System Context
 
-The system works with three systems:
-- Public (reporting)
-- Report Status (event grouping)
+Three systems work together in the flood reporting process:
+- Public (reporting).
+- Report Status (event grouping).
 - Risk Management (tools for professional partners).
 
 This overview describes how two of these systems work together to manage flood reporting:
@@ -68,5 +68,5 @@ flowchart LR
 |---|---|---|
 | `FloodReport` | — | The authoritative record of a flooding event |
 | `FloodReportSource` | one or many per `FloodReport` | A submission that contributed to this flood report |
-| `Investigation` | 0..1 per `FloodReportSource` | A follow on form completed by reporter to assist investigation |
+| `Investigation` | 0..1 per `FloodReportSource` | An optional follow-on form completed by the reporter and linked to the `FloodReportSource`, to provide additional information for later professional review |
 
