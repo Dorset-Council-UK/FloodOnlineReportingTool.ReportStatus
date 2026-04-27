@@ -11,7 +11,7 @@ sequenceDiagram
     rect rgb(0, 0, 0)
         Note over L,R: New Reports
         Public->>ASB: FloodReportSourceCreated (1)
-        ASB->>RS: Read FloodReportSourceCreated (2)
+        ASB->>RS: Reads FloodReportSourceCreated (2)
         alt Duplicate report detected
             RS->>RS: Attach FloodReportSource to existing FloodReport
         else New report
