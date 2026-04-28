@@ -4,17 +4,16 @@ using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using System.Collections.Immutable;
-using System.ComponentModel.Design;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class FloodReportService(
     ILogger<FloodReportService> logger, 
     IFloodReportRepository floodReportRepository,
+    IFloodReportSourceDuplicateRepository floodReportSourceRepository,
     ApplicationDbContext context
     ) : IFloodReportService
 {
@@ -105,6 +104,7 @@ public class FloodReportService(
         // Build the flood report and the initial source
         if (ExistingIds.Count == 0)
         {
+            // Add the new source
             var ReportStatusFloodReportId = Guid.CreateVersion7();
             generatedReport = new FloodReport()
             {
@@ -122,10 +122,53 @@ public class FloodReportService(
         else
         {
             // Get and update the existing records - We add new duplicates to all matches for a user to review.
+            var existingReports = await context.FloodReports
+                .Where(fr => ExistingIds.Contains(fr.Id))
+                .ToListAsync(ct);
 
+            if (existingReports.Count == 0)
+            {
+                return null;
+            }
 
-            //context.FloodReports.Update(generatedReport);
-            //await context.SaveChangesAsync(ct);
+            foreach (var existingReport in existingReports)
+            {
+                // Add the source record to the existing report as needed
+                var updatedReport = existingReport with
+                {
+                    UpdatedUtc = DateTimeOffset.UtcNow,
+                    RecordStatus = RecordStatusIds.DuplicateDetected,
+                };
+                context.FloodReports.Update(updatedReport);
+            }
+
+            // Add the duplicate source record
+            FloodReportSourceDuplicate duplicateSource = new FloodReportSourceDuplicate
+            {
+                Id = Guid.NewGuid(),
+                Reference = messageSource.Reference,
+                ViewUri = messageSource.ViewUri,
+                CreatedUtc = DateTimeOffset.UtcNow,
+                UpdatedUtc = null,
+                EligibilityCheckId = messageSource.EligibilityCheckId,
+                Uprn = messageSource.Uprn,
+                Usrn = messageSource.Usrn,
+                Geom = messageSource.Geom,
+                Easting = messageSource.Easting,
+                Northing = messageSource.Northing,
+                Latitude = messageSource.Latitude,
+                Longitude = messageSource.Longitude,
+                ImpactStartUtc = messageSource.ImpactStartUtc,
+                ImpactDurationHours = messageSource.ImpactDurationHours,
+                IsOnGoing = messageSource.IsOnGoing,
+                IsUninhabitable = messageSource.IsUninhabitable,
+                VulnerableCount = messageSource.VulnerableCount,
+                LocationDescription = messageSource.LocationDescription,
+                FloodReports = existingReports
+            };
+            context.FloodReportSourceDuplicates.Add(duplicateSource);
+
+            await context.SaveChangesAsync(ct);
         }
 
         return generatedReport;
@@ -278,6 +321,13 @@ public class FloodReportService(
 
         return await query
             .Select(fr => fr.Id)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyCollection<FloodReportSourceDuplicate>?> GetPotentialDuplicatesById(Guid id, CancellationToken ct)
+    {
+        return await floodReportSourceRepository
+            .GetFloodReportSourceDuplicateById(id)
             .ToListAsync(ct);
     }
 }

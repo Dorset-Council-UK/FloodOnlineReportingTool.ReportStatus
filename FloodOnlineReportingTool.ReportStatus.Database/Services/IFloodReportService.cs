@@ -72,4 +72,6 @@ public interface IFloodReportService
 
     Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType ReportType, double buffer, EligibilityCheckRecord ecr, CancellationToken ct);
 
+    Task<IReadOnlyCollection<FloodReportSourceDuplicate>?> GetPotentialDuplicatesById(Guid id, CancellationToken ct);
+
 }
