@@ -11,15 +11,248 @@ public static class FindPotentialDuplicatesData
     private static readonly double BaseEasting = 368991.12;
     private static readonly double BaseNorthing = 90881.94;
 
-    // Fixed authority IDs — no FloodAuthorityIds constants exist in the contracts package,
-    // so we define stable GUIDs here that represent EA and LLFA for testing purposes
+    // Fixed authority IDs — no FloodAuthorityIds constants exist in the contracts package
     internal static readonly Guid EnvironmentAgencyId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001");
-    internal static readonly Guid LlfaId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000002");
+    internal static readonly Guid LlfaId             = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000002");
 
-    /// <summary>
-    /// Creates a <see cref="FloodReport"/> with a single source record for duplicate detection testing.
-    /// Authority defaults to <see cref="EnvironmentAgencyId"/> unless overridden.
-    /// </summary>
+    // -------------------------------------------------------------------------
+    // Named reports with fixed IDs so tests can assert on specific GUIDs.
+    // Each name describes the ONE characteristic that makes it distinctive.
+    // -------------------------------------------------------------------------
+
+    // Property (UPRN) reports
+    public static readonly FloodReport Property_ExactDateMatch =
+        CreateReport(id: Guid.Parse("11111111-0001-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: BaseImpactDate);
+
+    public static readonly FloodReport Property_WithinWindow =
+        CreateReport(id: Guid.Parse("11111111-0002-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1);
+
+    public static readonly FloodReport Property_TooEarly =
+        CreateReport(id: Guid.Parse("11111111-0003-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-30), impactDurationHours: 1);
+
+    public static readonly FloodReport Property_TooLate =
+        CreateReport(id: Guid.Parse("11111111-0004-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(30));
+
+    public static readonly FloodReport Property_DifferentUprn =
+        CreateReport(id: Guid.Parse("11111111-0005-0000-0000-000000000000"),
+            uprn: 99999999999, impactStartUtc: BaseImpactDate);
+
+    public static readonly FloodReport Property_DifferentAuthority =
+        CreateReport(id: Guid.Parse("11111111-0006-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: BaseImpactDate, authorityId: LlfaId);
+
+    public static readonly FloodReport Property_GroundwaterWindow =
+        CreateReport(id: Guid.Parse("11111111-0007-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1);
+
+    // Matched only by an ongoing ECR — starts after a standard incomingEnd but before UtcNow
+    public static readonly FloodReport Property_OngoingOnlyMatch =
+        CreateReport(id: Guid.Parse("11111111-0008-0000-0000-000000000000"),
+            uprn: 10023242411, impactStartUtc: new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+
+    // Road (USRN) reports
+    public static readonly FloodReport Road_ExactDateMatch =
+        CreateReport(id: Guid.Parse("22222222-0001-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate);
+
+    public static readonly FloodReport Road_WithinWindow =
+        CreateReport(id: Guid.Parse("22222222-0002-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1);
+
+    public static readonly FloodReport Road_TooEarly =
+        CreateReport(id: Guid.Parse("22222222-0003-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-30), impactDurationHours: 1);
+
+    public static readonly FloodReport Road_TooLate =
+        CreateReport(id: Guid.Parse("22222222-0004-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(30));
+
+    public static readonly FloodReport Road_DifferentUsrn =
+        CreateReport(id: Guid.Parse("22222222-0005-0000-0000-000000000000"),
+            usrn: 99999999999, impactStartUtc: BaseImpactDate);
+
+    public static readonly FloodReport Road_DifferentAuthority =
+        CreateReport(id: Guid.Parse("22222222-0006-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate, authorityId: LlfaId);
+
+    public static readonly FloodReport Road_GroundwaterWindow =
+        CreateReport(id: Guid.Parse("22222222-0007-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1);
+
+    public static readonly FloodReport Road_OngoingOnlyMatch =
+        CreateReport(id: Guid.Parse("22222222-0008-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+
+    // Location reports
+    public static readonly FloodReport Location_Within25m =
+        CreateReport(id: Guid.Parse("33333333-0001-0000-0000-000000000000"),
+            easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate);
+
+    public static readonly FloodReport Location_Within25m_Second =
+        CreateReport(id: Guid.Parse("33333333-0002-0000-0000-000000000000"),
+            easting: BaseEasting + 10, northing: BaseNorthing,
+            impactStartUtc: BaseImpactDate.AddDays(-2), impactDurationHours: 48);
+
+    public static readonly FloodReport Location_Outside25m =
+        CreateReport(id: Guid.Parse("33333333-0003-0000-0000-000000000000"),
+            easting: BaseEasting + 30, northing: BaseNorthing, impactStartUtc: BaseImpactDate);
+
+    public static readonly FloodReport Location_TooEarly =
+        CreateReport(id: Guid.Parse("33333333-0004-0000-0000-000000000000"),
+            easting: BaseEasting + 20, northing: BaseNorthing,
+            impactStartUtc: BaseImpactDate.AddDays(-30), impactDurationHours: 1);
+
+    public static readonly FloodReport Location_TooLate =
+        CreateReport(id: Guid.Parse("33333333-0005-0000-0000-000000000000"),
+            easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate.AddDays(30));
+
+    public static readonly FloodReport Location_DifferentAuthority =
+        CreateReport(id: Guid.Parse("33333333-0006-0000-0000-000000000000"),
+            easting: BaseEasting + 20, northing: BaseNorthing,
+            impactStartUtc: BaseImpactDate, authorityId: LlfaId);
+
+    // -------------------------------------------------------------------------
+    // Single shared dataset — every test uses this collection, mirroring the
+    // real FloodReports table which contains many unrelated records.
+    // -------------------------------------------------------------------------
+    public static readonly ICollection<FloodReport> AllReports =
+    [
+        Property_ExactDateMatch, Property_WithinWindow, Property_TooEarly, Property_TooLate,
+        Property_DifferentUprn, Property_DifferentAuthority, Property_GroundwaterWindow, Property_OngoingOnlyMatch,
+        Road_ExactDateMatch, Road_WithinWindow, Road_TooEarly, Road_TooLate,
+        Road_DifferentUsrn, Road_DifferentAuthority, Road_GroundwaterWindow, Road_OngoingOnlyMatch,
+        Location_Within25m, Location_Within25m_Second, Location_Outside25m,
+        Location_TooEarly, Location_TooLate, Location_DifferentAuthority,
+    ];
+
+    // -------------------------------------------------------------------------
+    // Theory data — reports array is gone; tests always use AllReports.
+    // Match cases pass the ID that MUST be in the result.
+    // No-match cases pass the ID that MUST NOT be in the result.
+    // -------------------------------------------------------------------------
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyMatch_Cases()
+    {
+        var ecr = CreateEcr(uprn: 10023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 1", FloodReportType.Property, ecr, Property_ExactDateMatch.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 2", FloodReportType.Property, ecr, Property_WithinWindow.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyNoMatch_Cases()
+    {
+        var ecr = CreateEcr(uprn: 10023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 3", FloodReportType.Property, ecr, Property_DifferentUprn.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 4", FloodReportType.Property, ecr, Property_TooEarly.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 5", FloodReportType.Property, ecr, Property_TooLate.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>> PropertyAuthority_Cases()
+    {
+        var ecrEa = CreateEcr(uprn: 10023242411, authorityId: EnvironmentAgencyId);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 6", FloodReportType.Property, ecrEa, Property_ExactDateMatch.Id, true);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 7", FloodReportType.Property, ecrEa, Property_DifferentAuthority.Id, false);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>> PropertyMultipleMatches_Cases()
+    {
+        var ecr = CreateEcr(uprn: 10023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>
+            ("Scenario 8", FloodReportType.Property, ecr, [Property_ExactDateMatch.Id, Property_WithinWindow.Id]);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyOngoing_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>
+            ("Scenario 9", FloodReportType.Property, CreateEcr(uprn: 10023242411, isOnGoing: true), Property_OngoingOnlyMatch.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadMatch_Cases()
+    {
+        var ecr = CreateEcr(usrn: 20023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 10", FloodReportType.Road, ecr, Road_ExactDateMatch.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 11", FloodReportType.Road, ecr, Road_WithinWindow.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadNoMatch_Cases()
+    {
+        var ecr = CreateEcr(usrn: 20023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 12", FloodReportType.Road, ecr, Road_DifferentUsrn.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 13", FloodReportType.Road, ecr, Road_TooEarly.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 14", FloodReportType.Road, ecr, Road_TooLate.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>> RoadAuthority_Cases()
+    {
+        var ecrEa = CreateEcr(usrn: 20023242411, authorityId: EnvironmentAgencyId);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 15", FloodReportType.Road, ecrEa, Road_ExactDateMatch.Id, true);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 16", FloodReportType.Road, ecrEa, Road_DifferentAuthority.Id, false);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>> RoadMultipleMatches_Cases()
+    {
+        var ecr = CreateEcr(usrn: 20023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>
+            ("Scenario 17", FloodReportType.Road, ecr, [Road_ExactDateMatch.Id, Road_WithinWindow.Id]);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadOngoing_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>
+            ("Scenario 18", FloodReportType.Road, CreateEcr(usrn: 20023242411, isOnGoing: true), Road_OngoingOnlyMatch.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>> LocationMatch_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>
+            ("Scenario 19", FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, Location_Within25m.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>> LocationNoMatch_Cases()
+    {
+        var ecr = CreateEcr(easting: BaseEasting, northing: BaseNorthing);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 20", FloodReportType.Location, ecr, 25, Location_Outside25m.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 21", FloodReportType.Location, ecr, 25, Location_TooEarly.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 22", FloodReportType.Location, ecr, 25, Location_TooLate.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>> LocationAuthority_Cases()
+    {
+        var ecrEa = CreateEcr(easting: BaseEasting, northing: BaseNorthing, authorityId: EnvironmentAgencyId);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>("Scenario 23", FloodReportType.Location, ecrEa, 25, Location_Within25m.Id, true);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>("Scenario 24", FloodReportType.Location, ecrEa, 25, Location_DifferentAuthority.Id, false);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid[]>> LocationMultipleMatches_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid[]>(
+            "Scenario 25", FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25,
+            [Location_Within25m.Id, Location_Within25m_Second.Id]);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> GroundwaterBuffer_ReturnsMatch_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 26", FloodReportType.Property, CreateEcr(uprn: 10023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), Property_GroundwaterWindow.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 27", FloodReportType.Road, CreateEcr(usrn: 20023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), Road_GroundwaterWindow.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> GroundwaterBuffer_ReturnsNoMatch_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 28", FloodReportType.Property, CreateEcr(uprn: 10023242411, causeIds: [PrimaryCauseIds.River]), Property_GroundwaterWindow.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 29", FloodReportType.Road, CreateEcr(usrn: 20023242411, causeIds: [PrimaryCauseIds.River]), Road_GroundwaterWindow.Id);
+    }
+
+    // -------------------------------------------------------------------------
+    // Factories
+    // -------------------------------------------------------------------------
+
     public static FloodReport CreateReport(
         Guid? id = null,
         FloodReportType recordType = FloodReportType.Property,
@@ -47,14 +280,14 @@ public static class FindPotentialDuplicatesData
         ICollection<FloodReportSourceOrganisation> organisations =
         [
             new FloodReportSourceOrganisation
-                {
-                    Id = Guid.NewGuid(),
-                    OrganisationId = Guid.NewGuid(),
-                    OrganisationName = "Test Organisation",
-                    FloodAuthorityId = effectiveAuthorityId,
-                    FloodAuthorityName = effectiveAuthorityId == EnvironmentAgencyId ? "Environment Agency" : "LLFA",
-                    FloodReportSourceId = sourceId,
-                }
+            {
+                Id = Guid.NewGuid(),
+                OrganisationId = Guid.NewGuid(),
+                OrganisationName = "Test Organisation",
+                FloodAuthorityId = effectiveAuthorityId,
+                FloodAuthorityName = effectiveAuthorityId == EnvironmentAgencyId ? "Environment Agency" : "LLFA",
+                FloodReportSourceId = sourceId,
+            }
         ];
 
         var source = new FloodReportSource
@@ -86,10 +319,6 @@ public static class FindPotentialDuplicatesData
         };
     }
 
-    /// <summary>
-    /// Creates an <see cref="EligibilityCheckRecord"/> for the incoming event being checked for duplicates.
-    /// Authority defaults to <see cref="EnvironmentAgencyId"/> unless overridden.
-    /// </summary>
     public static EligibilityCheckRecord CreateEcr(
         long? uprn = null,
         long? usrn = null,
@@ -102,196 +331,24 @@ public static class FindPotentialDuplicatesData
         Guid? authorityId = null)
     {
         var effectiveAuthorityId = authorityId ?? EnvironmentAgencyId;
-
         var causes = (causeIds ?? [PrimaryCauseIds.River])
             .Select(id => new EligibilityCheckFloodSource(id, id.ToString()))
             .ToList();
 
-        // EligibilityCheckOrganisation(Guid Id, string Name, Guid FloodAuthorityId, string FloodAuthorityName)
         IReadOnlyCollection<EligibilityCheckOrganisation> organisations =
         [
             new EligibilityCheckOrganisation(
-                    Guid.NewGuid(),
-                    "Test Organisation",
-                    effectiveAuthorityId,
-                    effectiveAuthorityId == EnvironmentAgencyId ? "Environment Agency" : "LLFA")
+                Guid.NewGuid(),
+                "Test Organisation",
+                effectiveAuthorityId,
+                effectiveAuthorityId == EnvironmentAgencyId ? "Environment Agency" : "LLFA")
         ];
 
         return new EligibilityCheckRecord(
-            Guid.NewGuid(),
-            uprn,
-            usrn,
-            easting ?? BaseEasting,
-            northing ?? BaseNorthing,
+            Guid.NewGuid(), uprn, usrn,
+            easting ?? BaseEasting, northing ?? BaseNorthing,
             impactStartUtc ?? BaseImpactDate,
-            impactDurationHours,
-            isOnGoing,
-            false,
-            0,
-            "Test location",
-            organisations,
-            causes
-        );
+            impactDurationHours, isOnGoing, false, 0, "Test location",
+            organisations, causes);
     }
-
-    // --- Match cases ---
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> PropertyMatch_Cases() =>
-        new()
-        {
-            // Exact date match — incoming and existing share the same start date
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate)], FloodReportType.Property, CreateEcr(uprn: 10023242411), 1 },
-            // Within 7-day window — existing event ended 3 days before incoming, inside buffer
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1)], FloodReportType.Property, CreateEcr(uprn: 10023242411), 1 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> PropertyNoMatch_Cases() =>
-        new()
-        {
-            // Different UPRN
-            { [CreateReport(uprn: 99999999999, impactStartUtc: BaseImpactDate)], FloodReportType.Property, CreateEcr(uprn: 10023242411), 0 },
-            // Too early — existing ended 23 days ago, outside the 7-day buffer window
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-30), impactDurationHours: 1)], FloodReportType.Property, CreateEcr(uprn: 10023242411), 0 },
-            // Too late — existing starts 30 days after the incoming event ends
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(30))], FloodReportType.Property, CreateEcr(uprn: 10023242411), 0 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> PropertyAuthorityMatch_Cases() =>
-        new()
-        {
-            // Same UPRN, same dates, same authority → match
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate, authorityId: EnvironmentAgencyId)], FloodReportType.Property, CreateEcr(uprn: 10023242411, authorityId: EnvironmentAgencyId), 1 },
-            // Same UPRN, same dates, different authority → no match
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate, authorityId: LlfaId)], FloodReportType.Property, CreateEcr(uprn: 10023242411, authorityId: EnvironmentAgencyId), 0 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> PropertyMultipleMatches_Cases() =>
-        new()
-        {
-            // 2 reports, both matching UPRN, authority and date window → 2
-            {
-                [
-                    CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate),
-                    CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1)
-                ],
-                FloodReportType.Property, CreateEcr(uprn: 10023242411), 2
-            },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> PropertyOngoing_Cases() =>
-        new()
-        {
-            // Ongoing incoming — incomingEnd becomes UtcNow so past events within window match
-            {
-                [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1)],
-                FloodReportType.Property, CreateEcr(uprn: 10023242411, isOnGoing: true), 1
-            },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> RoadMatch_Cases() =>
-        new()
-        {
-            // Exact date match, same USRN, same authority
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate)], FloodReportType.Road, CreateEcr(usrn: 20023242411), 1 },
-            // Within 7-day window
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1)], FloodReportType.Road, CreateEcr(usrn: 20023242411), 1 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> RoadNoMatch_Cases() =>
-        new()
-        {
-            // Different USRN
-            { [CreateReport(usrn: 99999999999, impactStartUtc: BaseImpactDate)], FloodReportType.Road, CreateEcr(usrn: 20023242411), 0 },
-            // Too early
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-30), impactDurationHours: 1)], FloodReportType.Road, CreateEcr(usrn: 20023242411), 0 },
-            // Too late
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(30))], FloodReportType.Road, CreateEcr(usrn: 20023242411), 0 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> RoadAuthorityMatch_Cases() =>
-        new()
-        {
-            // Same USRN, same dates, same authority → match
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate, authorityId: EnvironmentAgencyId)], FloodReportType.Road, CreateEcr(usrn: 20023242411, authorityId: EnvironmentAgencyId), 1 },
-            // Same USRN, same dates, different authority → no match
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate, authorityId: LlfaId)], FloodReportType.Road, CreateEcr(usrn: 20023242411, authorityId: EnvironmentAgencyId), 0 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> RoadMultipleMatches_Cases() =>
-        new()
-        {
-            {
-                [
-                    CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate),
-                    CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1)
-                ],
-                FloodReportType.Road, CreateEcr(usrn: 20023242411), 2
-            },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> RoadOngoing_Cases() =>
-        new()
-        {
-            {
-                [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-3), impactDurationHours: 1)],
-                FloodReportType.Road, CreateEcr(usrn: 20023242411, isOnGoing: true), 1
-            },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, double, int> LocationMatch_Cases() =>
-        new()
-        {
-            // 20m away (within 25m buffer), same authority, exact date
-            { [CreateReport(easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate)], FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, 1 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, double, int> LocationNoMatch_Cases() =>
-        new()
-        {
-            // Outside 25m buffer (30m away)
-            { [CreateReport(easting: BaseEasting + 30, northing: BaseNorthing, impactStartUtc: BaseImpactDate)], FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, 0 },
-            // Within buffer but date too early
-            { [CreateReport(easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate.AddDays(-30), impactDurationHours: 1)], FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, 0 },
-            // Within buffer but date too late
-            { [CreateReport(easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate.AddDays(30))], FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, 0 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, double, int> LocationAuthorityMatch_Cases() =>
-        new()
-        {
-            // Within buffer, same authority → match
-            { [CreateReport(easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate, authorityId: EnvironmentAgencyId)], FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing, authorityId: EnvironmentAgencyId), 25, 1 },
-            // Within buffer, different authority → no match
-            { [CreateReport(easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate, authorityId: LlfaId)], FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing, authorityId: EnvironmentAgencyId), 25, 0 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, double, int> LocationMultipleMatches_Cases() =>
-        new()
-        {
-            {
-                [
-                    CreateReport(easting: BaseEasting + 10, northing: BaseNorthing, impactStartUtc: BaseImpactDate),
-                    CreateReport(easting: BaseEasting + 20, northing: BaseNorthing, impactStartUtc: BaseImpactDate.AddDays(-2), impactDurationHours: 48)
-                ],
-                FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, 2
-            },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> GroundwaterBuffer_ReturnsMatch_Cases() =>
-        new()
-        {
-            // Property: groundwater incoming → 14-day buffer → event 10 days ago matches
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1)], FloodReportType.Property, CreateEcr(uprn: 10023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), 1 },
-            // Road: groundwater incoming → 14-day buffer → event 10 days ago matches
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1)], FloodReportType.Road, CreateEcr(usrn: 20023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), 1 },
-        };
-
-    public static TheoryData<FloodReport[], FloodReportType, EligibilityCheckRecord, int> GroundwaterBuffer_ReturnsNoMatch_Cases() =>
-        new()
-        {
-            // Property: river incoming → 7-day buffer → event 10 days ago is outside window
-            { [CreateReport(uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1)], FloodReportType.Property, CreateEcr(uprn: 10023242411, causeIds: [PrimaryCauseIds.River]), 0 },
-            // Road: river incoming → 7-day buffer → same event outside window
-            { [CreateReport(usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1)], FloodReportType.Road, CreateEcr(usrn: 20023242411, causeIds: [PrimaryCauseIds.River]), 0 },
-        };
 }
