@@ -82,8 +82,7 @@ public class FloodReportService(
     {
         // Check if this is a duplicate record
         IReadOnlyCollection<Guid> ExistingIds = [];
-        var trackedUpdatedReports = new List<FloodReport>();
-        FloodReport? generatedReport = null;
+        var generatedOrUpdatedReports = new List<FloodReport>();
         FloodReportType ReportType;
         if (messageSource.Uprn.HasValue)
         {
@@ -107,7 +106,7 @@ public class FloodReportService(
         {
             // Add the new source
             var ReportStatusFloodReportId = Guid.CreateVersion7();
-            generatedReport = new FloodReport()
+            var generatedReport = new FloodReport()
             {
                 Id = ReportStatusFloodReportId,
                 RecordStatus = RecordStatusIds.New,
@@ -118,7 +117,7 @@ public class FloodReportService(
             };
 
             context.FloodReports.Add(generatedReport);
-            trackedUpdatedReports.Add(generatedReport);
+            generatedOrUpdatedReports.Add(generatedReport);
             await context.SaveChangesAsync(ct);
         }
         else
@@ -144,49 +143,70 @@ public class FloodReportService(
                     RecordStatusIds.DuplicateDetected,
                     messageSource.Reference,
                     duplicateDetectedUtc);
-
-                // Add the source record to the existing report as needed
-                var updatedReport = existingReport with
-                {
-                    UpdatedUtc = duplicateDetectedUtc,
-                    RecordStatus = RecordStatusIds.DuplicateDetected,
-                };
-                context.FloodReports.Update(updatedReport);
-                trackedUpdatedReports.Add(updatedReport);
             }
 
-            // Add the duplicate source record
-            FloodReportSourceDuplicate duplicateSource = new FloodReportSourceDuplicate
+            await using var transaction = await context.Database.BeginTransactionAsync(ct);
+            try
             {
-                Id = Guid.NewGuid(),
-                Reference = messageSource.Reference,
-                ViewUri = messageSource.ViewUri,
-                CreatedUtc = DateTimeOffset.UtcNow,
-                UpdatedUtc = null,
-                EligibilityCheckId = messageSource.EligibilityCheckId,
-                Uprn = messageSource.Uprn,
-                Usrn = messageSource.Usrn,
-                Geom = messageSource.Geom,
-                Easting = messageSource.Easting,
-                Northing = messageSource.Northing,
-                Latitude = messageSource.Latitude,
-                Longitude = messageSource.Longitude,
-                ImpactStartUtc = messageSource.ImpactStartUtc,
-                ImpactDurationHours = messageSource.ImpactDurationHours,
-                IsOnGoing = messageSource.IsOnGoing,
-                IsUninhabitable = messageSource.IsUninhabitable,
-                VulnerableCount = messageSource.VulnerableCount,
-                LocationDescription = messageSource.LocationDescription,
-                FloodCauses = messageSource.FloodCauses?.ToList() ?? [],
-                Organisations = messageSource.Organisations?.ToList() ?? [],
-                FloodReports = trackedUpdatedReports
-            };
-            context.FloodReportSourceDuplicates.Add(duplicateSource);
+                // Add the source record to the existing report as needed
+                await context.FloodReports
+                    .Where(fr => ExistingIds.Contains(fr.Id))
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(fr => fr.RecordStatus, RecordStatusIds.DuplicateDetected)
+                        .SetProperty(fr => fr.UpdatedUtc, duplicateDetectedUtc), ct);
 
-            await context.SaveChangesAsync(ct);
+                // Attach the untracked instances as Unchanged so EF can create the junction rows
+                // linking FloodReportSourceDuplicate to the existing reports without trying to
+                // insert or update the reports themselves
+                context.AttachRange(existingReports);
+
+                // Add the duplicate source record
+                FloodReportSourceDuplicate duplicateSource = new FloodReportSourceDuplicate
+                {
+                    Id = Guid.NewGuid(),
+                    Reference = messageSource.Reference,
+                    ViewUri = messageSource.ViewUri,
+                    CreatedUtc = DateTimeOffset.UtcNow,
+                    UpdatedUtc = null,
+                    EligibilityCheckId = messageSource.EligibilityCheckId,
+                    Uprn = messageSource.Uprn,
+                    Usrn = messageSource.Usrn,
+                    Geom = messageSource.Geom,
+                    Easting = messageSource.Easting,
+                    Northing = messageSource.Northing,
+                    Latitude = messageSource.Latitude,
+                    Longitude = messageSource.Longitude,
+                    ImpactStartUtc = messageSource.ImpactStartUtc,
+                    ImpactDurationHours = messageSource.ImpactDurationHours,
+                    IsOnGoing = messageSource.IsOnGoing,
+                    IsUninhabitable = messageSource.IsUninhabitable,
+                    VulnerableCount = messageSource.VulnerableCount,
+                    LocationDescription = messageSource.LocationDescription,
+                    FloodCauses = messageSource.FloodCauses?.ToList() ?? [],
+                    Organisations = messageSource.Organisations?.ToList() ?? [],
+                    FloodReports = existingReports
+                };
+                context.FloodReportSourceDuplicates.Add(duplicateSource);
+
+                await context.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(ct);
+                throw;
+            }
+
+            generatedOrUpdatedReports = existingReports
+                .Select(r => r with
+                {
+                    RecordStatus = RecordStatusIds.DuplicateDetected,
+                    UpdatedUtc = duplicateDetectedUtc,
+                })
+                .ToList();
         }
 
-        return trackedUpdatedReports;
+        return generatedOrUpdatedReports;
     }
 
     public async Task<IReadOnlyCollection<FloodReport>> GetFloodReports(CancellationToken ct)
@@ -246,25 +266,27 @@ public class FloodReportService(
 
         var existing = await floodReportRepository
             .GetFloodReports()
+            .AsNoTracking()
             .FirstOrDefaultAsync(fr => fr.Id.Equals(id), ct);
 
-        if (existing == null)
+        if (existing is null)
         {
             return null;
         }
 
-        var updated = existing with
+        await context.FloodReports
+            .Where(fr => fr.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(fr => fr.RecordStatus, dto.RecordStatus)
+                .SetProperty(fr => fr.SourceRecords, dto.SourceRecords)
+                .SetProperty(fr => fr.UpdatedUtc, DateTimeOffset.UtcNow), ct);
+
+        return existing with
         {
             UpdatedUtc = DateTimeOffset.UtcNow,
             RecordStatus = dto.RecordStatus,
-
-            SourceRecords = dto.SourceRecords
+            SourceRecords = dto.SourceRecords,
         };
-
-        context.FloodReports.Update(updated);
-        await context.SaveChangesAsync(ct);
-
-        return updated;
     }
 
     public async Task<bool> DeleteFloodReport(Guid id, CancellationToken ct)
