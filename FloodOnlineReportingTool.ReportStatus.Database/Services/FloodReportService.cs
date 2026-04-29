@@ -145,59 +145,78 @@ public class FloodReportService(
                     duplicateDetectedUtc);
             }
 
-            await using var transaction = await context.Database.BeginTransactionAsync(ct);
-            try
+            var strategy = context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
-                // Add the source record to the existing report as needed
-                await context.FloodReports
-                    .Where(fr => ExistingIds.Contains(fr.Id))
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(fr => fr.RecordStatus, RecordStatusIds.DuplicateDetected)
-                        .SetProperty(fr => fr.UpdatedUtc, duplicateDetectedUtc), ct);
-
-                // Attach the untracked instances as Unchanged so EF Core knows these reports
-                // already exist in the database. When SaveChangesAsync runs, EF will only write
-                // the new FloodReportSourceDuplicate row and the junction rows that link it to
-                // these reports — the Unchanged state prevents any INSERT or UPDATE on the
-                // FloodReport entities themselves, even though they are referenced via FloodReports below.
-                context.AttachRange(existingReports);
-
-                // Add the duplicate source record
-                FloodReportSourceDuplicate duplicateSource = new FloodReportSourceDuplicate
+                await using var transaction = await context.Database.BeginTransactionAsync(ct);
+                try
                 {
-                    Id = Guid.NewGuid(),
-                    Reference = messageSource.Reference,
-                    ViewUri = messageSource.ViewUri,
-                    CreatedUtc = DateTimeOffset.UtcNow,
-                    UpdatedUtc = null,
-                    EligibilityCheckId = messageSource.EligibilityCheckId,
-                    Uprn = messageSource.Uprn,
-                    Usrn = messageSource.Usrn,
-                    Geom = messageSource.Geom,
-                    Easting = messageSource.Easting,
-                    Northing = messageSource.Northing,
-                    Latitude = messageSource.Latitude,
-                    Longitude = messageSource.Longitude,
-                    ImpactStartUtc = messageSource.ImpactStartUtc,
-                    ImpactDurationHours = messageSource.ImpactDurationHours,
-                    IsOnGoing = messageSource.IsOnGoing,
-                    IsUninhabitable = messageSource.IsUninhabitable,
-                    VulnerableCount = messageSource.VulnerableCount,
-                    LocationDescription = messageSource.LocationDescription,
-                    FloodCauses = messageSource.FloodCauses?.ToList() ?? [],
-                    Organisations = messageSource.Organisations?.ToList() ?? [],
-                    FloodReports = existingReports
-                };
-                context.FloodReportSourceDuplicates.Add(duplicateSource);
+                    // Add the source record to the existing report as needed
+                    await context.FloodReports
+                        .Where(fr => ExistingIds.Contains(fr.Id))
+                        .ExecuteUpdateAsync(setters => setters
+                            .SetProperty(fr => fr.RecordStatus, RecordStatusIds.DuplicateDetected)
+                            .SetProperty(fr => fr.UpdatedUtc, duplicateDetectedUtc), ct);
 
-                await context.SaveChangesAsync(ct);
-                await transaction.CommitAsync(ct);
-            }
-            catch
-            {
-                await transaction.RollbackAsync(ct);
-                throw;
-            }
+                    // Attach the untracked instances as Unchanged so EF Core knows these reports
+                    // already exist in the database. When SaveChangesAsync runs, EF will only write
+                    // the new FloodReportSourceDuplicate row and the junction rows that link it to
+                    // these reports — the Unchanged state prevents any INSERT or UPDATE on the
+                    // FloodReport entities themselves, even though they are referenced via FloodReports below.
+                    context.AttachRange(existingReports);
+
+                    // Add the duplicate source record
+                    FloodReportSourceDuplicate duplicateSource = new FloodReportSourceDuplicate
+                    {
+                        Id = Guid.NewGuid(),
+                        Reference = messageSource.Reference,
+                        ViewUri = messageSource.ViewUri,
+                        CreatedUtc = DateTimeOffset.UtcNow,
+                        UpdatedUtc = null,
+                        EligibilityCheckId = messageSource.EligibilityCheckId,
+                        Uprn = messageSource.Uprn,
+                        Usrn = messageSource.Usrn,
+                        Geom = messageSource.Geom,
+                        Easting = messageSource.Easting,
+                        Northing = messageSource.Northing,
+                        Latitude = messageSource.Latitude,
+                        Longitude = messageSource.Longitude,
+                        ImpactStartUtc = messageSource.ImpactStartUtc,
+                        ImpactDurationHours = messageSource.ImpactDurationHours,
+                        IsOnGoing = messageSource.IsOnGoing,
+                        IsUninhabitable = messageSource.IsUninhabitable,
+                        VulnerableCount = messageSource.VulnerableCount,
+                        LocationDescription = messageSource.LocationDescription,
+                        FloodCauses = messageSource.FloodCauses?
+                            .Select(fc => new FloodReportSourceFloodCause
+                            {
+                                Id = Guid.NewGuid(),
+                                CauseId = fc.CauseId,
+                                Name = fc.Name
+                                // FloodReportSourceDuplicateId set by EF via navigation
+                            }).ToList() ?? [],
+                        Organisations = messageSource.Organisations?
+                            .Select(org => new FloodReportSourceOrganisation
+                            {
+                                Id = Guid.NewGuid(),
+                                OrganisationId = org.OrganisationId,
+                                OrganisationName = org.OrganisationName,
+                                FloodAuthorityId = org.FloodAuthorityId,
+                                FloodAuthorityName = org.FloodAuthorityName
+                            }).ToList() ?? [],
+                        FloodReports = existingReports
+                    };
+                    context.FloodReportSourceDuplicates.Add(duplicateSource);
+
+                    await context.SaveChangesAsync(ct);
+                    await transaction.CommitAsync(ct);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(ct);
+                    throw;
+                }
+            });
 
             generatedOrUpdatedReports = existingReports
                 .Select(r => r with
