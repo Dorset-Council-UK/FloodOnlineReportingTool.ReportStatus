@@ -92,7 +92,7 @@ internal static class EndpointExtensions
 
         // Get all
         group
-            .MapGet(pattern: "/{id}", FloodReportSourceDuplicateEndpoints.GetFloodReportSources)
+            .MapGet(pattern: "/{floodReportId}", FloodReportSourceDuplicateEndpoints.GetFloodReportSources)
             .WithSummary("Flood report duplicates - Get")
             .WithDescription("Gets duplicate records for flood report from the database")
             .RequireAuthorization(PolicyNames.Reader);

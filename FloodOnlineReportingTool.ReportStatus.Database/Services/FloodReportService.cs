@@ -123,6 +123,7 @@ public class FloodReportService(
         {
             // Get and update the existing records - We add new duplicates to all matches for a user to review.
             var existingReports = await context.FloodReports
+                .AsNoTracking()
                 .Where(fr => ExistingIds.Contains(fr.Id))
                 .ToListAsync(ct);
 
@@ -131,6 +132,7 @@ public class FloodReportService(
                 return null;
             }
 
+            var trackedUpdatedReports = new List<FloodReport>(existingReports.Count);
             foreach (var existingReport in existingReports)
             {
                 // Add the source record to the existing report as needed
@@ -140,6 +142,7 @@ public class FloodReportService(
                     RecordStatus = RecordStatusIds.DuplicateDetected,
                 };
                 context.FloodReports.Update(updatedReport);
+                trackedUpdatedReports.Add(updatedReport);
             }
 
             // Add the duplicate source record
@@ -164,7 +167,7 @@ public class FloodReportService(
                 IsUninhabitable = messageSource.IsUninhabitable,
                 VulnerableCount = messageSource.VulnerableCount,
                 LocationDescription = messageSource.LocationDescription,
-                FloodReports = existingReports
+                FloodReports = trackedUpdatedReports
             };
             context.FloodReportSourceDuplicates.Add(duplicateSource);
 
