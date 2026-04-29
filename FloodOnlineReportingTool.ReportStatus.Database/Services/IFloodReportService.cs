@@ -8,14 +8,14 @@ public interface IFloodReportService
     const double MaxMetres = 100;
 
     /// <summary>
-    /// Creates a new flood report based on incoming message.
+    /// Creates a new flood report or sets existing rows to duplicate based on incoming message.
     /// </summary>
     Task CreateFromFloodReportCreated(FloodReportSourceCreated message, CancellationToken ct);
 
     /// <summary>
-    /// Creates a new flood report using the API endpoint.
+    /// Creates a new flood report or returns updated duplicate rows using the API endpoint.
     /// </summary>
-    Task<FloodReport?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct);
+    Task<List<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood report in the database.

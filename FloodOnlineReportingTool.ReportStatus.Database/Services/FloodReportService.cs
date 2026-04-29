@@ -50,7 +50,7 @@ public class FloodReportService(
         await GenerateFromSource(messageSource, message.EligibilityCheckRecord, message.Buffer, ct);
     }
 
-    public async Task<FloodReport?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
+    public async Task<List<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
     {
         // Reverse-map wrapper types back to contract types for EligibilityCheckRecord
         IReadOnlyCollection<EligibilityCheckOrganisation> organisations = [.. dto.Organisations
@@ -78,10 +78,11 @@ public class FloodReportService(
         return await GenerateFromSource(dto, eligibilityCheckRecord, buffer, ct);
     }
 
-    private async Task<FloodReport?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
+    private async Task<List<FloodReport>?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
     {
         // Check if this is a duplicate record
         IReadOnlyCollection<Guid> ExistingIds = [];
+        var trackedUpdatedReports = new List<FloodReport>();
         FloodReport? generatedReport = null;
         FloodReportType ReportType;
         if (messageSource.Uprn.HasValue)
@@ -117,6 +118,7 @@ public class FloodReportService(
             };
 
             context.FloodReports.Add(generatedReport);
+            trackedUpdatedReports.Add(generatedReport);
             await context.SaveChangesAsync(ct);
         }
         else
@@ -133,7 +135,6 @@ public class FloodReportService(
             }
 
             var duplicateDetectedUtc = DateTimeOffset.UtcNow;
-            var trackedUpdatedReports = new List<FloodReport>(existingReports.Count);
             foreach (var existingReport in existingReports)
             {
                 logger.LogInformation(
@@ -185,7 +186,7 @@ public class FloodReportService(
             await context.SaveChangesAsync(ct);
         }
 
-        return generatedReport;
+        return trackedUpdatedReports;
     }
 
     public async Task<IReadOnlyCollection<FloodReport>> GetFloodReports(CancellationToken ct)
