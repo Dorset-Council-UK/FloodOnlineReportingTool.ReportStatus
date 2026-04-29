@@ -291,6 +291,7 @@ public class FloodReportService(
 
     public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType reportType, double buffer, EligibilityCheckRecord ecr, CancellationToken ct)
     {
+        ImmutableHashSet<Guid> incomingAuthorityIds = [.. ecr.Organisations.Select(o => o.FloodAuthorityId)];
         ImmutableHashSet<Guid> newSourceIds = [.. ecr.FloodSources.Select(s => s.Id)];
         var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
@@ -302,8 +303,9 @@ public class FloodReportService(
         var query = context.FloodReports
             .AsNoTracking()
             .Where(fr => fr.SourceRecords.Any(sr =>
-                // Match on flood causes — at least one cause in common
-                sr.FloodCauses.Any(fc => newSourceIds.Contains(fc.CauseId))
+                // Match on flood authority as this is more forgiving than matching on cause. If the record is for an existing flood authority (regardless of cause) then we flag it as a potential duplicate for review.
+                // Falls back to just matching if the incoming has no organisations (e.g. bad data)
+                (!incomingAuthorityIds.Any() || sr.Organisations.Any(o => incomingAuthorityIds.Contains(o.FloodAuthorityId)))
                 // Date overlap
                 && sr.ImpactStartUtc != null
                 && incomingStart != null
