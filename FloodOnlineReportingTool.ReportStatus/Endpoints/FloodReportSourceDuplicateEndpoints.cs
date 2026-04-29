@@ -6,7 +6,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class FloodReportSourceDuplicateEndpoints
 {
-    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReportSourceDuplicate>>, NotFound, BadRequest>> GetFloodReportSources(IFloodReportService floodReportService, Guid floodReportId, CancellationToken ct)
+    internal static async Task<Results<Ok<IReadOnlyCollection<FloodReportSourceDuplicate>>, NotFound>> GetFloodReportSources(IFloodReportService floodReportService, Guid floodReportId, CancellationToken ct)
     {
         var floodReportSourceDuplicates = await floodReportService.GetPotentialDuplicatesById(floodReportId, ct).ConfigureAwait(false);
         return floodReportSourceDuplicates is null ? TypedResults.NotFound() : TypedResults.Ok(floodReportSourceDuplicates);
