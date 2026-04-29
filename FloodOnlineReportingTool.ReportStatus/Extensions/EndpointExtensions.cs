@@ -90,7 +90,7 @@ internal static class EndpointExtensions
             .HasApiVersion(Versions.V1.Version)
             .WithTags("Duplicate Records");
 
-        // Get all
+        // Get duplicates for a specific flood report
         group
             .MapGet(pattern: "/{floodReportId}", FloodReportSourceDuplicateEndpoints.GetFloodReportSources)
             .WithSummary("Flood report duplicates - Get")

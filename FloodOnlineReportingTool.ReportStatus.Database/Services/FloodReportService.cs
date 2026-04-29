@@ -132,13 +132,22 @@ public class FloodReportService(
                 return null;
             }
 
+            var duplicateDetectedUtc = DateTimeOffset.UtcNow;
             var trackedUpdatedReports = new List<FloodReport>(existingReports.Count);
             foreach (var existingReport in existingReports)
             {
+                logger.LogInformation(
+                    "Flood report {FloodReportId} status changed from {PreviousRecordStatus} to {NewRecordStatus} due to duplicate source {DuplicateSourceReference} at {ChangedUtc}.",
+                    existingReport.Id,
+                    existingReport.RecordStatus,
+                    RecordStatusIds.DuplicateDetected,
+                    messageSource.Reference,
+                    duplicateDetectedUtc);
+
                 // Add the source record to the existing report as needed
                 var updatedReport = existingReport with
                 {
-                    UpdatedUtc = DateTimeOffset.UtcNow,
+                    UpdatedUtc = duplicateDetectedUtc,
                     RecordStatus = RecordStatusIds.DuplicateDetected,
                 };
                 context.FloodReports.Update(updatedReport);
@@ -167,6 +176,8 @@ public class FloodReportService(
                 IsUninhabitable = messageSource.IsUninhabitable,
                 VulnerableCount = messageSource.VulnerableCount,
                 LocationDescription = messageSource.LocationDescription,
+                FloodCauses = messageSource.FloodCauses?.ToList() ?? [],
+                Organisations = messageSource.Organisations?.ToList() ?? [],
                 FloodReports = trackedUpdatedReports
             };
             context.FloodReportSourceDuplicates.Add(duplicateSource);
@@ -331,8 +342,10 @@ public class FloodReportService(
 
     public async Task<IReadOnlyCollection<FloodReportSourceDuplicate>?> GetPotentialDuplicatesById(Guid id, CancellationToken ct)
     {
-        return await floodReportSourceRepository
+        var duplicates = await floodReportSourceRepository
             .GetFloodReportSourceDuplicateById(id)
             .ToListAsync(ct);
+
+        return duplicates.Count == 0 ? null : duplicates;
     }
 }
