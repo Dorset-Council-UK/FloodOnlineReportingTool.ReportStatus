@@ -155,9 +155,11 @@ public class FloodReportService(
                         .SetProperty(fr => fr.RecordStatus, RecordStatusIds.DuplicateDetected)
                         .SetProperty(fr => fr.UpdatedUtc, duplicateDetectedUtc), ct);
 
-                // Attach the untracked instances as Unchanged so EF can create the junction rows
-                // linking FloodReportSourceDuplicate to the existing reports without trying to
-                // insert or update the reports themselves
+                // Attach the untracked instances as Unchanged so EF Core knows these reports
+                // already exist in the database. When SaveChangesAsync runs, EF will only write
+                // the new FloodReportSourceDuplicate row and the junction rows that link it to
+                // these reports — the Unchanged state prevents any INSERT or UPDATE on the
+                // FloodReport entities themselves, even though they are referenced via FloodReports below.
                 context.AttachRange(existingReports);
 
                 // Add the duplicate source record
