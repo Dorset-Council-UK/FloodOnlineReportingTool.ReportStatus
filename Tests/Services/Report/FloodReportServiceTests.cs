@@ -35,9 +35,9 @@ public class FloodReportServiceTests
     // Scenario 2: UPRN match, existing event within 7-day buffer window — ID must be in results
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.PropertyMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatch_WhenPropertyCriteriaMet(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid expectedId)
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenPropertyCriteriaMet(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
     }
 
@@ -46,9 +46,9 @@ public class FloodReportServiceTests
     // Scenario 5: Correct UPRN, event too late (starts after incoming ends) — must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.PropertyNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenPropertyCriteriaNotMet(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid excludedId)
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenPropertyCriteriaNotMet(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid excludedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(excludedId, result);
     }
 
@@ -56,9 +56,9 @@ public class FloodReportServiceTests
     // Scenario 7: Same UPRN + date, different authority (LLFA vs EA) — report must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.PropertyAuthority_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatchOrNoMatch_WhenPropertyAuthorityMatchesOrDiffers(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid reportId, bool shouldBeContained)
+    public async Task FindPotentialDuplicates_ReturnsMatchOrNoMatch_WhenPropertyAuthorityMatchesOrDiffers(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid reportId, bool shouldBeContained)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         if (shouldBeContained)
             Assert.Contains(reportId, result);
         else
@@ -68,9 +68,9 @@ public class FloodReportServiceTests
     // Scenario 8: Two reports matching UPRN + authority + date window — both IDs must be in results
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.PropertyMultipleMatches_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMultipleMatches_WhenMultiplePropertyReportsMatch(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid[] expectedIds)
+    public async Task FindPotentialDuplicates_ReturnsMultipleMatches_WhenMultiplePropertyReportsMatch(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid[] expectedIds)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         foreach (var id in expectedIds)
             Assert.Contains(id, result);
     }
@@ -78,9 +78,9 @@ public class FloodReportServiceTests
     // Scenario 9: Ongoing incoming (incomingEnd = UtcNow) — future-dated report that would normally be too late must be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.PropertyOngoing_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatch_WhenPropertyIncomingEventIsOngoing(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid expectedId)
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenPropertyIncomingEventIsOngoing(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
     }
 
@@ -90,9 +90,9 @@ public class FloodReportServiceTests
     // Scenario 11: USRN match, existing event within 7-day buffer window — ID must be in results
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.RoadMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatch_WhenRoadCriteriaMet(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid expectedId)
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenRoadCriteriaMet(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
     }
 
@@ -101,9 +101,9 @@ public class FloodReportServiceTests
     // Scenario 14: Correct USRN, event too late (starts after incoming ends) — must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.RoadNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenRoadCriteriaNotMet(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid excludedId)
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenRoadCriteriaNotMet(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid excludedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(excludedId, result);
     }
 
@@ -111,9 +111,9 @@ public class FloodReportServiceTests
     // Scenario 16: Same USRN + date, different authority — report must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.RoadAuthority_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatchOrNoMatch_WhenRoadAuthorityMatchesOrDiffers(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid reportId, bool shouldBeContained)
+    public async Task FindPotentialDuplicates_ReturnsMatchOrNoMatch_WhenRoadAuthorityMatchesOrDiffers(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid reportId, bool shouldBeContained)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         if (shouldBeContained)
             Assert.Contains(reportId, result);
         else
@@ -123,9 +123,9 @@ public class FloodReportServiceTests
     // Scenario 17: Two reports matching USRN + authority + date window — both IDs must be in results
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.RoadMultipleMatches_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMultipleMatches_WhenMultipleRoadReportsMatch(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid[] expectedIds)
+    public async Task FindPotentialDuplicates_ReturnsMultipleMatches_WhenMultipleRoadReportsMatch(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid[] expectedIds)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         foreach (var id in expectedIds)
             Assert.Contains(id, result);
     }
@@ -133,9 +133,9 @@ public class FloodReportServiceTests
     // Scenario 18: Ongoing incoming — future-dated road report that would normally be too late must be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.RoadOngoing_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatch_WhenRoadIncomingEventIsOngoing(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid expectedId)
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenRoadIncomingEventIsOngoing(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
     }
 
@@ -144,9 +144,9 @@ public class FloodReportServiceTests
     // Scenario 19: Existing report 20m away (within 25m buffer), same authority, overlapping date — must be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.LocationMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatch_WhenLocationWithinBuffer(string _, FloodReportType type, EligibilityCheckRecord ecr, double buffer, Guid expectedId)
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenLocationWithinBuffer(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, double buffer, Guid expectedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, buffer, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, buffer, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
     }
 
@@ -155,9 +155,9 @@ public class FloodReportServiceTests
     // Scenario 22: Within buffer but event too late (starts after incoming ends) — must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.LocationNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenLocationCriteriaNotMet(string _, FloodReportType type, EligibilityCheckRecord ecr, double buffer, Guid excludedId)
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenLocationCriteriaNotMet(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, double buffer, Guid excludedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, buffer, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, buffer, incomingRecord, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(excludedId, result);
     }
 
@@ -165,9 +165,9 @@ public class FloodReportServiceTests
     // Scenario 24: Within buffer, different authority — must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.LocationAuthority_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatchOrNoMatch_WhenLocationAuthorityMatchesOrDiffers(string _, FloodReportType type, EligibilityCheckRecord ecr, double buffer, Guid reportId, bool shouldBeContained)
+    public async Task FindPotentialDuplicates_ReturnsMatchOrNoMatch_WhenLocationAuthorityMatchesOrDiffers(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, double buffer, Guid reportId, bool shouldBeContained)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, buffer, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, buffer, incomingRecord, TestContext.Current.CancellationToken);
         if (shouldBeContained)
             Assert.Contains(reportId, result);
         else
@@ -177,9 +177,9 @@ public class FloodReportServiceTests
     // Scenario 25: Two reports within 25m buffer, same authority, different dates — both IDs must be in results
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.LocationMultipleMatches_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMultipleMatches_WhenMultipleLocationReportsWithinBuffer(string _, FloodReportType type, EligibilityCheckRecord ecr, double buffer, Guid[] expectedIds)
+    public async Task FindPotentialDuplicates_ReturnsMultipleMatches_WhenMultipleLocationReportsWithinBuffer(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, double buffer, Guid[] expectedIds)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, buffer, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, buffer, incomingRecord, TestContext.Current.CancellationToken);
         foreach (var id in expectedIds)
             Assert.Contains(id, result);
     }
@@ -190,9 +190,9 @@ public class FloodReportServiceTests
     // Scenario 27: Road, groundwater incoming — 14-day buffer applied — report 10 days ago must be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.GroundwaterBuffer_ReturnsMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsMatch_WhenGroundwaterIncomingUsesExtendedDateBuffer(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid expectedId)
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenGroundwaterIncomingUsesExtendedDateBuffer(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
     }
 
@@ -200,9 +200,9 @@ public class FloodReportServiceTests
     // Scenario 29: Road, river incoming — 7-day buffer applied — report 10 days ago must not be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.GroundwaterBuffer_ReturnsNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
-    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenNonGroundwaterIncomingUsesStandardDateBuffer(string _, FloodReportType type, EligibilityCheckRecord ecr, Guid excludedId)
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenNonGroundwaterIncomingUsesStandardDateBuffer(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid excludedId)
     {
-        var result = await CreateService().FindPotentialDuplicates(type, 0, ecr, TestContext.Current.CancellationToken);
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(excludedId, result);
     }
 
@@ -210,8 +210,8 @@ public class FloodReportServiceTests
     [Fact]
     public async Task FindPotentialDuplicates_ReturnsCorrectIds_NotJustCount()
     {
-        var ecr = FindPotentialDuplicatesData.CreateEcr(uprn: 10023242411);
-        var result = await CreateService().FindPotentialDuplicates(FloodReportType.Property, 0, ecr, TestContext.Current.CancellationToken);
+        var incomingRecord = FindPotentialDuplicatesData.CreateIncomingRecord(uprn: 10023242411);
+        var result = await CreateService().FindPotentialDuplicates(FloodReportType.Property, 0, incomingRecord, TestContext.Current.CancellationToken);
 
         Assert.Contains(FindPotentialDuplicatesData.Property_ExactDateMatch.Id, result);
         Assert.DoesNotContain(FindPotentialDuplicatesData.Property_DifferentUprn.Id, result);

@@ -49,7 +49,7 @@ public static class FindPotentialDuplicatesData
         CreateReport(id: Guid.Parse("11111111-0007-0000-0000-000000000000"),
             uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1);
 
-    // Matched only by an ongoing ECR — starts after a standard incomingEnd but before UtcNow
+    // Matched only by an ongoing IncomingRecord — starts after a standard incomingEnd but before UtcNow
     public static readonly FloodReport Property_OngoingOnlyMatch =
         CreateReport(id: Guid.Parse("11111111-0008-0000-0000-000000000000"),
             uprn: 10023242411, impactStartUtc: new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
@@ -137,116 +137,116 @@ public static class FindPotentialDuplicatesData
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyMatch_Cases()
     {
-        var ecr = CreateEcr(uprn: 10023242411);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 1", FloodReportType.Property, ecr, Property_ExactDateMatch.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 2", FloodReportType.Property, ecr, Property_WithinWindow.Id);
+        var incomingRecord = CreateIncomingRecord(uprn: 10023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 1", FloodReportType.Property, incomingRecord, Property_ExactDateMatch.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 2", FloodReportType.Property, incomingRecord, Property_WithinWindow.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyNoMatch_Cases()
     {
-        var ecr = CreateEcr(uprn: 10023242411);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 3", FloodReportType.Property, ecr, Property_DifferentUprn.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 4", FloodReportType.Property, ecr, Property_TooEarly.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 5", FloodReportType.Property, ecr, Property_TooLate.Id);
+        var incomingRecord = CreateIncomingRecord(uprn: 10023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 3", FloodReportType.Property, incomingRecord, Property_DifferentUprn.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 4", FloodReportType.Property, incomingRecord, Property_TooEarly.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 5", FloodReportType.Property, incomingRecord, Property_TooLate.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>> PropertyAuthority_Cases()
     {
-        var ecrEa = CreateEcr(uprn: 10023242411, authorityId: EnvironmentAgencyId);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 6", FloodReportType.Property, ecrEa, Property_ExactDateMatch.Id, true);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 7", FloodReportType.Property, ecrEa, Property_DifferentAuthority.Id, false);
+        var incomingRecordEa = CreateIncomingRecord(uprn: 10023242411, authorityId: EnvironmentAgencyId);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 6", FloodReportType.Property, incomingRecordEa, Property_ExactDateMatch.Id, true);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 7", FloodReportType.Property, incomingRecordEa, Property_DifferentAuthority.Id, false);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>> PropertyMultipleMatches_Cases()
     {
-        var ecr = CreateEcr(uprn: 10023242411);
+        var incomingRecord = CreateIncomingRecord(uprn: 10023242411);
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>
-            ("Scenario 8", FloodReportType.Property, ecr, [Property_ExactDateMatch.Id, Property_WithinWindow.Id]);
+            ("Scenario 8", FloodReportType.Property, incomingRecord, [Property_ExactDateMatch.Id, Property_WithinWindow.Id]);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyOngoing_Cases()
     {
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>
-            ("Scenario 9", FloodReportType.Property, CreateEcr(uprn: 10023242411, isOnGoing: true), Property_OngoingOnlyMatch.Id);
+            ("Scenario 9", FloodReportType.Property, CreateIncomingRecord(uprn: 10023242411, isOnGoing: true), Property_OngoingOnlyMatch.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadMatch_Cases()
     {
-        var ecr = CreateEcr(usrn: 20023242411);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 10", FloodReportType.Road, ecr, Road_ExactDateMatch.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 11", FloodReportType.Road, ecr, Road_WithinWindow.Id);
+        var incomingRecord = CreateIncomingRecord(usrn: 20023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 10", FloodReportType.Road, incomingRecord, Road_ExactDateMatch.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 11", FloodReportType.Road, incomingRecord, Road_WithinWindow.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadNoMatch_Cases()
     {
-        var ecr = CreateEcr(usrn: 20023242411);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 12", FloodReportType.Road, ecr, Road_DifferentUsrn.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 13", FloodReportType.Road, ecr, Road_TooEarly.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 14", FloodReportType.Road, ecr, Road_TooLate.Id);
+        var incomingRecord = CreateIncomingRecord(usrn: 20023242411);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 12", FloodReportType.Road, incomingRecord, Road_DifferentUsrn.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 13", FloodReportType.Road, incomingRecord, Road_TooEarly.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>("Scenario 14", FloodReportType.Road, incomingRecord, Road_TooLate.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>> RoadAuthority_Cases()
     {
-        var ecrEa = CreateEcr(usrn: 20023242411, authorityId: EnvironmentAgencyId);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 15", FloodReportType.Road, ecrEa, Road_ExactDateMatch.Id, true);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 16", FloodReportType.Road, ecrEa, Road_DifferentAuthority.Id, false);
+        var incomingRecordEa = CreateIncomingRecord(usrn: 20023242411, authorityId: EnvironmentAgencyId);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 15", FloodReportType.Road, incomingRecordEa, Road_ExactDateMatch.Id, true);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid, bool>("Scenario 16", FloodReportType.Road, incomingRecordEa, Road_DifferentAuthority.Id, false);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>> RoadMultipleMatches_Cases()
     {
-        var ecr = CreateEcr(usrn: 20023242411);
+        var incomingRecord = CreateIncomingRecord(usrn: 20023242411);
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid[]>
-            ("Scenario 17", FloodReportType.Road, ecr, [Road_ExactDateMatch.Id, Road_WithinWindow.Id]);
+            ("Scenario 17", FloodReportType.Road, incomingRecord, [Road_ExactDateMatch.Id, Road_WithinWindow.Id]);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadOngoing_Cases()
     {
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>
-            ("Scenario 18", FloodReportType.Road, CreateEcr(usrn: 20023242411, isOnGoing: true), Road_OngoingOnlyMatch.Id);
+            ("Scenario 18", FloodReportType.Road, CreateIncomingRecord(usrn: 20023242411, isOnGoing: true), Road_OngoingOnlyMatch.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>> LocationMatch_Cases()
     {
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>
-            ("Scenario 19", FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25, Location_Within25m.Id);
+            ("Scenario 19", FloodReportType.Location, CreateIncomingRecord(easting: BaseEasting, northing: BaseNorthing), 25, Location_Within25m.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>> LocationNoMatch_Cases()
     {
-        var ecr = CreateEcr(easting: BaseEasting, northing: BaseNorthing);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 20", FloodReportType.Location, ecr, 25, Location_Outside25m.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 21", FloodReportType.Location, ecr, 25, Location_TooEarly.Id);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 22", FloodReportType.Location, ecr, 25, Location_TooLate.Id);
+        var incomingRecord = CreateIncomingRecord(easting: BaseEasting, northing: BaseNorthing);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 20", FloodReportType.Location, incomingRecord, 25, Location_Outside25m.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 21", FloodReportType.Location, incomingRecord, 25, Location_TooEarly.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid>("Scenario 22", FloodReportType.Location, incomingRecord, 25, Location_TooLate.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>> LocationAuthority_Cases()
     {
-        var ecrEa = CreateEcr(easting: BaseEasting, northing: BaseNorthing, authorityId: EnvironmentAgencyId);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>("Scenario 23", FloodReportType.Location, ecrEa, 25, Location_Within25m.Id, true);
-        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>("Scenario 24", FloodReportType.Location, ecrEa, 25, Location_DifferentAuthority.Id, false);
+        var incomingRecordEa = CreateIncomingRecord(easting: BaseEasting, northing: BaseNorthing, authorityId: EnvironmentAgencyId);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>("Scenario 23", FloodReportType.Location, incomingRecordEa, 25, Location_Within25m.Id, true);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid, bool>("Scenario 24", FloodReportType.Location, incomingRecordEa, 25, Location_DifferentAuthority.Id, false);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid[]>> LocationMultipleMatches_Cases()
     {
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, double, Guid[]>(
-            "Scenario 25", FloodReportType.Location, CreateEcr(easting: BaseEasting, northing: BaseNorthing), 25,
+            "Scenario 25", FloodReportType.Location, CreateIncomingRecord(easting: BaseEasting, northing: BaseNorthing), 25,
             [Location_Within25m.Id, Location_Within25m_Second.Id]);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> GroundwaterBuffer_ReturnsMatch_Cases()
     {
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
-            "Scenario 26", FloodReportType.Property, CreateEcr(uprn: 10023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), Property_GroundwaterWindow.Id);
+            "Scenario 26", FloodReportType.Property, CreateIncomingRecord(uprn: 10023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), Property_GroundwaterWindow.Id);
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
-            "Scenario 27", FloodReportType.Road, CreateEcr(usrn: 20023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), Road_GroundwaterWindow.Id);
+            "Scenario 27", FloodReportType.Road, CreateIncomingRecord(usrn: 20023242411, causeIds: [PrimaryCauseIds.WaterRisingOutOfTheGround]), Road_GroundwaterWindow.Id);
     }
 
     public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> GroundwaterBuffer_ReturnsNoMatch_Cases()
     {
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
-            "Scenario 28", FloodReportType.Property, CreateEcr(uprn: 10023242411, causeIds: [PrimaryCauseIds.River]), Property_GroundwaterWindow.Id);
+            "Scenario 28", FloodReportType.Property, CreateIncomingRecord(uprn: 10023242411, causeIds: [PrimaryCauseIds.River]), Property_GroundwaterWindow.Id);
         yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
-            "Scenario 29", FloodReportType.Road, CreateEcr(usrn: 20023242411, causeIds: [PrimaryCauseIds.River]), Road_GroundwaterWindow.Id);
+            "Scenario 29", FloodReportType.Road, CreateIncomingRecord(usrn: 20023242411, causeIds: [PrimaryCauseIds.River]), Road_GroundwaterWindow.Id);
     }
 
     // -------------------------------------------------------------------------
@@ -319,7 +319,7 @@ public static class FindPotentialDuplicatesData
         };
     }
 
-    public static EligibilityCheckRecord CreateEcr(
+    public static EligibilityCheckRecord CreateIncomingRecord(
         long? uprn = null,
         long? usrn = null,
         double? easting = null,

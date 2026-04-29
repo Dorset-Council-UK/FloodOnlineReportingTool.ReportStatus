@@ -289,14 +289,14 @@ public class FloodReportService(
             .ToListAsync(ct);
     }
 
-    public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType reportType, double buffer, EligibilityCheckRecord ecr, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType reportType, double buffer, EligibilityCheckRecord incomingRecord, CancellationToken ct)
     {
-        ImmutableHashSet<Guid> incomingAuthorityIds = [.. ecr.Organisations.Select(o => o.FloodAuthorityId)];
-        ImmutableHashSet<Guid> newSourceIds = [.. ecr.FloodSources.Select(s => s.Id)];
+        ImmutableHashSet<Guid> incomingAuthorityIds = [.. incomingRecord.Organisations.Select(o => o.FloodAuthorityId)];
+        ImmutableHashSet<Guid> newSourceIds = [.. incomingRecord.FloodSources.Select(s => s.Id)];
         var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
-        var incomingStart = ecr.ImpactStartUTC?.AddDays(-bufferDays);
-        var incomingEnd = ecr.IsOnGoing ? DateTimeOffset.UtcNow : ecr.ImpactStartUTC?.AddHours(ecr.ImpactDurationHours);
+        var incomingStart = incomingRecord.ImpactStartUTC?.AddDays(-bufferDays);
+        var incomingEnd = incomingRecord.IsOnGoing ? DateTimeOffset.UtcNow : incomingRecord.ImpactStartUTC?.AddHours(incomingRecord.ImpactDurationHours);
 
         // All three cases now query FloodReport directly via its SourceRecords collection,
         // since FloodProperty / FloodRoad / FloodLocation join tables have been removed from the model.
@@ -314,11 +314,11 @@ public class FloodReportService(
                 && sr.ImpactStartUtc.Value.AddHours(sr.ImpactDurationHours ?? 1) >= incomingStart
                 // Match on location
                 && (reportType == FloodReportType.Property
-                        ? sr.Uprn == ecr.Uprn
+                        ? sr.Uprn == incomingRecord.Uprn
                     : reportType == FloodReportType.Road
-                        ? sr.Usrn == ecr.Usrn
+                        ? sr.Usrn == incomingRecord.Usrn
                         // Location: geometry within buffer
-                        : sr.Geom.Intersects(new Point(ecr.Easting, ecr.Northing) { SRID = 27700 }.Buffer(buffer)))
+                        : sr.Geom.Intersects(new Point(incomingRecord.Easting, incomingRecord.Northing) { SRID = 27700 }.Buffer(buffer)))
             ));
 
         return await query
