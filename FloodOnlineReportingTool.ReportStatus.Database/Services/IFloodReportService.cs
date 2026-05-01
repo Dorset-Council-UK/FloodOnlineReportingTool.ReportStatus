@@ -29,6 +29,11 @@ public interface IFloodReportService
     Task<IReadOnlyCollection<FloodReport>> GetFloodReports(CancellationToken ct);
 
     /// <summary>
+    /// Checks if a report with the provided reference exists in the database.
+    /// </summary>
+    Task<bool> ReportWithReferenceExists(string reference, CancellationToken ct);
+
+    /// <summary>
     /// Gets a flood report by its reference from the database.
     /// </summary>
     /// <remarks>Flood report sources are included</remarks>

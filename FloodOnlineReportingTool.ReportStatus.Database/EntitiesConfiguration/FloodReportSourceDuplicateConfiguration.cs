@@ -17,9 +17,10 @@ internal class FloodReportSourceDuplicateConfiguration : IEntityTypeConfiguratio
         // EF Core conventions would incorrectly create a FK on FloodReport instead
         // of a junction table.
         builder
-            .HasMany(o => o.FloodReports)
-            .WithMany()
-            .UsingEntity(j => j.ToTable("FloodReportSourceDuplicateFloodReport"));
+            .HasMany(o => o.FloodReportReferences)
+            .WithOne()
+            .HasForeignKey("FloodReportSourceDuplicateId")
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Property(o => o.Geom)

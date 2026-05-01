@@ -4,10 +4,12 @@ using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using System.Collections.Immutable;
+using System.Security.Cryptography;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
@@ -113,6 +115,7 @@ public class FloodReportService(
             var generatedReport = new FloodReport()
             {
                 Id = ReportStatusFloodReportId,
+                Reference = await CreateReference(ct),
                 RecordStatus = RecordStatusIds.New,
                 RecordType = ReportType,
                 CreatedUtc = DateTimeOffset.UtcNow,
@@ -162,13 +165,6 @@ public class FloodReportService(
                             .SetProperty(fr => fr.RecordStatus, RecordStatusIds.DuplicateDetected)
                             .SetProperty(fr => fr.UpdatedUtc, duplicateDetectedUtc), ct);
 
-                    // Attach the untracked instances as Unchanged so EF Core knows these reports
-                    // already exist in the database. When SaveChangesAsync runs, EF will only write
-                    // the new FloodReportSourceDuplicate row and the junction rows that link it to
-                    // these reports — the Unchanged state prevents any INSERT or UPDATE on the
-                    // FloodReport entities themselves, even though they are referenced via FloodReports below.
-                    context.AttachRange(existingReports);
-
                     // Add the duplicate source record
                     FloodReportSourceDuplicate duplicateSource = new FloodReportSourceDuplicate
                     {
@@ -208,7 +204,13 @@ public class FloodReportService(
                                 FloodAuthorityId = org.FloodAuthorityId,
                                 FloodAuthorityName = org.FloodAuthorityName
                             }).ToList() ?? [],
-                        FloodReports = existingReports
+                        FloodReportReferences = existingReports
+                            .Select(r => new FloodReportDuplicateReference
+                            {
+                                Id = Guid.NewGuid(),
+                                FloodReportId = r.Id,
+                                PreviousRecordStatus = r.RecordStatus
+                            }).ToList()
                     };
                     context.FloodReportSourceDuplicates.Add(duplicateSource);
 
@@ -248,6 +250,14 @@ public class FloodReportService(
 
         var query = floodReportRepository.GetFloodReportByReference(reference);
         return await query.FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<bool> ReportWithReferenceExists(string reference, CancellationToken ct)
+    {
+        logger.LogInformation("Checking existence of flood report with reference number {Reference}.", reference);
+        return await context.FloodReports
+            .AsNoTracking()
+            .AnyAsync(o => o.Reference == reference, ct);
     }
 
     public async Task<FloodReport?> GetFloodReportById(Guid id, CancellationToken ct)
@@ -435,5 +445,45 @@ public class FloodReportService(
 
         var cap = start.Value.AddDays(ongoingCapDays);
         return DateTimeOffset.UtcNow < cap ? DateTimeOffset.UtcNow : cap;
+    }
+
+    private async Task<string> CreateReference(CancellationToken ct)
+    {
+        var reference = GenerateReferenceId();
+        //check existence of reference
+        var reportWithReferenceExists = await ReportWithReferenceExists(reference, ct);
+        var iteration = 0;
+        var maxIterations = 100;
+        while (reportWithReferenceExists && iteration < maxIterations)
+        {
+            reference = GenerateReferenceId();
+            reportWithReferenceExists = await ReportWithReferenceExists(reference, ct);
+            iteration++;
+        }
+        if (!reportWithReferenceExists)
+        {
+            logger.LogInformation("Creating a new flood report reference number {Reference}.", reference);
+            return reference;
+        }
+
+        logger.LogError("Could not generate a unique reference after {maxIterations} tries", maxIterations);
+        throw new Exception("Could not generate a unique reference");
+    }
+
+    private const string CrockfordAlphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+    private static string GenerateReferenceId()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(5); // 40 bits
+        ulong value = ((ulong)bytes[0] << 32) | ((ulong)bytes[1] << 24) |
+                      ((ulong)bytes[2] << 16) | ((ulong)bytes[3] << 8) | bytes[4];
+
+        Span<char> chars = stackalloc char[8];
+        for (int i = 7; i >= 0; i--)
+        {
+            chars[i] = CrockfordAlphabet[(int)(value & 0x1F)];
+            value >>= 5;
+        }
+        return new string(chars);
     }
 }

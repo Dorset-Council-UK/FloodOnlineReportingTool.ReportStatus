@@ -40,12 +40,40 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<int>("RecordType")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset?>("UpdatedUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.ToTable("FloodReports", "fortreportstatus");
+                });
+
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportDuplicateReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FloodReportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FloodReportSourceDuplicateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PreviousRecordStatus")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FloodReportId");
+
+                    b.HasIndex("FloodReportSourceDuplicateId");
+
+                    b.ToTable("FloodReportDuplicateReference", "fortreportstatus");
                 });
 
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", b =>
@@ -283,21 +311,6 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.ToTable("FloodReportSourceOrganisation", "fortreportstatus");
                 });
 
-            modelBuilder.Entity("FloodReportFloodReportSourceDuplicate", b =>
-                {
-                    b.Property<Guid>("FloodReportSourceDuplicateId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("FloodReportsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("FloodReportSourceDuplicateId", "FloodReportsId");
-
-                    b.HasIndex("FloodReportsId");
-
-                    b.ToTable("FloodReportSourceDuplicateFloodReport", "fortreportstatus");
-                });
-
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
                 {
                     b.Property<long>("Id")
@@ -472,6 +485,21 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.ToTable("OutboxState", "fortreportstatus");
                 });
 
+            modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportDuplicateReference", b =>
+                {
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", null)
+                        .WithMany()
+                        .HasForeignKey("FloodReportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceDuplicate", null)
+                        .WithMany("FloodReportReferences")
+                        .HasForeignKey("FloodReportSourceDuplicateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", b =>
                 {
                     b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", "FloodReport")
@@ -513,21 +541,6 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Navigation("FloodReportSourceDuplicate");
                 });
 
-            modelBuilder.Entity("FloodReportFloodReportSourceDuplicate", b =>
-                {
-                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceDuplicate", null)
-                        .WithMany()
-                        .HasForeignKey("FloodReportSourceDuplicateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReport", null)
-                        .WithMany()
-                        .HasForeignKey("FloodReportsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
                 {
                     b.HasOne("MassTransit.EntityFrameworkCoreIntegration.OutboxState", null)
@@ -555,6 +568,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
             modelBuilder.Entity("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSourceDuplicate", b =>
                 {
                     b.Navigation("FloodCauses");
+
+                    b.Navigation("FloodReportReferences");
 
                     b.Navigation("Organisations");
                 });
