@@ -4,6 +4,7 @@ using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using System.Collections.Immutable;
@@ -13,11 +14,14 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 public class FloodReportService(
     ILogger<FloodReportService> logger, 
     IFloodReportRepository floodReportRepository,
+    IConfiguration configuration,
     IFloodReportSourceDuplicateRepository floodReportSourceRepository,
     ApplicationDbContext context
     ) : IFloodReportService
 {
-    int MaxBuffer = 25; // TODO - Check this
+    int MaxBuffer = configuration.GetValue<int>("ReportStatus:LocationBufferMetres");
+    int GroundwaterCapDays = configuration.GetValue<int>("ReportStatus:GroundwaterCapDays");
+    int FloodingCapDays = configuration.GetValue<int>("ReportStatus:FloodingCapDays");
 
     public async Task CreateFromFloodReportCreated(FloodReportSourceCreated message, CancellationToken ct)
     {
@@ -351,25 +355,44 @@ public class FloodReportService(
     {
         ImmutableHashSet<Guid> incomingAuthorityIds = [.. incomingRecord.Organisations.Select(o => o.FloodAuthorityId)];
         ImmutableHashSet<Guid> newSourceIds = [.. incomingRecord.FloodSources.Select(s => s.Id)];
+
+        // Groundwater cap applies if groundwater is any of the causes, even alongside others
         var isGroundWaterSource = newSourceIds.Contains(PrimaryCauseIds.WaterRisingOutOfTheGround);
         var bufferDays = isGroundWaterSource ? 14 : 7;
-        var incomingStart = incomingRecord.ImpactStartUTC?.AddDays(-bufferDays);
-        var incomingEnd = incomingRecord.IsOnGoing ? DateTimeOffset.UtcNow : incomingRecord.ImpactStartUTC?.AddHours(incomingRecord.ImpactDurationHours);
+        var incomingCapDays = isGroundWaterSource ? GroundwaterCapDays : FloodingCapDays;
 
-        // All three cases now query FloodReport directly via its SourceRecords collection,
-        // since FloodProperty / FloodRoad / FloodLocation join tables have been removed from the model.
+        var incomingStart = incomingRecord.ImpactStartUTC?.AddDays(-bufferDays);
+
+        // Cap ongoing events so that a flood marked as ongoing years ago cannot
+        // incorrectly match against a new report today.
+        var incomingEnd = ResolveEffectiveEnd(
+            incomingRecord.ImpactStartUTC,
+            incomingRecord.IsOnGoing,
+            incomingRecord.ImpactDurationHours,
+            incomingCapDays);
+
+        // Capture as locals so EF Core can capture them in the query expression
+        var groundwaterCapDays = GroundwaterCapDays;
+        var floodingCapDays = FloodingCapDays;
+
         var query = context.FloodReports
             .AsNoTracking()
             .Where(fr => fr.SourceRecords.Any(sr =>
                 // Match on flood authority as this is more forgiving than matching on cause. If the record is for an existing flood authority (regardless of cause) then we flag it as a potential duplicate for review.
                 // Falls back to just matching if the incoming has no organisations (e.g. bad data)
                 (!incomingAuthorityIds.Any() || sr.Organisations.Any(o => incomingAuthorityIds.Contains(o.FloodAuthorityId)))
-                // Date overlap
+                // Date overlap: db.start <= incoming.end
                 && sr.ImpactStartUtc != null
                 && incomingStart != null
                 && incomingEnd != null
                 && sr.ImpactStartUtc <= incomingEnd
-                && sr.ImpactStartUtc.Value.AddHours(sr.ImpactDurationHours ?? 1) >= incomingStart
+                // Date overlap: db.end >= incoming.start
+                // Ongoing DB records are capped by cause — groundwater cap applies if it is any of the causes.
+                && (sr.IsOnGoing
+                    ? (sr.FloodCauses.Any(fc => fc.CauseId == PrimaryCauseIds.WaterRisingOutOfTheGround)
+                        ? sr.ImpactStartUtc.Value.AddDays(groundwaterCapDays)
+                        : sr.ImpactStartUtc.Value.AddDays(floodingCapDays))
+                    : sr.ImpactStartUtc.Value.AddHours(sr.ImpactDurationHours ?? 1)) >= incomingStart
                 // Match on location
                 && (reportType == FloodReportType.Property
                         ? sr.Uprn == incomingRecord.Uprn
@@ -391,5 +414,26 @@ public class FloodReportService(
             .ToListAsync(ct);
 
         return duplicates.Count == 0 ? null : duplicates;
+    }
+
+    /// <summary>
+    /// Resolves the effective end datetime for a flood event.
+    /// Ongoing events are capped at <paramref name="ongoingCapDays"/> past their start rather than
+    /// using <see cref="DateTimeOffset.UtcNow"/>, which would cause stale records to match indefinitely.
+    /// </summary>
+    private static DateTimeOffset? ResolveEffectiveEnd(DateTimeOffset? start, bool isOngoing, double durationHours, int ongoingCapDays)
+    {
+        if (start is null)
+        {
+            return null;
+        }
+
+        if (!isOngoing)
+        {
+            return start.Value.AddHours(durationHours);
+        }
+
+        var cap = start.Value.AddDays(ongoingCapDays);
+        return DateTimeOffset.UtcNow < cap ? DateTimeOffset.UtcNow : cap;
     }
 }

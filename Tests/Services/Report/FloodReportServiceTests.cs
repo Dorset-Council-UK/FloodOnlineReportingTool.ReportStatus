@@ -4,6 +4,7 @@ using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MockQueryable.NSubstitute;
 using NSubstitute;
@@ -23,10 +24,19 @@ public class FloodReportServiceTests
         var floodReportSourceRepository = Substitute.For<IFloodReportSourceDuplicateRepository>();
         var context = Substitute.For<ApplicationDbContext>(options);
 
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["ReportStatus:LocationBufferMetres"] = "25",
+                ["ReportStatus:GroundwaterCapDays"] = "31",
+                ["ReportStatus:FloodingCapDays"] = "14",
+            })
+            .Build();
+
         var mockDbSet = FindPotentialDuplicatesData.AllReports.BuildMockDbSet();
         context.FloodReports.Returns(mockDbSet);
 
-        return new FloodReportService(logger, floodReportRepository, floodReportSourceRepository, context);
+        return new FloodReportService(logger, floodReportRepository, configuration, floodReportSourceRepository, context);
     }
 
     // --- Property (UPRN) ---
@@ -75,13 +85,23 @@ public class FloodReportServiceTests
             Assert.Contains(id, result);
     }
 
-    // Scenario 9: Ongoing incoming (incomingEnd = UtcNow) — future-dated report that would normally be too late must be returned
+    // Scenario 9: Ongoing incoming — DB record within the cap window must be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.PropertyOngoing_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
     public async Task FindPotentialDuplicates_ReturnsMatch_WhenPropertyIncomingEventIsOngoing(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
         var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
+    }
+
+    // Scenario 31: Ongoing incoming but DB record starts beyond FloodingCapDays — must not be returned
+    // Scenario 32: Historical DB record marked as ongoing — DB-side cap prevents effective end reaching UtcNow — must not be returned
+    [Theory]
+    [MemberData(nameof(FindPotentialDuplicatesData.PropertyOngoingNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenPropertyOngoingCapExceeded(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid excludedId)
+    {
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
+        Assert.DoesNotContain(excludedId, result);
     }
 
     // --- Road (USRN) ---
@@ -130,13 +150,23 @@ public class FloodReportServiceTests
             Assert.Contains(id, result);
     }
 
-    // Scenario 18: Ongoing incoming — future-dated road report that would normally be too late must be returned
+    // Scenario 18: Ongoing incoming — DB record within the cap window must be returned
     [Theory]
     [MemberData(nameof(FindPotentialDuplicatesData.RoadOngoing_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
     public async Task FindPotentialDuplicates_ReturnsMatch_WhenRoadIncomingEventIsOngoing(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
     {
         var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.Contains(expectedId, result);
+    }
+
+    // Scenario 33: Ongoing incoming but DB record starts beyond FloodingCapDays — must not be returned
+    // Scenario 34: Historical DB record marked as ongoing — DB-side cap prevents effective end reaching UtcNow — must not be returned
+    [Theory]
+    [MemberData(nameof(FindPotentialDuplicatesData.RoadOngoingNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenRoadOngoingCapExceeded(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid excludedId)
+    {
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
+        Assert.DoesNotContain(excludedId, result);
     }
 
     // --- Location (geometry buffer) ---

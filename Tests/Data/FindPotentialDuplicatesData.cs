@@ -49,10 +49,23 @@ public static class FindPotentialDuplicatesData
         CreateReport(id: Guid.Parse("11111111-0007-0000-0000-000000000000"),
             uprn: 10023242411, impactStartUtc: BaseImpactDate.AddDays(-10), impactDurationHours: 1);
 
-    // Matched only by an ongoing IncomingRecord — starts after a standard incomingEnd but before UtcNow
+    // Matched only by an ongoing incoming — starts after the 24h normal duration end
+    // but within the 14-day FloodingCapDays window (i.e. AddDays(3) < 14).
     public static readonly FloodReport Property_OngoingOnlyMatch =
         CreateReport(id: Guid.Parse("11111111-0008-0000-0000-000000000000"),
-            uprn: 10023242411, impactStartUtc: new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+            uprn: 10023242411, isOnGoing: true, impactStartUtc: BaseImpactDate.AddDays(3));
+
+    // Stale ongoing — starts beyond FloodingCapDays (21 > 14) so must never match,
+    // even when the incoming record itself is ongoing.
+    public static readonly FloodReport Property_OngoingCapExceeded =
+        CreateReport(id: Guid.Parse("11111111-0009-0000-0000-000000000000"),
+            uprn: 10023242411, isOnGoing: true, impactStartUtc: BaseImpactDate.AddDays(21));
+
+    // Stale ongoing — starts before but should be capped so must never match,
+    // even when the incoming record itself is ongoing.
+    public static readonly FloodReport Property_OngoingHistorical =
+        CreateReport(id: Guid.Parse("11111111-0010-0000-0000-000000000000"),
+            uprn: 10023242411, isOnGoing: true, impactStartUtc: BaseImpactDate.AddDays(-100));
 
     // Road (USRN) reports
     public static readonly FloodReport Road_ExactDateMatch =
@@ -85,7 +98,15 @@ public static class FindPotentialDuplicatesData
 
     public static readonly FloodReport Road_OngoingOnlyMatch =
         CreateReport(id: Guid.Parse("22222222-0008-0000-0000-000000000000"),
-            usrn: 20023242411, impactStartUtc: new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+            usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(3));
+
+    public static readonly FloodReport Road_OngoingCapExceeded =
+        CreateReport(id: Guid.Parse("22222222-0009-0000-0000-000000000000"),
+            usrn: 20023242411, impactStartUtc: BaseImpactDate.AddDays(21));
+
+    public static readonly FloodReport Road_OngoingHistorical =
+        CreateReport(id: Guid.Parse("22222222-0010-0000-0000-000000000000"),
+            uprn: 10023242411, isOnGoing: true, impactStartUtc: BaseImpactDate.AddDays(-100));
 
     // Location reports
     public static readonly FloodReport Location_Within25m =
@@ -122,9 +143,11 @@ public static class FindPotentialDuplicatesData
     public static readonly ICollection<FloodReport> AllReports =
     [
         Property_ExactDateMatch, Property_WithinWindow, Property_TooEarly, Property_TooLate,
-        Property_DifferentUprn, Property_DifferentAuthority, Property_GroundwaterWindow, Property_OngoingOnlyMatch,
+        Property_DifferentUprn, Property_DifferentAuthority, Property_GroundwaterWindow,
+        Property_OngoingOnlyMatch, Property_OngoingCapExceeded, Property_OngoingHistorical,
         Road_ExactDateMatch, Road_WithinWindow, Road_TooEarly, Road_TooLate,
-        Road_DifferentUsrn, Road_DifferentAuthority, Road_GroundwaterWindow, Road_OngoingOnlyMatch,
+        Road_DifferentUsrn, Road_DifferentAuthority, Road_GroundwaterWindow,
+        Road_OngoingOnlyMatch, Road_OngoingCapExceeded, Road_OngoingHistorical,
         Location_Within25m, Location_Within25m_Second, Location_Outside25m,
         Location_TooEarly, Location_TooLate, Location_DifferentAuthority,
     ];
@@ -249,6 +272,22 @@ public static class FindPotentialDuplicatesData
             "Scenario 29", FloodReportType.Road, CreateIncomingRecord(usrn: 20023242411, causeIds: [PrimaryCauseIds.River]), Road_GroundwaterWindow.Id);
     }
 
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> PropertyOngoingNoMatch_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 31", FloodReportType.Property, CreateIncomingRecord(uprn: 10023242411, isOnGoing: true), Property_OngoingCapExceeded.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 32", FloodReportType.Property, CreateIncomingRecord(uprn: 10023242411), Property_OngoingHistorical.Id);
+    }
+
+    public static IEnumerable<TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>> RoadOngoingNoMatch_Cases()
+    {
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 33", FloodReportType.Road, CreateIncomingRecord(usrn: 20023242411, isOnGoing: true), Road_OngoingCapExceeded.Id);
+        yield return new TheoryDataRow<string, FloodReportType, EligibilityCheckRecord, Guid>(
+            "Scenario 34", FloodReportType.Road, CreateIncomingRecord(usrn: 20023242411), Road_OngoingHistorical.Id);
+    }
+
     // -------------------------------------------------------------------------
     // Factories
     // -------------------------------------------------------------------------
@@ -262,6 +301,7 @@ public static class FindPotentialDuplicatesData
         double? northing = null,
         DateTimeOffset? impactStartUtc = null,
         int impactDurationHours = 5,
+        bool isOnGoing = false,
         ICollection<Guid>? causeIds = null,
         Guid? authorityId = null)
     {
@@ -303,7 +343,7 @@ public static class FindPotentialDuplicatesData
             Geom = new Point(easting ?? BaseEasting, northing ?? BaseNorthing) { SRID = 27700 },
             ImpactStartUtc = impactStartUtc ?? BaseImpactDate,
             ImpactDurationHours = impactDurationHours,
-            IsOnGoing = false,
+            IsOnGoing = isOnGoing,
             IsUninhabitable = false,
             FloodCauses = causes,
             Organisations = organisations,
