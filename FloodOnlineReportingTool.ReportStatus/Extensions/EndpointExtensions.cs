@@ -11,6 +11,7 @@ internal static class EndpointExtensions
     internal static WebApplication MapReportStatusEndpoints(this WebApplication app)
     {
         MapFloodReportEndpoints(app);
+        MapFloodReportDuplicateEndpoints(app);
         MapFloodReportSourceEndpoints(app);
 
         MapSearchFloodReportEndpoints(app);
@@ -78,6 +79,22 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/{id}/exists", FloodReportEndpoints.FloodReportExists)
             .WithSummary("Flood report - Exists")
             .WithDescription("Checks if a flood report exists in the database")
+            .RequireAuthorization(PolicyNames.Reader);
+    }
+
+    private static void MapFloodReportDuplicateEndpoints(WebApplication app)
+    {
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/flood/report/duplicates")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Duplicate Records");
+
+        // Get duplicates for a specific flood report
+        group
+            .MapGet(pattern: "/{floodReportId}", FloodReportSourceDuplicateEndpoints.GetFloodReportSources)
+            .WithSummary("Flood report duplicates - Get")
+            .WithDescription("Gets duplicate records for flood report from the database")
             .RequireAuthorization(PolicyNames.Reader);
     }
 

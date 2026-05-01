@@ -8,6 +8,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public virtual DbSet<FloodReport> FloodReports { get; set; }
     public virtual DbSet<FloodReportSource> FloodReportSources { get; set; }
+    public virtual DbSet<FloodReportSourceDuplicate> FloodReportSourceDuplicates { get; set; }   
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

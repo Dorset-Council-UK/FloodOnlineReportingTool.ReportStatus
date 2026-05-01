@@ -1,6 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using Microsoft.Azure.Amqp.Framing;
 using NetTopologySuite.Geometries;
 
 namespace Tests.Data;
