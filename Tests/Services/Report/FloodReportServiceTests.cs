@@ -170,6 +170,7 @@ public class FloodReportServiceTests
     }
 
     // --- Location (geometry buffer) ---
+    // Note: size buffer in tests may differ from real config but test data may need updating if you change the value.
 
     // Scenario 19: Existing report 20m away (within 25m buffer), same authority, overlapping date — must be returned
     [Theory]
@@ -245,5 +246,31 @@ public class FloodReportServiceTests
 
         Assert.Contains(FindPotentialDuplicatesData.Property_ExactDateMatch.Id, result);
         Assert.DoesNotContain(FindPotentialDuplicatesData.Property_DifferentUprn.Id, result);
+    }
+
+    // --- Groundwater ongoing cap ---
+
+    // Scenario 35: Property, groundwater ongoing incoming — DB record between 14 and 31 days — must be returned
+    // Scenario 36: Road equivalent
+    // Scenario 39: Property, DB record with groundwater cause ongoing at -22 days — groundwater DB cap (+9) covers incomingStart(-7) — must be returned
+    // Scenario 40: Road equivalent
+    [Theory]
+    [MemberData(nameof(FindPotentialDuplicatesData.GroundwaterOngoingCap_ReturnsMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
+    public async Task FindPotentialDuplicates_ReturnsMatch_WhenGroundwaterCapAppliesToOngoingEvent(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid expectedId)
+    {
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
+        Assert.Contains(expectedId, result);
+    }
+
+    // Scenario 37: Property, river ongoing incoming — DB record at +20 days beyond 14-day flooding cap — must not be returned
+    // Scenario 38: Road equivalent
+    // Scenario 41: Property, DB record with river cause ongoing at -22 days — flooding DB cap (-8) misses incomingStart(-7) — must not be returned
+    // Scenario 42: Road equivalent
+    [Theory]
+    [MemberData(nameof(FindPotentialDuplicatesData.GroundwaterOngoingCap_ReturnsNoMatch_Cases), MemberType = typeof(FindPotentialDuplicatesData))]
+    public async Task FindPotentialDuplicates_ReturnsNoMatch_WhenFloodingCapInsufficientForGroundwaterWindow(string _, FloodReportType type, EligibilityCheckRecord incomingRecord, Guid excludedId)
+    {
+        var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
+        Assert.DoesNotContain(excludedId, result);
     }
 }
