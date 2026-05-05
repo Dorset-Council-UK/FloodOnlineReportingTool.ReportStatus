@@ -34,10 +34,20 @@ public interface IFloodReportService
     Task<bool> ReportWithReferenceExists(string reference, CancellationToken ct);
 
     /// <summary>
+    /// Checks if a report with the provided source reference exists in the database.
+    /// </summary>
+    Task<bool> ReportWithSourceReferenceExists(string reference, CancellationToken ct);
+
+    /// <summary>
     /// Gets a flood report by its reference from the database.
     /// </summary>
     /// <remarks>Flood report sources are included</remarks>
     Task<FloodReport?> GetFloodReportByReference(string reference, CancellationToken ct);
+
+    /// <summary>
+    /// Gets a flood report by its source reference from the database.
+    /// </summary>
+    Task<FloodReport?> GetFloodReportBySourceReference(string reference, CancellationToken ct);
 
     /// <summary>
     /// Gets a flood report by its ID from the database.

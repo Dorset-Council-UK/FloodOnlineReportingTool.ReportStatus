@@ -21,6 +21,42 @@ internal static class FloodReportEndpoints
         return floodReport == null ? TypedResults.NotFound() : TypedResults.Ok(floodReport);
     }
 
+    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportExists(IFloodReportService floodReportService, Guid id, CancellationToken ct)
+    {
+        var exists = await floodReportService.FloodReportExists(id, ct).ConfigureAwait(false);
+        return TypedResults.Ok(exists);
+    }
+
+    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportReferenceExists(
+        IFloodReportService floodReportService,
+        string reference,
+        FloodReferenceSearchType searchType,
+        CancellationToken ct)
+    {
+        var exists = searchType switch
+        {
+            FloodReferenceSearchType.Source => await floodReportService.ReportWithSourceReferenceExists(reference, ct).ConfigureAwait(false),
+            _ => await floodReportService.ReportWithReferenceExists(reference, ct).ConfigureAwait(false),
+        };
+
+        return TypedResults.Ok(exists);
+    }
+
+    internal static async Task<Results<Ok<FloodReport>, NotFound>> GetFloodReportByReference(
+        IFloodReportService floodReportService,
+        string reference,
+        FloodReferenceSearchType searchType,
+        CancellationToken ct)
+    {
+        var floodReport = searchType switch
+        {
+            FloodReferenceSearchType.Source => await floodReportService.GetFloodReportBySourceReference(reference, ct).ConfigureAwait(false),
+            _ => await floodReportService.GetFloodReportByReference(reference, ct).ConfigureAwait(false),
+        };
+
+        return floodReport == null ? TypedResults.NotFound() : TypedResults.Ok(floodReport);
+    }
+
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetFloodReportsByUprn(IFloodReportService floodReportService, long uprn, CancellationToken ct)
     {
         var floodReports = await floodReportService.GetFloodReportsByUprn(uprn, ct).ConfigureAwait(false);
@@ -57,11 +93,5 @@ internal static class FloodReportEndpoints
     {
         var deleted = await floodReportService.DeleteFloodReport(id, ct).ConfigureAwait(false);
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
-    }
-
-    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportExists(IFloodReportService floodReportService, Guid id, CancellationToken ct)
-    {
-        var exists = await floodReportService.FloodReportExists(id, ct).ConfigureAwait(false);
-        return TypedResults.Ok(exists);
     }
 }

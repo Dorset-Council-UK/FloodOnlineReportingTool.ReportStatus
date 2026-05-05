@@ -251,10 +251,26 @@ public class FloodReportService(
         return await query.FirstOrDefaultAsync(ct);
     }
 
+    public async Task<FloodReport?> GetFloodReportBySourceReference(string reference, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving flood report from the database by source reference.");
+
+        var query = floodReportRepository.GetFloodReportBySourceReference(reference);
+        return await query.FirstOrDefaultAsync(ct);
+    }
+
     public async Task<bool> ReportWithReferenceExists(string reference, CancellationToken ct)
     {
         logger.LogInformation("Checking existence of flood report with reference number {Reference}.", reference);
         return await context.FloodReports
+            .AsNoTracking()
+            .AnyAsync(o => o.Reference == reference, ct);
+    }
+
+    public async Task<bool> ReportWithSourceReferenceExists(string reference, CancellationToken ct)
+    {
+        logger.LogInformation("Checking existence of flood report with source reference number {Reference}.", reference);
+        return await context.FloodReportSources
             .AsNoTracking()
             .AnyAsync(o => o.Reference == reference, ct);
     }
