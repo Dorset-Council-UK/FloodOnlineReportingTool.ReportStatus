@@ -12,10 +12,9 @@ internal class FloodReportSourceDuplicateConfiguration : IEntityTypeConfiguratio
 
         builder.HasIndex(o => o.EligibilityCheckId);
 
-        // Explicit many-to-many is required here because FloodReport has no inverse
-        // navigation property back to FloodReportSourceDuplicate. Without this,
-        // EF Core conventions would incorrectly create a FK on FloodReport instead
-        // of a junction table.
+        // Explicit FK is required here because FloodReportDuplicateReference has no
+        // inverse navigation property back to FloodReportSourceDuplicate. Without this,
+        // EF Core conventions would generate an unpredictable shadow FK column name.
         builder
             .HasMany(o => o.FloodReportReferences)
             .WithOne()
