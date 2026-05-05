@@ -83,8 +83,6 @@ public interface IFloodReportService
     /// </summary>
     Task<bool> FloodReportExists(Guid id, CancellationToken ct);
 
-    Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByPoint(double easting, double northing, double buffer, CancellationToken ct);
-
     Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType ReportType, double buffer, EligibilityCheckRecord incomingRecord, CancellationToken ct);
 
     Task<IReadOnlyCollection<FloodReportSourceDuplicate>?> GetPotentialDuplicatesById(Guid id, CancellationToken ct);

@@ -365,16 +365,6 @@ public class FloodReportService(
             .AnyAsync(o => o.Id.Equals(id), ct);
     }
 
-    public async Task<IReadOnlyCollection<FloodReport>> GetFloodReportsByPoint(double easting, double northing, double buffer, CancellationToken ct)
-    {
-        logger.LogDebug("Retrieving all flood locations within buffer {buffer} of {easting}, {northing} from the database.", buffer, easting, northing);
-
-        buffer = Math.Clamp(buffer, 0, MaxBuffer);
-
-        return await floodReportRepository
-            .GetFloodReportsWithinMetres(easting, northing, buffer)
-            .ToListAsync(ct);
-    }
 
     public async Task<IReadOnlyCollection<Guid>> FindPotentialDuplicates(FloodReportType reportType, double buffer, EligibilityCheckRecord incomingRecord, CancellationToken ct)
     {
