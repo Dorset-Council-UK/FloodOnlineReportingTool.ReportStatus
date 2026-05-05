@@ -28,12 +28,20 @@ internal static class FloodReportEndpoints
         return TypedResults.Ok(exists);
     }
 
-    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportReferenceExists(
+    internal static async Task<Results<Ok<bool>, BadRequest, ValidationProblem>> FloodReportReferenceExists(
         IFloodReportService floodReportService,
         string reference,
         FloodReferenceSearchType searchType,
         CancellationToken ct)
     {
+        if (!Enum.IsDefined(searchType))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { nameof(searchType), [$"Invalid search type '{searchType}'. Valid values are: {string.Join(", ", Enum.GetNames<FloodReferenceSearchType>())}."] },
+            });
+        }
+
         var exists = searchType switch
         {
             FloodReferenceSearchType.Source => await floodReportService.ReportWithSourceReferenceExists(reference, ct).ConfigureAwait(false),
@@ -43,12 +51,20 @@ internal static class FloodReportEndpoints
         return TypedResults.Ok(exists);
     }
 
-    internal static async Task<Results<Ok<FloodReport>, NotFound>> GetFloodReportByReference(
+    internal static async Task<Results<Ok<FloodReport>, NotFound, ValidationProblem>> GetFloodReportByReference(
         IFloodReportService floodReportService,
         string reference,
         FloodReferenceSearchType searchType,
         CancellationToken ct)
     {
+        if (!Enum.IsDefined(searchType))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { nameof(searchType), [$"Invalid search type '{searchType}'. Valid values are: {string.Join(", ", Enum.GetNames<FloodReferenceSearchType>())}."] },
+            });
+        }
+
         var floodReport = searchType switch
         {
             FloodReferenceSearchType.Source => await floodReportService.GetFloodReportBySourceReference(reference, ct).ConfigureAwait(false),
