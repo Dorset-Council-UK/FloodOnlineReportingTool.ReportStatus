@@ -29,7 +29,7 @@ public record FloodReportSourceDuplicate : ICreatedUpdated
     public string? LocationDescription { get; init; }
 
     // Navigation properties using wrapper models instead of contract types directly
-    public ICollection<FloodReport> FloodReports { get; init; } = []; // This defines the possible matches
+    public ICollection<FloodReportDuplicateReference> FloodReportReferences { get; init; } = []; 
     public ICollection<FloodReportSourceFloodCause> FloodCauses { get; init; } = [];
     public ICollection<FloodReportSourceOrganisation> Organisations { get; init; } = [];
 }

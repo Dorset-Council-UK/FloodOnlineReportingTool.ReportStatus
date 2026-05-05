@@ -21,7 +21,16 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
         return context.FloodReports
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Where(fr => fr.SourceRecords.Any( sr => sr.Reference.Equals(reference)))
+            .Where(fr => fr.Reference.Equals(reference))
+            .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id));
+    }
+
+    public IQueryable<FloodReport?> GetFloodReportBySourceReference(string reference)
+    {
+        return context.FloodReports
+            .AsNoTracking()
+            .IgnoreAutoIncludes()
+            .Where(fr => fr.SourceRecords.Any(sr => sr.Reference.Equals(reference)))
             .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id));
     }
 

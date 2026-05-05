@@ -58,6 +58,12 @@ internal static class EndpointExtensions
             .WithDescription("Gets a flood report by id from the database")
             .RequireAuthorization(PolicyNames.Reader);
 
+        group
+            .MapGet(pattern: "/reference/{reference}", FloodReportEndpoints.GetFloodReportByReference)
+            .WithSummary("Flood report - Get by reference")
+            .WithDescription("Gets a flood report by reference. Use searchType=Report to match the flood report reference, or searchType=Source to match the originating source reference.")
+            .RequireAuthorization(PolicyNames.Reader);
+
         // Create - not currently available as done via messages instead
 
         // Update
@@ -79,6 +85,12 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/{id}/exists", FloodReportEndpoints.FloodReportExists)
             .WithSummary("Flood report - Exists")
             .WithDescription("Checks if a flood report exists in the database")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        group.
+            MapGet(pattern: "/reference/{reference}/exists", FloodReportEndpoints.FloodReportReferenceExists)
+            .WithSummary("Flood report - Reference exists")
+            .WithDescription("Checks if a flood report reference exists. Use searchType=Report to match the flood report reference, or searchType=Source to match the originating source reference.")
             .RequireAuthorization(PolicyNames.Reader);
     }
 

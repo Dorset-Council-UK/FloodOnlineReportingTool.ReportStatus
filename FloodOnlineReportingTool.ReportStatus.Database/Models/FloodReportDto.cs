@@ -3,6 +3,7 @@
 public record FloodReportDto
 {
     public required Guid Id { get; init; }
+    public required string Reference { get; init; }
     public required Guid RecordStatus { get; set; }
 
     // Other properties

@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Settings;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -18,6 +19,58 @@ internal static class FloodReportEndpoints
     internal static async Task<Results<Ok<FloodReport>, NotFound>> GetFloodReportById(IFloodReportService floodReportService, Guid id, CancellationToken ct)
     {
         var floodReport = await floodReportService.GetFloodReportById(id, ct).ConfigureAwait(false);
+        return floodReport == null ? TypedResults.NotFound() : TypedResults.Ok(floodReport);
+    }
+
+    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportExists(IFloodReportService floodReportService, Guid id, CancellationToken ct)
+    {
+        var exists = await floodReportService.FloodReportExists(id, ct).ConfigureAwait(false);
+        return TypedResults.Ok(exists);
+    }
+
+    internal static async Task<Results<Ok<bool>, BadRequest, ValidationProblem>> FloodReportReferenceExists(
+        IFloodReportService floodReportService,
+        string reference,
+        FloodReferenceSearchType searchType,
+        CancellationToken ct)
+    {
+        if (!Enum.IsDefined(searchType))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { nameof(searchType), [$"Invalid search type '{searchType}'. Valid values are: {string.Join(", ", Enum.GetNames<FloodReferenceSearchType>())}."] },
+            });
+        }
+
+        var exists = searchType switch
+        {
+            FloodReferenceSearchType.Source => await floodReportService.ReportWithSourceReferenceExists(reference, ct).ConfigureAwait(false),
+            _ => await floodReportService.ReportWithReferenceExists(reference, ct).ConfigureAwait(false),
+        };
+
+        return TypedResults.Ok(exists);
+    }
+
+    internal static async Task<Results<Ok<FloodReport>, NotFound, ValidationProblem>> GetFloodReportByReference(
+        IFloodReportService floodReportService,
+        string reference,
+        FloodReferenceSearchType searchType,
+        CancellationToken ct)
+    {
+        if (!Enum.IsDefined(searchType))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { nameof(searchType), [$"Invalid search type '{searchType}'. Valid values are: {string.Join(", ", Enum.GetNames<FloodReferenceSearchType>())}."] },
+            });
+        }
+
+        var floodReport = searchType switch
+        {
+            FloodReferenceSearchType.Source => await floodReportService.GetFloodReportBySourceReference(reference, ct).ConfigureAwait(false),
+            _ => await floodReportService.GetFloodReportByReference(reference, ct).ConfigureAwait(false),
+        };
+
         return floodReport == null ? TypedResults.NotFound() : TypedResults.Ok(floodReport);
     }
 
@@ -57,11 +110,5 @@ internal static class FloodReportEndpoints
     {
         var deleted = await floodReportService.DeleteFloodReport(id, ct).ConfigureAwait(false);
         return deleted ? TypedResults.NoContent() : TypedResults.NotFound();
-    }
-
-    internal static async Task<Results<Ok<bool>, BadRequest>> FloodReportExists(IFloodReportService floodReportService, Guid id, CancellationToken ct)
-    {
-        var exists = await floodReportService.FloodReportExists(id, ct).ConfigureAwait(false);
-        return TypedResults.Ok(exists);
     }
 }

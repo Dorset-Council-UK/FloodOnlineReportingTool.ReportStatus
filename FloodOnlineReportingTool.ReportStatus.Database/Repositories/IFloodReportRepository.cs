@@ -8,6 +8,7 @@ public interface IFloodReportRepository
 {
     IQueryable<FloodReport> GetFloodReports();
     IQueryable<FloodReport?> GetFloodReportByReference(string reference);
+    IQueryable<FloodReport?> GetFloodReportBySourceReference(string reference);
     IQueryable<FloodReport?> GetFloodReportById(Guid id);
     IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres);
     IQueryable<FloodReport> GetFloodReportsByUprn(long uprn);

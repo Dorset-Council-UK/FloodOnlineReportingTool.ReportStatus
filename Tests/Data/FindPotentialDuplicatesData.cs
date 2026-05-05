@@ -424,6 +424,7 @@ public static class FindPotentialDuplicatesData
         return new FloodReport
         {
             Id = reportId,
+            Reference = $"TEST-{reportId.ToString()[..8].ToUpperInvariant()}",
             RecordStatus = RecordStatusIds.New,
             RecordType = recordType,
             CreatedUtc = BaseImpactDate,

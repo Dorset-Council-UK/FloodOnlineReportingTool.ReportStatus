@@ -1,5 +1,4 @@
-﻿using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.Contracts.Shared.Search;
+﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
@@ -12,6 +11,7 @@ public static class FloodReportExtensions
         return new FloodReportDto
         {
             Id = floodReport.Id,
+            Reference = floodReport.Reference,
             RecordStatus = floodReport.RecordStatus,
             SourceRecords = floodReport.SourceRecords
         };
@@ -21,6 +21,7 @@ public static class FloodReportExtensions
     {
         return new(
             floodReport.Id,
+            floodReport.Reference,
             floodReport.RecordStatus,
             floodReport.SourceRecords.ToSearchResults()
         );
@@ -30,6 +31,7 @@ public static class FloodReportExtensions
     {
         return floodReportQuery.Select(fr => new SearchResultFloodReport(
             fr.Id,
+            fr.Reference,
             fr.RecordStatus,
             fr.SourceRecords.Select(sr => new SearchResultFloodReportSource(
                 sr.Id,

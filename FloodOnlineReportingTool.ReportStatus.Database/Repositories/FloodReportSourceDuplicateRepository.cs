@@ -12,6 +12,6 @@ public class FloodReportSourceDuplicateRepository(ApplicationDbContext context) 
         return context.FloodReportSourceDuplicates
             .AsNoTracking()
             .IgnoreAutoIncludes()
-            .Where(frsd => frsd.FloodReports.Any(fr => fr.Id == floodReportId));
+            .Where(frsd => frsd.FloodReportReferences.Any(frr => frr.FloodReportId == floodReportId));
     }
 }
