@@ -1,8 +1,10 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 public class FloodReportService(
     ILogger<FloodReportService> logger, 
     IFloodReportRepository floodReportRepository,
+    IPublishEndpoint publishEndpoint,
     IConfiguration configuration,
     IFloodReportSourceDuplicateRepository floodReportSourceRepository,
     ApplicationDbContext context
@@ -48,6 +51,9 @@ public class FloodReportService(
             IsUninhabitable = message.EligibilityCheckRecord.IsUninhabitable,
             VulnerableCount = message.EligibilityCheckRecord.VulnerableCount,
             LocationDescription = message.EligibilityCheckRecord.LocationDescription,
+            HasInvestigation = message.HasInvestigation,
+            HasContacts = message.HasContacts,
+            ContactRecordTypes = message.ContactRecordTypes,
             FloodCauses = floodCauses,
             Organisations = organisations,
         };
@@ -124,13 +130,16 @@ public class FloodReportService(
 
             context.FloodReports.Add(generatedReport);
             generatedOrUpdatedReports.Add(generatedReport);
+            
+            var floodReportCreatedMessage = generatedReport.ToMessageCreated();
+            await publishEndpoint.Publish(floodReportCreatedMessage, ct);
             await context.SaveChangesAsync(ct);
         }
         else
         {
             // Get and update the existing records - We add new duplicates to all matches for a user to review.
-            var existingReports = await context.FloodReports
-                .AsNoTracking()
+            var existingReports = await floodReportRepository
+                .GetFloodReports()
                 .Where(fr => ExistingIds.Contains(fr.Id))
                 .ToListAsync(ct);
 
@@ -140,17 +149,6 @@ public class FloodReportService(
             }
 
             var duplicateDetectedUtc = DateTimeOffset.UtcNow;
-            foreach (var existingReport in existingReports)
-            {
-                logger.LogInformation(
-                    "Flood report {FloodReportId} status changed from {PreviousRecordStatus} to {NewRecordStatus} due to duplicate source {DuplicateSourceReference} at {ChangedUtc}.",
-                    existingReport.Id,
-                    existingReport.RecordStatus,
-                    RecordStatusIds.DuplicateDetected,
-                    messageSource.Reference,
-                    duplicateDetectedUtc);
-            }
-
             var strategy = context.Database.CreateExecutionStrategy();
             await strategy.ExecuteAsync(async () =>
             {
@@ -186,6 +184,9 @@ public class FloodReportService(
                         IsUninhabitable = messageSource.IsUninhabitable,
                         VulnerableCount = messageSource.VulnerableCount,
                         LocationDescription = messageSource.LocationDescription,
+                        HasInvestigation = messageSource.HasInvestigation,
+                        HasContacts = messageSource.HasContacts,
+                        ContactRecordTypes = messageSource.ContactRecordTypes,
                         FloodCauses = messageSource.FloodCauses?
                             .Select(fc => new FloodReportSourceFloodCause
                             {
@@ -230,6 +231,13 @@ public class FloodReportService(
                     UpdatedUtc = duplicateDetectedUtc,
                 })
                 .ToList();
+
+            // Publish one FloodReportUpdated message per affected report.
+            foreach (var updatedReport in generatedOrUpdatedReports)
+            {
+                var floodReportUpdatedMessage = updatedReport.ToMessageUpdated();
+                await publishEndpoint.Publish(floodReportUpdatedMessage, ct);
+            }
         }
 
         return generatedOrUpdatedReports;

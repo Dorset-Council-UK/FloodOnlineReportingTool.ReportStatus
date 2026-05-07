@@ -60,15 +60,24 @@ internal static class MessageSystemExtensions
 
                 config.Message<FloodReportSourceCreated>(m =>
                 {
-                    m.SetEntityName(TopicNames.FloodSourceCreated);
+                    m.SetEntityName(TopicNames.FloodReportSourceCreated);
+                });
+                config.Message<FloodReportCreated>(m =>
+                {
+                    m.SetEntityName(TopicNames.FloodReportCreated);
+                });
+                config.Message<FloodReportUpdated>(m =>
+                {
+                    m.SetEntityName(TopicNames.FloodReportUpdated);
                 });
 
                 // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
-                config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatus", o =>
+                config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatus", e =>
                 {
-                    o.ConfigureConsumer<FloodReportSourceCreatedConsumer>(context);
+                    e.ConfigureConsumer<FloodReportSourceCreatedConsumer>(context);
                 });
 
+                // Finalise all remaining endpoint topology
                 config.ConfigureEndpoints(context);
             });
         });

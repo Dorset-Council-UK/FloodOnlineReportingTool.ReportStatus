@@ -82,6 +82,10 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<int[]>("ContactRecordTypes")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -99,6 +103,12 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<bool>("HasContacts")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasInvestigation")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("ImpactDurationHours")
                         .HasColumnType("integer");
@@ -165,6 +175,10 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<int[]>("ContactRecordTypes")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -179,6 +193,12 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<bool>("HasContacts")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasInvestigation")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("ImpactDurationHours")
                         .HasColumnType("integer");
