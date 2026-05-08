@@ -25,6 +25,8 @@ public static class FloodReportExtensions
             floodReport.Id,
             floodReport.Reference,
             floodReport.CreatedUtc,
+            floodReport.Easting,
+            floodReport.Northing,
             floodReport.SourceRecords.Any(sr => sr.HasContacts),
             floodReport.SourceRecords.SelectMany(sr => sr.ContactRecordTypes).Distinct().ToList()
         );
@@ -37,6 +39,8 @@ public static class FloodReportExtensions
             floodReport.Reference,
             floodReport.UpdatedUtc ?? DateTimeOffset.UtcNow,
             floodReport.RecordStatus,
+            floodReport.Easting,
+            floodReport.Northing,
             floodReport.SourceRecords.Any(sr => sr.HasInvestigation),
             floodReport.SourceRecords.Any(s => s.HasContacts),
             floodReport.SourceRecords.SelectMany(sr => sr.ContactRecordTypes).Distinct().ToList()
