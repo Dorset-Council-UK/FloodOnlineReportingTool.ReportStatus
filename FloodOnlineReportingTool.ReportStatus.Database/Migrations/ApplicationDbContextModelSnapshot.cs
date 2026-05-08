@@ -34,6 +34,30 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<double>("Easting")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("double precision")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 27700))", true);
+
+                    b.Property<Point>("Geom")
+                        .IsRequired()
+                        .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<double>("Northing")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("double precision")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 27700))", true);
+
                     b.Property<Guid>("RecordStatus")
                         .HasColumnType("uuid");
 
