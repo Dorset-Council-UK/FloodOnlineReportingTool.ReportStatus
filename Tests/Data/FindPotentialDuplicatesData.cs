@@ -427,6 +427,7 @@ public static class FindPotentialDuplicatesData
             Reference = $"TEST-{reportId.ToString()[..8].ToUpperInvariant()}",
             RecordStatus = RecordStatusIds.New,
             RecordType = recordType,
+            Geom = new Point(easting ?? BaseEasting, northing ?? BaseNorthing) { SRID = 27700 },
             CreatedUtc = BaseImpactDate,
             SourceRecords = [source],
         };

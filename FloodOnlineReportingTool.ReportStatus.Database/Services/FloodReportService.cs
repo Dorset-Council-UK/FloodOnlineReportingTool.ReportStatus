@@ -123,6 +123,7 @@ public class FloodReportService(
                 Reference = await CreateReference(ct),
                 RecordStatus = RecordStatusIds.New,
                 RecordType = ReportType,
+                Geom = messageSource.Geom,
                 CreatedUtc = DateTimeOffset.UtcNow,
                 UpdatedUtc = null,
                 SourceRecords = [messageSource]
