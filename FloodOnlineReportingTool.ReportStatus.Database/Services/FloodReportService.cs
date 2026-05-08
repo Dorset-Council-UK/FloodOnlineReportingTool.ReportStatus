@@ -238,6 +238,9 @@ public class FloodReportService(
                 var floodReportUpdatedMessage = updatedReport.ToMessageUpdated();
                 await publishEndpoint.Publish(floodReportUpdatedMessage, ct);
             }
+
+            // Persist MassTransit EF/Bus outbox records created by Publish calls.
+            await context.SaveChangesAsync(ct);
         }
 
         return generatedOrUpdatedReports;
