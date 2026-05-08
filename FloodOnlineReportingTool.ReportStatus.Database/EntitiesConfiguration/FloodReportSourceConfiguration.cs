@@ -11,6 +11,7 @@ internal class FloodReportSourceConfiguration : IEntityTypeConfiguration<FloodRe
         builder.HasKey(o => o.Id);
 
         builder.HasIndex(o => o.EligibilityCheckId);
+        builder.HasIndex(o => o.Reference).IsUnique();
         builder.HasIndex(o => new { o.FloodReportId, o.EligibilityCheckId });
 
         builder

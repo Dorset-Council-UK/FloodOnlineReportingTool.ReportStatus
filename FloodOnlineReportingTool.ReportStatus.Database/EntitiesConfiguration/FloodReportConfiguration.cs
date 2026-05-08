@@ -9,6 +9,7 @@ internal class FloodReportConfiguration : IEntityTypeConfiguration<FloodReport>
     public void Configure(EntityTypeBuilder<FloodReport> builder)
     {
         builder.HasKey(o => o.Id);
+        builder.HasIndex(o => o.Reference).IsUnique();
 
         builder
             .Property(o => o.Geom)

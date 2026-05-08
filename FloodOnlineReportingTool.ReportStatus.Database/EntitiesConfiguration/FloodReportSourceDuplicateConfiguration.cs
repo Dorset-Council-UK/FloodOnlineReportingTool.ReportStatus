@@ -10,6 +10,7 @@ internal class FloodReportSourceDuplicateConfiguration : IEntityTypeConfiguratio
     {
         builder.HasKey(o => o.Id);
 
+        builder.HasIndex(o => o.Reference).IsUnique();
         builder.HasIndex(o => o.EligibilityCheckId);
 
         // Explicit FK is required here because FloodReportDuplicateReference has no
