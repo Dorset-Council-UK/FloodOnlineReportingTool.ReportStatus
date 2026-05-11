@@ -72,7 +72,7 @@ internal static class MessageSystemExtensions
                 });
 
                 // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
-                config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatus", e =>
+                config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatusPW", e =>
                 {
                     e.ConfigureConsumer<FloodReportSourceCreatedConsumer>(context);
                 });
