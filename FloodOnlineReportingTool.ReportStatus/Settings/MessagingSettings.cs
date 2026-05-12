@@ -6,4 +6,5 @@ public class MessagingSettings
 
     public required bool Enabled { get; init; } = false;
     public required string ConnectionString { get; init; }
+    public string? SubscriptionNameOverride { get; init; }
 }

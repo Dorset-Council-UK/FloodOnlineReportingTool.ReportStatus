@@ -16,6 +16,14 @@ internal static class MessageSystemExtensions
     /// </summary>
     public static IServiceCollection AddMessageSystem(this IServiceCollection services, MessagingSettings messagingSettings)
     {
+        // Default subscription name; can be overridden via MessagingSettings.SubscriptionNameOverride
+        // to support isolated environments such as per-developer or per-PR deployments.
+        const string defaultFloodReportSourceCreatedSubscription = "floodreport-reportstatus";
+
+        var floodReportSourceCreatedSubscription = messagingSettings.SubscriptionNameOverride is not null
+            ? messagingSettings.SubscriptionNameOverride
+            : defaultFloodReportSourceCreatedSubscription;
+
         if (!messagingSettings.Enabled)
         {
             return services;
@@ -72,7 +80,7 @@ internal static class MessageSystemExtensions
                 });
 
                 // Subscriptions https://masstransit.io/documentation/transports/azure-service-bus#subscriptions
-                config.SubscriptionEndpoint<FloodReportSourceCreated>("floodreport-reportstatusPW", e =>
+                config.SubscriptionEndpoint<FloodReportSourceCreated>(floodReportSourceCreatedSubscription, e =>
                 {
                     e.ConfigureConsumer<FloodReportSourceCreatedConsumer>(context);
                 });
