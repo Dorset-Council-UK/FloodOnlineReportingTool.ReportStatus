@@ -61,7 +61,7 @@ public class FloodReportService(
         await GenerateFromSource(messageSource, message.EligibilityCheckRecord, message.Buffer, ct);
     }
 
-    public async Task<List<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
+    public async Task<ICollection<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
     {
         // Reverse-map wrapper types back to contract types for EligibilityCheckRecord
         IReadOnlyCollection<EligibilityCheckOrganisation> organisations = [.. dto.Organisations
@@ -89,7 +89,7 @@ public class FloodReportService(
         return await GenerateFromSource(dto, eligibilityCheckRecord, buffer, ct);
     }
 
-    private async Task<List<FloodReport>?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
+    private async Task<ICollection<FloodReport>?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
     {
         // Check if this is a duplicate record
         IReadOnlyCollection<Guid> ExistingIds = [];

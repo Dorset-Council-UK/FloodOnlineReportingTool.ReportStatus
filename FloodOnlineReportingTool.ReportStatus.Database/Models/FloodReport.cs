@@ -22,5 +22,5 @@ public record FloodReport : ICreatedUpdated
 
     // Other properties
     [JsonIgnore]
-    public ICollection<FloodReportSource> SourceRecords { get; init; }
+    public ICollection<FloodReportSource> SourceRecords { get; init; } = [];
 }
