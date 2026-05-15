@@ -34,6 +34,30 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<double>("Easting")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("double precision")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 27700))", true);
+
+                    b.Property<Point>("Geom")
+                        .IsRequired()
+                        .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<decimal>("Latitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<decimal>("Longitude")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("numeric")
+                        .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", true);
+
+                    b.Property<double>("Northing")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("double precision")
+                        .HasComputedColumnSql("ST_Y(ST_Transform(\"Geom\", 27700))", true);
+
                     b.Property<Guid>("RecordStatus")
                         .HasColumnType("uuid");
 
@@ -85,6 +109,10 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<int[]>("ContactRecordTypes")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -102,6 +130,12 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<bool>("HasContacts")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasInvestigation")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("ImpactDurationHours")
                         .HasColumnType("integer");
@@ -171,6 +205,10 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<int[]>("ContactRecordTypes")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -185,6 +223,12 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Point>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry (point, 27700)");
+
+                    b.Property<bool>("HasContacts")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasInvestigation")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("ImpactDurationHours")
                         .HasColumnType("integer");

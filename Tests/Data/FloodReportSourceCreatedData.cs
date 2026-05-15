@@ -1,5 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 
 namespace Tests.Data;
 

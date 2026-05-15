@@ -1,8 +1,10 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -36,7 +38,7 @@ public class FloodReportServiceTests
         var mockDbSet = FindPotentialDuplicatesData.AllReports.BuildMockDbSet();
         context.FloodReports.Returns(mockDbSet);
 
-        return new FloodReportService(logger, floodReportRepository, configuration, floodReportSourceRepository, context);
+        return new FloodReportService(logger, floodReportRepository, Substitute.For<IPublishEndpoint>(), configuration, floodReportSourceRepository, context);
     }
 
     // --- Property (UPRN) ---

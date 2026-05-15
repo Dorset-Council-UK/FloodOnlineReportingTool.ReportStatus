@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using NetTopologySuite.Geometries;
+using System.Text.Json.Serialization;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 public record FloodReport : ICreatedUpdated
@@ -12,7 +13,14 @@ public record FloodReport : ICreatedUpdated
     public DateTimeOffset CreatedUtc { get; init; }
     public DateTimeOffset? UpdatedUtc { get; init; }
 
+    // Source records might have a slightly different location if the UPRN/USRN has changed between reports or if the location match option has been used. This is the official location for the whole report so we have a separate Geom and coordinates here. This will be used for user range filtering. 
+    public required Point Geom { get; init; }
+    public double Easting { get; init; }
+    public double Northing { get; init; }
+    public decimal Latitude { get; init; }
+    public decimal Longitude { get; init; }
+
     // Other properties
     [JsonIgnore]
-    public ICollection<FloodReportSource> SourceRecords { get; init; }
+    public ICollection<FloodReportSource> SourceRecords { get; init; } = [];
 }

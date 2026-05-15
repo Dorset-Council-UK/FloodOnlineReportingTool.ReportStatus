@@ -1,8 +1,10 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 public class FloodReportService(
     ILogger<FloodReportService> logger, 
     IFloodReportRepository floodReportRepository,
+    IPublishEndpoint publishEndpoint,
     IConfiguration configuration,
     IFloodReportSourceDuplicateRepository floodReportSourceRepository,
     ApplicationDbContext context
@@ -48,6 +51,9 @@ public class FloodReportService(
             IsUninhabitable = message.EligibilityCheckRecord.IsUninhabitable,
             VulnerableCount = message.EligibilityCheckRecord.VulnerableCount,
             LocationDescription = message.EligibilityCheckRecord.LocationDescription,
+            HasInvestigation = message.HasInvestigation,
+            HasContacts = message.HasContacts,
+            ContactRecordTypes = message.ContactRecordTypes,
             FloodCauses = floodCauses,
             Organisations = organisations,
         };
@@ -55,7 +61,7 @@ public class FloodReportService(
         await GenerateFromSource(messageSource, message.EligibilityCheckRecord, message.Buffer, ct);
     }
 
-    public async Task<List<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
+    public async Task<ICollection<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct)
     {
         // Reverse-map wrapper types back to contract types for EligibilityCheckRecord
         IReadOnlyCollection<EligibilityCheckOrganisation> organisations = [.. dto.Organisations
@@ -83,7 +89,7 @@ public class FloodReportService(
         return await GenerateFromSource(dto, eligibilityCheckRecord, buffer, ct);
     }
 
-    private async Task<List<FloodReport>?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
+    private async Task<ICollection<FloodReport>?> GenerateFromSource(FloodReportSource messageSource, EligibilityCheckRecord checkRecord, double buffer, CancellationToken ct)
     {
         // Check if this is a duplicate record
         IReadOnlyCollection<Guid> ExistingIds = [];
@@ -117,6 +123,7 @@ public class FloodReportService(
                 Reference = await CreateReference(ct),
                 RecordStatus = RecordStatusIds.New,
                 RecordType = ReportType,
+                Geom = messageSource.Geom,
                 CreatedUtc = DateTimeOffset.UtcNow,
                 UpdatedUtc = null,
                 SourceRecords = [messageSource]
@@ -124,13 +131,16 @@ public class FloodReportService(
 
             context.FloodReports.Add(generatedReport);
             generatedOrUpdatedReports.Add(generatedReport);
+            
+            var floodReportCreatedMessage = generatedReport.ToMessageCreated();
+            await publishEndpoint.Publish(floodReportCreatedMessage, ct);
             await context.SaveChangesAsync(ct);
         }
         else
         {
             // Get and update the existing records - We add new duplicates to all matches for a user to review.
-            var existingReports = await context.FloodReports
-                .AsNoTracking()
+            var existingReports = await floodReportRepository
+                .GetFloodReports()
                 .Where(fr => ExistingIds.Contains(fr.Id))
                 .ToListAsync(ct);
 
@@ -140,17 +150,6 @@ public class FloodReportService(
             }
 
             var duplicateDetectedUtc = DateTimeOffset.UtcNow;
-            foreach (var existingReport in existingReports)
-            {
-                logger.LogInformation(
-                    "Flood report {FloodReportId} status changed from {PreviousRecordStatus} to {NewRecordStatus} due to duplicate source {DuplicateSourceReference} at {ChangedUtc}.",
-                    existingReport.Id,
-                    existingReport.RecordStatus,
-                    RecordStatusIds.DuplicateDetected,
-                    messageSource.Reference,
-                    duplicateDetectedUtc);
-            }
-
             var strategy = context.Database.CreateExecutionStrategy();
             await strategy.ExecuteAsync(async () =>
             {
@@ -176,16 +175,15 @@ public class FloodReportService(
                         Uprn = messageSource.Uprn,
                         Usrn = messageSource.Usrn,
                         Geom = messageSource.Geom,
-                        Easting = messageSource.Easting,
-                        Northing = messageSource.Northing,
-                        Latitude = messageSource.Latitude,
-                        Longitude = messageSource.Longitude,
                         ImpactStartUtc = messageSource.ImpactStartUtc,
                         ImpactDurationHours = messageSource.ImpactDurationHours,
                         IsOnGoing = messageSource.IsOnGoing,
                         IsUninhabitable = messageSource.IsUninhabitable,
                         VulnerableCount = messageSource.VulnerableCount,
                         LocationDescription = messageSource.LocationDescription,
+                        HasInvestigation = messageSource.HasInvestigation,
+                        HasContacts = messageSource.HasContacts,
+                        ContactRecordTypes = messageSource.ContactRecordTypes,
                         FloodCauses = messageSource.FloodCauses?
                             .Select(fc => new FloodReportSourceFloodCause
                             {
@@ -230,6 +228,16 @@ public class FloodReportService(
                     UpdatedUtc = duplicateDetectedUtc,
                 })
                 .ToList();
+
+            // Publish one FloodReportUpdated message per affected report.
+            foreach (var updatedReport in generatedOrUpdatedReports)
+            {
+                var floodReportUpdatedMessage = updatedReport.ToMessageUpdated();
+                await publishEndpoint.Publish(floodReportUpdatedMessage, ct);
+            }
+
+            // Persist MassTransit EF/Bus outbox records created by Publish calls.
+            await context.SaveChangesAsync(ct);
         }
 
         return generatedOrUpdatedReports;

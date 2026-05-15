@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared.Search;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
@@ -15,6 +16,34 @@ public static class FloodReportExtensions
             RecordStatus = floodReport.RecordStatus,
             SourceRecords = floodReport.SourceRecords
         };
+    }
+
+    public static FloodReportCreated ToMessageCreated(this FloodReport floodReport)
+    {
+        return new FloodReportCreated(
+            floodReport.Id,
+            floodReport.Reference,
+            floodReport.CreatedUtc,
+            floodReport.Geom.X,
+            floodReport.Geom.Y,
+            floodReport.SourceRecords.Any(sr => sr.HasContacts),
+            floodReport.SourceRecords.SelectMany(sr => sr.ContactRecordTypes).Distinct().ToList()
+        );
+    }
+
+    public static FloodReportUpdated ToMessageUpdated(this FloodReport floodReport)
+    {
+        return new FloodReportUpdated(
+            floodReport.Id,
+            floodReport.Reference,
+            floodReport.UpdatedUtc ?? DateTimeOffset.UtcNow,
+            floodReport.RecordStatus,
+            floodReport.Geom.X,
+            floodReport.Geom.Y,
+            floodReport.SourceRecords.Any(sr => sr.HasInvestigation),
+            floodReport.SourceRecords.Any(s => s.HasContacts),
+            floodReport.SourceRecords.SelectMany(sr => sr.ContactRecordTypes).Distinct().ToList()
+        );
     }
 
     public static SearchResultFloodReport ToSearchResult(this FloodReport floodReport)
