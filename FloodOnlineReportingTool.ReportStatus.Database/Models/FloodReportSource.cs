@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using FloodOnlineReportingTool.Contracts.Shared;
+using NetTopologySuite.Geometries;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
@@ -27,10 +28,13 @@ public record FloodReportSource : ICreatedUpdated
     public bool IsUninhabitable { get; init; }
     public int? VulnerableCount { get; init; }
     public string? LocationDescription { get; init; }
+    public bool HasInvestigation { get; init; }
+    public bool HasContacts { get; init; }
+    public IReadOnlyCollection<ContactRecordType> ContactRecordTypes { get; init; } = [];
 
     // Navigation properties using wrapper models instead of contract types directly
     public Guid FloodReportId { get; init; }
     public FloodReport FloodReport { get; init; }
-    public ICollection<FloodReportSourceFloodCause> FloodCauses { get; init; } 
-    public ICollection<FloodReportSourceOrganisation> Organisations { get; init; }
+    public ICollection<FloodReportSourceFloodCause> FloodCauses { get; init; } = [];
+    public ICollection<FloodReportSourceOrganisation> Organisations { get; init; } = [];
 }

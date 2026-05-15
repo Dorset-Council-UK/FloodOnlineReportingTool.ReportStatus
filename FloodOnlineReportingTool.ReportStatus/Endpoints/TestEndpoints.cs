@@ -1,5 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Services;
 using Microsoft.AspNetCore.Http.HttpResults;

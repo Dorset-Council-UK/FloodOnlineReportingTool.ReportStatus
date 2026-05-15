@@ -1,5 +1,5 @@
-using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using NetTopologySuite.Geometries;
 
@@ -427,6 +427,7 @@ public static class FindPotentialDuplicatesData
             Reference = $"TEST-{reportId.ToString()[..8].ToUpperInvariant()}",
             RecordStatus = RecordStatusIds.New,
             RecordType = recordType,
+            Geom = new Point(easting ?? BaseEasting, northing ?? BaseNorthing) { SRID = 27700 },
             CreatedUtc = BaseImpactDate,
             SourceRecords = [source],
         };

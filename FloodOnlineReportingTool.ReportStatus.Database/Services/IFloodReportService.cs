@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
@@ -15,7 +16,7 @@ public interface IFloodReportService
     /// <summary>
     /// Creates a new flood report or returns updated duplicate rows using the API endpoint.
     /// </summary>
-    Task<List<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct);
+    Task<ICollection<FloodReport>?> CreateFloodReport(FloodReportSource dto, double buffer, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing flood report in the database.
