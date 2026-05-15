@@ -1,7 +1,5 @@
 using System.Reflection;
 using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.Contracts.Shared;
-using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.Contracts.Topics;
 using FloodOnlineReportingTool.ReportStatus.Settings;
 using MassTransit;
