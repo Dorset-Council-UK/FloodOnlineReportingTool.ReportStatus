@@ -18,7 +18,7 @@ internal static class MessageSystemExtensions
     {
         // Default subscription name; can be overridden via MessagingSettings.SubscriptionNameOverride
         // to support isolated environments such as per-developer or per-PR deployments.
-        const string defaultFloodReportSourceCreatedSubscription = "floodreport-reportstatus";
+        const string defaultFloodReportSourceCreatedSubscription = "fort-report-status";
 
         var floodReportSourceCreatedSubscription = messagingSettings.SubscriptionNameOverride is not null
             ? messagingSettings.SubscriptionNameOverride

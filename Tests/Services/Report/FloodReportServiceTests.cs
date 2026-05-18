@@ -20,10 +20,22 @@ public class FloodReportServiceTests
     // containing many unrelated records, so tests that return too many results will fail.
     private static FloodReportService CreateService()
     {
+        var (service, _) = CreateServiceWithPublishEndpoint(FindPotentialDuplicatesData.AllReports);
+        return service;
+    }
+
+    /// <summary>
+    /// Creates a <see cref="FloodReportService"/> with an exposed <see cref="IPublishEndpoint"/> mock,
+    /// allowing tests to verify that messages were published to the service bus.
+    /// </summary>
+    private static (FloodReportService Service, IPublishEndpoint PublishEndpoint) CreateServiceWithPublishEndpoint(
+        IEnumerable<FloodReport> seedReports)
+    {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>().Options;
         var logger = Substitute.For<ILogger<FloodReportService>>();
         var floodReportRepository = Substitute.For<IFloodReportRepository>();
         var floodReportSourceRepository = Substitute.For<IFloodReportSourceDuplicateRepository>();
+        var publishEndpoint = Substitute.For<IPublishEndpoint>();
         var context = Substitute.For<ApplicationDbContext>(options);
 
         var configuration = new ConfigurationBuilder()
@@ -35,10 +47,11 @@ public class FloodReportServiceTests
             })
             .Build();
 
-        var mockDbSet = FindPotentialDuplicatesData.AllReports.BuildMockDbSet();
+        var mockDbSet = seedReports.ToList().BuildMockDbSet();
         context.FloodReports.Returns(mockDbSet);
 
-        return new FloodReportService(logger, floodReportRepository, Substitute.For<IPublishEndpoint>(), configuration, floodReportSourceRepository, context);
+        var service = new FloodReportService(logger, floodReportRepository, publishEndpoint, configuration, floodReportSourceRepository, context);
+        return (service, publishEndpoint);
     }
 
     // --- Property (UPRN) ---
@@ -274,5 +287,24 @@ public class FloodReportServiceTests
     {
         var result = await CreateService().FindPotentialDuplicates(type, 0, incomingRecord, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(excludedId, result);
+    }
+
+    // --- FloodReportCreated publish ---
+
+    // Verifies that consuming a FloodReportSourceCreated message results in a FloodReportCreated
+    // message being published to the service bus when no duplicate report exists.
+    // NOTE: This test uses the real FloodReportService (not a mock) to exercise the full publish path.
+    // It does NOT connect to a real service bus — IPublishEndpoint is substituted via NSubstitute.
+    [Fact]
+    public async Task CreateFromFloodReportCreated_PublishesFloodReportCreated_WhenNoDuplicateExists()
+    {
+        // Arrange: empty DB so no duplicate is found, taking the "new report" branch
+        var (service, publishEndpoint) = CreateServiceWithPublishEndpoint([]);
+
+        // Act
+        await service.CreateFromFloodReportCreated(FloodReportSourceCreatedData.Property1, TestContext.Current.CancellationToken);
+
+        // Assert: a FloodReportCreated message was published to the service bus
+        await publishEndpoint.Received(1).Publish(Arg.Any<FloodReportCreated>(), Arg.Any<CancellationToken>());
     }
 }
