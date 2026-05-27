@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Authorization;
+using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Endpoints;
 using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 
@@ -127,7 +128,14 @@ internal static class EndpointExtensions
 
         // Get one
         group
-            .MapGet(pattern: "/{sourceId}", FloodReportSourceEndpoints.GetFloodReportSource)
+            .MapGet(pattern: "/{sourceReference}", FloodReportSourceEndpoints.GetFloodReportSourceByReference)
+            .WithSummary("Flood source for a flood report")
+            .WithDescription("Gets a flood source for a flood report")
+            .RequireAuthorization(PolicyNames.Reader);
+
+        // Get one
+        group
+            .MapGet(pattern: "/{sourceId:guid}", FloodReportSourceEndpoints.GetFloodReportSource)
             .WithSummary("Flood source for a flood report")
             .WithDescription("Gets a flood source for a flood report")
             .RequireAuthorization(PolicyNames.Reader);

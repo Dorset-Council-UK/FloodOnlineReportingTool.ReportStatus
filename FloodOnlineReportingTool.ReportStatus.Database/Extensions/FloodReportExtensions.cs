@@ -1,4 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.Contracts.Shared.Search;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
@@ -95,4 +96,19 @@ public static class FloodReportExtensions
     {
         return [.. floodReports.Select(fr => fr.ToSearchResult())];
     }
+    public static FloodReportWithSourceReferences ToWithSourceReferences(this FloodReport floodReport) =>
+        new()
+        {
+            Id = floodReport.Id,
+            Reference = floodReport.Reference,
+            RecordStatus = floodReport.RecordStatus,
+            RecordType = floodReport.RecordType,
+            CreatedUtc = floodReport.CreatedUtc,
+            UpdatedUtc = floodReport.UpdatedUtc,
+            Easting = floodReport.Easting,
+            Northing = floodReport.Northing,
+            Latitude = floodReport.Latitude,
+            Longitude = floodReport.Longitude,
+            SourceReferences = floodReport.SourceRecords.Select(s => s.Reference).ToList(),
+        };
 }

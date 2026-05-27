@@ -11,6 +11,11 @@ public interface IFloodReportSourceService
     Task<IReadOnlyCollection<FloodReportSource>> GetFloodReportSources(Guid floodReportId, CancellationToken ct);
 
     /// <summary>
+    /// Gets a flood report source by its reference from the database
+    /// </summary>
+    Task<FloodReportSource?> GetFloodReportSourceByReference(string sourceReference, CancellationToken ct);
+
+    /// <summary>
     /// Gets a flood report source by its ID from the database.
     /// </summary>
     Task<FloodReportSource?> GetFloodReportSource(Guid floodReportId, Guid sourceId, CancellationToken ct);

@@ -1,6 +1,7 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using Microsoft.Azure.Amqp.Framing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -18,6 +19,16 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
             .OrderBy(frs => frs.FloodReportId)
             .ThenBy(frs => frs.Id)
             .ToListAsync(ct);
+    }
+
+    public async Task<FloodReportSource?> GetFloodReportSourceByReference(string sourceReference, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving flood report source with reference from the database.");
+
+        return await context.FloodReportSources
+        .AsNoTracking()
+        .Where(frs => frs.Reference == sourceReference)
+        .FirstOrDefaultAsync(ct);
     }
 
     public async Task<FloodReportSource?> GetFloodReportSource(Guid floodReportId, Guid sourceId, CancellationToken ct)
