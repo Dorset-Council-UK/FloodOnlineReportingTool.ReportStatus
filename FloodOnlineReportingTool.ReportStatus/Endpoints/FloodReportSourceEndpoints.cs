@@ -1,8 +1,8 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Azure.Amqp.Framing;
 
+namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class FloodReportSourceEndpoints

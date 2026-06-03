@@ -1,7 +1,6 @@
-﻿using FloodOnlineReportingTool.Contracts.Shared.Models;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

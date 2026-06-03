@@ -1,6 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Authorization;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.ReportStatus.Authorization;
 using FloodOnlineReportingTool.ReportStatus.Endpoints;
+using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
