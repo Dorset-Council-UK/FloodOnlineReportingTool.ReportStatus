@@ -21,13 +21,13 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
             .ToListAsync(ct);
     }
 
-    public async Task<FloodReportSource?> GetFloodReportSourceByReference(string sourceReference, CancellationToken ct)
+    public async Task<FloodReportSource?> GetFloodReportSourceByReference(Guid floodReportId, string sourceReference, CancellationToken ct)
     {
         logger.LogDebug("Retrieving flood report source with reference from the database.");
 
         return await context.FloodReportSources
         .AsNoTracking()
-        .Where(frs => frs.Reference == sourceReference)
+        .Where(frs => frs.FloodReportId == floodReportId && frs.Reference == sourceReference)
         .FirstOrDefaultAsync(ct);
     }
 

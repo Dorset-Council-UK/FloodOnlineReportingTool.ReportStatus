@@ -13,7 +13,7 @@ public interface IFloodReportSourceService
     /// <summary>
     /// Gets a flood report source by its reference from the database
     /// </summary>
-    Task<FloodReportSource?> GetFloodReportSourceByReference(string sourceReference, CancellationToken ct);
+    Task<FloodReportSource?> GetFloodReportSourceByReference(Guid floodReportId, string sourceReference, CancellationToken ct);
 
     /// <summary>
     /// Gets a flood report source by its ID from the database.
