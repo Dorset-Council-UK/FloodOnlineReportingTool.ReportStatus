@@ -3,7 +3,6 @@ using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
-namespace FloodOnlineReportingTool.ReportStatus.Endpoints;
 
 internal static class FloodReportSourceEndpoints
 {

@@ -27,7 +27,7 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         return await context.FloodReportSources
         .AsNoTracking()
         .Where(frs => frs.FloodReportId == floodReportId && frs.Reference == sourceReference)
-        .FirstOrDefaultAsync(ct);
+        .SingleOrDefaultAsync(ct);
     }
 
     public async Task<FloodReportSource?> GetFloodReportSource(Guid floodReportId, Guid sourceId, CancellationToken ct)
