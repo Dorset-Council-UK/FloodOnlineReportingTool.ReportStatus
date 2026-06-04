@@ -1,4 +1,4 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -10,6 +10,12 @@ internal static class FloodReportSourceEndpoints
     {
         var floodReportSources = await floodReportSourceService.GetFloodReportSources(floodReportId, ct).ConfigureAwait(false);
         return TypedResults.Ok(floodReportSources);
+    }
+
+    internal static async Task<Results<Ok<FloodReportSource>, NotFound>> GetFloodReportSourceByReference(IFloodReportSourceService floodReportSourceService, Guid floodReportId, string sourceReference, CancellationToken ct)
+    {
+        var floodReportSource = await floodReportSourceService.GetFloodReportSourceByReference(floodReportId, sourceReference, ct).ConfigureAwait(false);
+        return floodReportSource == null ? TypedResults.NotFound() : TypedResults.Ok(floodReportSource);
     }
 
     internal static async Task<Results<Ok<FloodReportSource>, NotFound>> GetFloodReportSource(IFloodReportSourceService floodReportSourceService, Guid floodReportId, Guid sourceId, CancellationToken ct)

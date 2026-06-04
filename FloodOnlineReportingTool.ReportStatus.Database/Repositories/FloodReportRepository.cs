@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿using FloodOnlineReportingTool.Contracts.Shared;
+using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -20,7 +21,6 @@ public class FloodReportRepository(ApplicationDbContext context) : IFloodReportR
     {
         return context.FloodReports
             .AsNoTracking()
-            .IgnoreAutoIncludes()
             .Where(fr => fr.Reference.Equals(reference))
             .Include(fr => fr.SourceRecords.OrderBy(frs => frs.Id));
     }

@@ -1,4 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Contracts.Shared.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Settings;
@@ -51,7 +52,7 @@ internal static class FloodReportEndpoints
         return TypedResults.Ok(exists);
     }
 
-    internal static async Task<Results<Ok<FloodReport>, NotFound, ValidationProblem>> GetFloodReportByReference(
+    internal static async Task<Results<Ok<FloodReportWithSourceReferences>, NotFound, ValidationProblem>> GetFloodReportByReference(
         IFloodReportService floodReportService,
         string reference,
         FloodReferenceSearchType searchType,
@@ -71,7 +72,7 @@ internal static class FloodReportEndpoints
             _ => await floodReportService.GetFloodReportByReference(reference, ct).ConfigureAwait(false),
         };
 
-        return floodReport == null ? TypedResults.NotFound() : TypedResults.Ok(floodReport);
+        return floodReport == null ? TypedResults.NotFound() : TypedResults.Ok(floodReport.ToWithSourceReferences());
     }
 
     internal static async Task<Results<Ok<IReadOnlyCollection<FloodReport>>, BadRequest>> GetFloodReportsByUprn(IFloodReportService floodReportService, long uprn, CancellationToken ct)

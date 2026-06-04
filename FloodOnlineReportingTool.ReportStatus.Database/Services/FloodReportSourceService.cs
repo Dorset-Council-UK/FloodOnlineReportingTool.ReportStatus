@@ -1,4 +1,4 @@
-﻿using FloodOnlineReportingTool.Contracts.Shared.Models;
+using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +18,16 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
             .OrderBy(frs => frs.FloodReportId)
             .ThenBy(frs => frs.Id)
             .ToListAsync(ct);
+    }
+
+    public async Task<FloodReportSource?> GetFloodReportSourceByReference(Guid floodReportId, string sourceReference, CancellationToken ct)
+    {
+        logger.LogDebug("Retrieving flood report source with reference from the database.");
+
+        return await context.FloodReportSources
+        .AsNoTracking()
+        .Where(frs => frs.FloodReportId == floodReportId && frs.Reference == sourceReference)
+        .SingleOrDefaultAsync(ct);
     }
 
     public async Task<FloodReportSource?> GetFloodReportSource(Guid floodReportId, Guid sourceId, CancellationToken ct)
