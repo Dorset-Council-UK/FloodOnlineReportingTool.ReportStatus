@@ -3,26 +3,28 @@ using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class FloodReportService(
     ILogger<FloodReportService> logger, 
     IFloodReportRepository floodReportRepository,
-    IPublishEndpoint publishEndpoint,
     IConfiguration configuration,
     IFloodReportSourceDuplicateRepository floodReportSourceRepository,
     ApplicationDbContext context
     ) : IFloodReportService
 {
+    private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
+
     int MaxBuffer = configuration.GetValue<int>("ReportStatus:LocationBufferMetres");
     int GroundwaterCapDays = configuration.GetValue<int>("ReportStatus:GroundwaterCapDays");
     int FloodingCapDays = configuration.GetValue<int>("ReportStatus:FloodingCapDays");
@@ -133,7 +135,13 @@ public class FloodReportService(
             generatedOrUpdatedReports.Add(generatedReport);
             
             var floodReportCreatedMessage = generatedReport.ToMessageCreated();
-            await publishEndpoint.Publish(floodReportCreatedMessage, ct);
+            OutboxMessage outboxMessage = new()
+            {
+                MessageType = nameof(FloodReportCreated),
+                Message = JsonSerializer.Serialize(floodReportCreatedMessage, _jsonOptions),
+                Status = MessageStatus.Pending,
+            };
+            context.OutboxMessages.Add(outboxMessage);
             await context.SaveChangesAsync(ct);
         }
         else
@@ -233,7 +241,13 @@ public class FloodReportService(
             foreach (var updatedReport in generatedOrUpdatedReports)
             {
                 var floodReportUpdatedMessage = updatedReport.ToMessageUpdated();
-                await publishEndpoint.Publish(floodReportUpdatedMessage, ct);
+                OutboxMessage outboxMessage = new()
+                {
+                    MessageType = nameof(FloodReportUpdated),
+                    Message = JsonSerializer.Serialize(floodReportUpdatedMessage, _jsonOptions),
+                    Status = MessageStatus.Pending,
+                };
+                context.OutboxMessages.Add(outboxMessage);
             }
 
             // Persist MassTransit EF/Bus outbox records created by Publish calls.

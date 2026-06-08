@@ -1,7 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Settings;
-using MassTransit;
 using Microsoft.Extensions.Options;
 
 namespace FloodOnlineReportingTool.ReportStatus.Consumers;

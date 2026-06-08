@@ -14,7 +14,7 @@ builder.Services.AddReportStatusHealthChecks(messagingSettings);
 builder.Services.AddReportStatusVersioning();
 builder.Services.AddReportStatusOpenApi(identityOptions);
 builder.AddReportStatusDatabase();
-builder.Services.AddMessageSystem(messagingSettings);
+//builder.Services.AddMessageSystem(messagingSettings);
 builder.AddGovNotify();
 
 // Add services to DI

@@ -3,9 +3,9 @@ using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -21,22 +21,21 @@ public class FloodReportServiceTests
     // containing many unrelated records, so tests that return too many results will fail.
     private static FloodReportService CreateService()
     {
-        var (service, _) = CreateServiceWithPublishEndpoint(FindPotentialDuplicatesData.AllReports);
+        var (service, _) = CreateServiceWithContext(FindPotentialDuplicatesData.AllReports);
         return service;
     }
 
     /// <summary>
-    /// Creates a <see cref="FloodReportService"/> with an exposed <see cref="IPublishEndpoint"/> mock,
-    /// allowing tests to verify that messages were published to the service bus.
+    /// Creates a <see cref="FloodReportService"/> with an exposed <see cref="ApplicationDbContext"/> mock,
+    /// allowing tests to verify that outbox messages were written to the database.
     /// </summary>
-    private static (FloodReportService Service, IPublishEndpoint PublishEndpoint) CreateServiceWithPublishEndpoint(
+    private static (FloodReportService Service, ApplicationDbContext Context) CreateServiceWithContext(
         IEnumerable<FloodReport> seedReports)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>().Options;
         var logger = Substitute.For<ILogger<FloodReportService>>();
         var floodReportRepository = Substitute.For<IFloodReportRepository>();
         var floodReportSourceRepository = Substitute.For<IFloodReportSourceDuplicateRepository>();
-        var publishEndpoint = Substitute.For<IPublishEndpoint>();
         var context = Substitute.For<ApplicationDbContext>(options);
 
         var configuration = new ConfigurationBuilder()
@@ -51,8 +50,11 @@ public class FloodReportServiceTests
         var mockDbSet = seedReports.ToList().BuildMockDbSet();
         context.FloodReports.Returns(mockDbSet);
 
-        var service = new FloodReportService(logger, floodReportRepository, publishEndpoint, configuration, floodReportSourceRepository, context);
-        return (service, publishEndpoint);
+        var mockOutboxDbSet = new List<OutboxMessage>().BuildMockDbSet();
+        context.OutboxMessages.Returns(mockOutboxDbSet);
+
+        var service = new FloodReportService(logger, floodReportRepository, configuration, floodReportSourceRepository, context);
+        return (service, context);
     }
 
     // --- Property (UPRN) ---
@@ -290,22 +292,25 @@ public class FloodReportServiceTests
         Assert.DoesNotContain(excludedId, result);
     }
 
-    // --- FloodReportCreated publish ---
+    // --- FloodReportCreated outbox message ---
 
-    // Verifies that consuming a FloodReportSourceCreated message results in a FloodReportCreated
-    // message being published to the service bus when no duplicate report exists.
-    // NOTE: This test uses the real FloodReportService (not a mock) to exercise the full publish path.
-    // It does NOT connect to a real service bus — IPublishEndpoint is substituted via NSubstitute.
+    // Verifies that consuming a FloodReportSourceCreated message results in an OutboxMessage
+    // being written to the database when no duplicate report exists.
+    // The Outbox worker then picks this up and delivers it to the service bus.
+    // NOTE: This test uses the real FloodReportService (not a mock) to exercise the full outbox path.
+    // It does NOT connect to a real database — ApplicationDbContext is substituted via NSubstitute.
     [Fact]
-    public async Task CreateFromFloodReportCreated_PublishesFloodReportCreated_WhenNoDuplicateExists()
+    public async Task CreateFromFloodReportCreated_AddsOutboxMessage_WhenNoDuplicateExists()
     {
         // Arrange: empty DB so no duplicate is found, taking the "new report" branch
-        var (service, publishEndpoint) = CreateServiceWithPublishEndpoint([]);
+        var (service, context) = CreateServiceWithContext([]);
 
         // Act
         await service.CreateFromFloodReportCreated(FloodReportSourceCreatedData.Property1, TestContext.Current.CancellationToken);
 
-        // Assert: a FloodReportCreated message was published to the service bus
-        await publishEndpoint.Received(1).Publish(Arg.Any<FloodReportCreated>(), Arg.Any<CancellationToken>());
+        // Assert: an OutboxMessage for FloodReportCreated was written to the database
+        context.OutboxMessages.Received(1).Add(Arg.Is<OutboxMessage>(m =>
+            m.MessageType == nameof(FloodReportCreated) &&
+            m.Status == MessageStatus.Pending));
     }
 }

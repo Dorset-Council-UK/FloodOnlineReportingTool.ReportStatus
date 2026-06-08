@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Dorset-Council-UK.FloodOnlineReportingTool.Contracts" Version="6.0.3-beta" />
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="9.1.0" />
-    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="9.1.0" />
     <PackageReference Include="Meziantou.Analyzer" Version="3.0.47">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
