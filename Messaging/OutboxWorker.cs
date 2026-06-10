@@ -11,8 +11,8 @@ namespace Outbox;
 
 #pragma warning disable MA0051 // Method is too long
 
-public sealed class Worker(
-    ILogger<Worker> logger,
+public sealed class OutboxWorker(
+    ILogger<OutboxWorker> logger,
     IConfiguration configuration,
     IServiceProvider serviceProvider,
     IHostEnvironment hostEnvironment,

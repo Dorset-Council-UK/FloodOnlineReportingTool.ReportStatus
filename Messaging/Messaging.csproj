@@ -4,20 +4,24 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>457393aa-2372-4469-bb87-5bd38202cf26</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Aspire.Azure.Messaging.ServiceBus" Version="*" />
-	<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
+	<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
 	<PackageReference Include="Meziantou.Analyzer" Version="3.0.47">
 		<PrivateAssets>all</PrivateAssets>
 		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
+	<PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.0" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus.Database\FloodOnlineReportingTool.ReportStatus.Database.csproj" />
+    <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus\FloodOnlineReportingTool.ReportStatus.csproj" />
     <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 

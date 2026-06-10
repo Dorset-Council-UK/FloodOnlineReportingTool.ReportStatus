@@ -35,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus.Database\FloodOnlineReportingTool.ReportStatus.Database.csproj" />
     <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus\FloodOnlineReportingTool.ReportStatus.csproj" />
+    <ProjectReference Include="..\Messaging\Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

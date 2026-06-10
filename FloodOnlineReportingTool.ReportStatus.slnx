@@ -7,7 +7,7 @@
   </Project>
   <Project Path="FloodOnlineReportingTool.ReportStatus.Database/FloodOnlineReportingTool.ReportStatus.Database.csproj" />
   <Project Path="FloodOnlineReportingTool.ReportStatus/FloodOnlineReportingTool.ReportStatus.csproj" />
-  <Project Path="Outbox/Outbox.csproj" Id="fc775677-4b61-4cf0-add0-4b4d32d34988" />
+  <Project Path="Messaging/Messaging.csproj" Id="fc775677-4b61-4cf0-add0-4b4d32d34988" />
   <Project Path="ServiceDefaults/ServiceDefaults.csproj" Id="8896e9d9-4e09-4494-bce0-c4ec401c54f5" />
   <Project Path="Tests/Tests.csproj" />
 </Solution>

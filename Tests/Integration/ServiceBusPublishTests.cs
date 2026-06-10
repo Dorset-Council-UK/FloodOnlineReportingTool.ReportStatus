@@ -1,9 +1,10 @@
 using System.Reflection;
+using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Topics;
 using FloodOnlineReportingTool.ReportStatus.Settings;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
+using System.Net.Mime;
 using Tests.Data;
 
 namespace Tests.Integration;
@@ -15,11 +16,9 @@ namespace Tests.Integration;
 ///
 /// They are skipped by default.
 /// Set "Messaging:RunServiceBusTests" to "true" to run them.
-///
 /// </summary>
 public class ServiceBusPublishTests
 {
-    // Read once from user secrets — if not set to true, all tests in this class are skipped.
     private static readonly (string? SkipReason, string? ConnectionString) _settings = ReadSettings();
 
     private static (string? SkipReason, string? ConnectionString) ReadSettings()
@@ -40,27 +39,27 @@ public class ServiceBusPublishTests
             return ($"No connection string found in user secrets under '{MessagingSettings.SectionName}:{nameof(MessagingSettings.ConnectionString)}'.", null);
         }
 
+        if (!connectionString.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase))
+        {
+            return ("Service Bus integration tests currently require a full Service Bus connection string (with Endpoint=).", null);
+        }
+
         return (null, connectionString);
     }
 
-    private static IBusControl BuildBus(string connectionString)
+    private static async Task PublishToTopicAsync<T>(T payload, string topicName, CancellationToken cancellationToken)
     {
-        return Bus.Factory.CreateUsingAzureServiceBus(cfg =>
-        {
-            if (connectionString.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase))
-            {
-                cfg.Host(connectionString);
-            }
-            else
-            {
-                // Managed Identity / namespace URI
-                cfg.Host(new Uri(connectionString));
-            }
+        await using var client = new ServiceBusClient(_settings.ConnectionString!);
+        await using var sender = client.CreateSender(topicName);
 
-            cfg.Message<FloodReportSourceCreated>(m => m.SetEntityName(TopicNames.FloodReportSourceCreated));
-            cfg.Message<FloodReportCreated>(m => m.SetEntityName(TopicNames.FloodReportCreated));
-            cfg.Message<FloodReportUpdated>(m => m.SetEntityName(TopicNames.FloodReportUpdated));
-        });
+        var message = new ServiceBusMessage(BinaryData.FromObjectAsJson(payload))
+        {
+            ContentType = MediaTypeNames.Application.Json,
+            Subject = typeof(T).Name,
+            MessageId = Guid.CreateVersion7().ToString(),
+        };
+
+        await sender.SendMessageAsync(message, cancellationToken);
     }
 
     /// <summary>
@@ -71,23 +70,16 @@ public class ServiceBusPublishTests
     [Fact]
     public async Task Publish_FloodReportSourceCreated_ToRealServiceBus()
     {
-        var (skipReason, connectionString) = _settings;
+        var (skipReason, _) = _settings;
         if (skipReason is not null)
         {
             Assert.Skip(skipReason);
         }
 
-        var bus = BuildBus(connectionString!);
-        await bus.StartAsync(TestContext.Current.CancellationToken);
-
-        try
-        {
-            await bus.Publish(FloodReportSourceCreatedData.Property1, TestContext.Current.CancellationToken);
-        }
-        finally
-        {
-            await bus.StopAsync(TestContext.Current.CancellationToken);
-        }
+        await PublishToTopicAsync(
+            FloodReportSourceCreatedData.Property1,
+            TopicNames.FloodReportSourceCreated,
+            TestContext.Current.CancellationToken);
     }
 
     /// <summary>
@@ -98,7 +90,7 @@ public class ServiceBusPublishTests
     [Fact]
     public async Task Publish_FloodReportCreated_ToRealServiceBus()
     {
-        var (skipReason, connectionString) = _settings;
+        var (skipReason, _) = _settings;
         if (skipReason is not null)
         {
             Assert.Skip(skipReason);
@@ -111,19 +103,11 @@ public class ServiceBusPublishTests
             Easting: 368991.12,
             Northing: 90881.94,
             HasContacts: false,
-            ContactRecordTypes: []
-        );
+            ContactRecordTypes: []);
 
-        var bus = BuildBus(connectionString!);
-        await bus.StartAsync(TestContext.Current.CancellationToken);
-
-        try
-        {
-            await bus.Publish(message, TestContext.Current.CancellationToken);
-        }
-        finally
-        {
-            await bus.StopAsync(TestContext.Current.CancellationToken);
-        }
+        await PublishToTopicAsync(
+            message,
+            TopicNames.FloodReportCreated,
+            TestContext.Current.CancellationToken);
     }
 }
