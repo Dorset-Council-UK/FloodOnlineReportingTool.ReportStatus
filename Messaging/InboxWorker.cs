@@ -2,8 +2,8 @@
 using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Topics;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace Inbox;
 
@@ -16,6 +16,7 @@ public sealed class InboxWorker(
 {
     public const string ActivitySourceName = "InboxWorker";
     private static readonly ActivitySource _activitySource = new(ActivitySourceName);
+    private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -61,15 +62,14 @@ public sealed class InboxWorker(
 
         try
         {
-            var message = args.Message.Body.ToObjectFromJson<FloodReportSourceCreated>()
-                        ?? throw new InvalidOperationException($"Failed to deserialize message {args.Message.MessageId} as {nameof(FloodReportSourceCreated)}.");
-            if (message.ViewUri == null) {
+            var message = JsonSerializer.Deserialize<FloodReportSourceCreated>(args.Message.Body, _jsonOptions);
+            if (message is null) {
                 logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
                 return;
             }
             await using var scope = serviceProvider.CreateAsyncScope();
             var floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
-            await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken).ConfigureAwait(false);
+            await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
 
             await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
