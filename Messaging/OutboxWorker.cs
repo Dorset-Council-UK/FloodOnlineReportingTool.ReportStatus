@@ -124,8 +124,8 @@ public sealed class OutboxWorker(
     {
         var topicName = messageType switch
         {
-            nameof(FloodReportSourceCreated) => TopicNames.FloodReportSourceCreated,
-            nameof(FloodReportSourceUpdated) => TopicNames.FloodReportSourceUpdated,
+            nameof(FloodReportCreated) => TopicNames.FloodReportCreated,
+            nameof(FloodReportUpdated) => TopicNames.FloodReportUpdated,
             _ => throw new NotSupportedException($"Message type {messageType} is not supported."),
         };
 

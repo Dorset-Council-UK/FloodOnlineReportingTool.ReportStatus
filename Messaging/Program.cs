@@ -17,6 +17,8 @@ builder.Services
     .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
     .AddScoped<IFloodReportService, FloodReportService>();
 
+
+
 // add database
 string? connectionString = builder.Configuration.GetConnectionString(ConnectionStringNames.ReportStatus);
 if (string.IsNullOrWhiteSpace(connectionString))

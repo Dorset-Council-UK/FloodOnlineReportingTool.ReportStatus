@@ -75,11 +75,18 @@ public sealed class InboxWorker(
 
             logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
         }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
+            // TODO what do we want to do here?
+            // Consider whether to abandon or dead-letter the message here depending on the retry strategy
+            //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
             // Consider whether to abandon or dead-letter the message here depending on the exception type and retry strategy
-             //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
+            //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
         }
         
     }
