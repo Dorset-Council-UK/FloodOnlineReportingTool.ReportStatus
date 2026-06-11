@@ -55,6 +55,10 @@ To run this project with minimal modification, you will need the following:
    ```shell
    dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
+   or if using the Package Manager Console in Visual Studio, run:
+   ```shell
+   Add-Migration MigrationName -Context ApplicationDbContext -StartupProject FloodOnlineReportingTool.ReportStatus
+   ```
 
 ## Database Setup
 
