@@ -101,7 +101,7 @@ public sealed class InboxWorker(
     /// <summary>
     /// Retrieves the topic name for the specified message type.
     /// </summary>
-    /// <remarks>Optional suffix can be set via configuration (Inbox:TopicSuffix) and will be appended to the topic name. Useful for testing.</remarks>
+    /// <remarks>Optional suffix can be set via configuration (Messaging:TopicSuffix) and will be appended to the topic name. Useful for testing.</remarks>
     /// <exception cref="NotSupportedException">Thrown if the message type is not supported.</exception>
     private string GetTopicName(string messageType)
     {
@@ -111,7 +111,7 @@ public sealed class InboxWorker(
             _ => throw new NotSupportedException($"Message type '{messageType}' is not supported."),
         };
 
-        string? suffix = configuration["Inbox:TopicSuffix"];
+        string? suffix = configuration["Messaging:TopicSuffix"];
         return string.IsNullOrWhiteSpace(suffix) ? topicName : $"{topicName}{suffix}";
     }
 }

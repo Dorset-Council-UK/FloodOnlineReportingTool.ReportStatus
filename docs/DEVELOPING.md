@@ -80,7 +80,7 @@ The project requires a `ConnectionStrings` section in your user secrets. And a c
 You must set up user secrets for development. Run the following command in the terminal within the project folder:
 - Using Visual Studio:
 
-  Right click the project and select "Manage User Secrets".
+  Right click the ReportStatus and Messaging projects and select "Manage User Secrets".
 - Using .NET CLI:
   ```shell
   dotnet user-secrets init
@@ -94,7 +94,7 @@ Example secrets file:
 ```json
 {
   "ConnectionStrings": {
-    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus"
+    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public"
   },
   "Messaging": {
     "Enabled": "true",
@@ -112,6 +112,18 @@ Example secrets file:
       "Vulnerable": "YourTemplateId"
     }
   }
+}
+```
+
+Example Messaging project secrets file:
+```json
+{
+  "ConnectionStrings": {
+  "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public",
+    "service-bus": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
+  },
+  "Messaging:TopicSuffix": "-name",
+  "Inbox:SubscriptionName": "subscription-name"
 }
 ```
 
