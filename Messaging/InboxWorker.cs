@@ -10,7 +10,7 @@ namespace Messaging;
 public sealed class InboxWorker(
     ILogger<InboxWorker> logger,
     IConfiguration configuration,
-    IFloodReportService floodReportService,
+    IServiceScopeFactory scopeFactory,
     ServiceBusClient serviceBusClient
 ) : BackgroundService
 {
@@ -20,26 +20,29 @@ public sealed class InboxWorker(
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Inbox worker started...");
-
-        string topicName = GetTopicName(nameof(FloodReportSourceCreated));
         string subscriptionName = configuration["Inbox:SubscriptionName"]
             ?? throw new InvalidOperationException("Missing configuration setting: 'Inbox:SubscriptionName' is required.");
 
-        ServiceBusProcessorOptions options = new()
+        string? suffix = configuration["Messaging:TopicSuffix"];
+        string topicName = string.IsNullOrWhiteSpace(suffix) ? TopicNames.FloodReportSourceCreated : $"{TopicNames.FloodReportSourceCreated}{suffix}";
+
+        logger.LogInformation("Service bus processor starting...");
+
+        await using var processor = serviceBusClient.CreateProcessor(topicName, subscriptionName, options: new ServiceBusProcessorOptions
         {
             AutoCompleteMessages = false,
-            MaxConcurrentCalls = 2
-        };
+            MaxConcurrentCalls = 2,
+        });
 
-        await using ServiceBusProcessor processor = serviceBusClient.CreateProcessor(topicName, subscriptionName, options);
         processor.ProcessMessageAsync += HandleMessageAsync;
         processor.ProcessErrorAsync += HandleErrorAsync;
 
         await processor.StartProcessingAsync(cancellationToken);
+        logger.LogInformation("Service bus processor started");
 
         try
         {
+            // This is not an infinite loop. Wait until cancelled. Low CPU usage while waiting.
             await Task.Delay(Timeout.Infinite, cancellationToken);
         }
         catch (OperationCanceledException)
@@ -49,9 +52,16 @@ public sealed class InboxWorker(
         finally
         {
             await processor.StopProcessingAsync(CancellationToken.None);
+
+            // Detach event handlers to prevent them from being called after disposal
             processor.ProcessMessageAsync -= HandleMessageAsync;
             processor.ProcessErrorAsync -= HandleErrorAsync;
+
+            // Dispose of the processor
+            await processor.DisposeAsync();
         }
+
+        logger.LogInformation("Service bus processor stopped");
     }
 
     private async Task HandleMessageAsync(ProcessMessageEventArgs args)
@@ -67,6 +77,10 @@ public sealed class InboxWorker(
                 logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
                 return;
             }
+
+            // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
+            await using var scope = scopeFactory.CreateAsyncScope();
+            IFloodReportService floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
             await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
 
             await args.CompleteMessageAsync(args.Message, args.CancellationToken);
@@ -86,30 +100,12 @@ public sealed class InboxWorker(
             // Consider whether to abandon or dead-letter the message here depending on the exception type and retry strategy
             //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
         }
-        
     }
 
     private Task HandleErrorAsync(ProcessErrorEventArgs args)
     {
-        logger.LogError(args.Exception, "Inbox worker error on {EntityPath}: {ErrorSource}", args.EntityPath, args.ErrorSource);
+        logger.LogError(args.Exception, "Inbox worker error on Entity path: {EntityPath} Source: {ErrorSource}", args.EntityPath, args.ErrorSource);
         // Should this be dead lettering?
         return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Retrieves the topic name for the specified message type.
-    /// </summary>
-    /// <remarks>Optional suffix can be set via configuration (Messaging:TopicSuffix) and will be appended to the topic name. Useful for testing.</remarks>
-    /// <exception cref="NotSupportedException">Thrown if the message type is not supported.</exception>
-    private string GetTopicName(string messageType)
-    {
-        var topicName = messageType switch
-        {
-            nameof(FloodReportSourceCreated) => TopicNames.FloodReportSourceCreated,
-            _ => throw new NotSupportedException($"Message type '{messageType}' is not supported."),
-        };
-
-        string? suffix = configuration["Messaging:TopicSuffix"];
-        return string.IsNullOrWhiteSpace(suffix) ? topicName : $"{topicName}{suffix}";
     }
 }
