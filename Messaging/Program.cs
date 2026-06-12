@@ -1,12 +1,9 @@
 ﻿using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
-using Inbox;
+using Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
-using Outbox;
-using ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 

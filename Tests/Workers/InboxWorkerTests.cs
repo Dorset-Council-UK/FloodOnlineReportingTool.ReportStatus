@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using Inbox;
+using Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

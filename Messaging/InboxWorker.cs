@@ -5,7 +5,7 @@ using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace Inbox;
+namespace Messaging;
 
 public sealed class InboxWorker(
     ILogger<InboxWorker> logger,

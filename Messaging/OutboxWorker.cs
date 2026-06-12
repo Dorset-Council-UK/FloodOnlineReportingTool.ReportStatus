@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Net.Mime;
 
-namespace Outbox;
+namespace Messaging;
 
 #pragma warning disable MA0051 // Method is too long
 
