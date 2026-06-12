@@ -20,17 +20,18 @@ builder.Services
 
 
 // add database
-string? connectionString = builder.Configuration.GetConnectionString(ConnectionStringNames.ReportStatus);
-if (string.IsNullOrWhiteSpace(connectionString))
+string? databaseConnectionString = builder.Configuration.GetConnectionString("FloodReportingReportStatus");
+if (string.IsNullOrWhiteSpace(databaseConnectionString))
 {
-    throw new Exception($"Missing configuration setting: The database connection string '{ConnectionStringNames.ReportStatus}' is missing.");
+    throw new InvalidOperationException("Missing configuration setting: The database connection string 'FloodReportingReportStatus' is missing.");
 }
-builder.Services.AddDbContextPool<ApplicationDbContext>(options => options.UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.UseNetTopologySuite()));
+builder.Services.AddDbContextPool<ApplicationDbContext>(options => options.UseNpgsql(databaseConnectionString, npgsqlOptions => npgsqlOptions.UseNetTopologySuite()));
 
 // add service bus
-if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString(ConnectionStringNames.ServiceBus)))
+string? serviceBusConnectionString = builder.Configuration.GetConnectionString("service-bus");
+if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
 {
-    throw new Exception($"Missing configuration setting: The service bus connection string '{ConnectionStringNames.ServiceBus}' is missing.");
+    throw new InvalidOperationException("Missing configuration setting: The service bus connection string 'service-bus' is missing.");
 }
 string? serviceBusConnectionString = builder.Configuration.GetConnectionString(ConnectionStringNames.ServiceBus);
 builder.Services.AddAzureClients(clientBuilder =>
@@ -42,4 +43,5 @@ builder.Services.AddAzureClients(clientBuilder =>
             options.TransportType = ServiceBusTransportType.AmqpWebSockets;
         });
 });
+
 await builder.Build().RunAsync();
