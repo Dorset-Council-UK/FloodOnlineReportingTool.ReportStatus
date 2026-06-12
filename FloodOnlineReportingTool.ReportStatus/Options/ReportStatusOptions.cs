@@ -1,6 +1,6 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Settings;
+﻿namespace FloodOnlineReportingTool.ReportStatus.Options;
 
-public class ReportStatusSettings
+public class ReportStatusOptions
 {
     public const string SectionName = "ReportStatus";
 

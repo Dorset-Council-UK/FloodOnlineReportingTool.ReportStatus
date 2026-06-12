@@ -11,7 +11,6 @@ public sealed class InboxWorker(
     ILogger<InboxWorker> logger,
     IConfiguration configuration,
     IFloodReportService floodReportService,
-    IServiceProvider serviceProvider,
     ServiceBusClient serviceBusClient
 ) : BackgroundService
 {

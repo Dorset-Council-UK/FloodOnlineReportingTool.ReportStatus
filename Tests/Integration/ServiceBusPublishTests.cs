@@ -2,7 +2,6 @@ using System.Reflection;
 using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Topics;
-using FloodOnlineReportingTool.ReportStatus.Settings;
 using Microsoft.Extensions.Configuration;
 using System.Net.Mime;
 using Tests.Data;
@@ -27,16 +26,10 @@ public class ServiceBusPublishTests
             .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
 
-        var enabled = config[$"{MessagingSettings.SectionName}:RunServiceBusTests"];
-        if (!string.Equals(enabled, "true", StringComparison.OrdinalIgnoreCase))
-        {
-            return ("Set Messaging:RunServiceBusTests=true in user secrets to run real service bus integration tests.", null);
-        }
-
-        var connectionString = config[$"{MessagingSettings.SectionName}:{nameof(MessagingSettings.ConnectionString)}"];
+        string? connectionString = config.GetConnectionString("service-bus");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return ($"No connection string found in user secrets under '{MessagingSettings.SectionName}:{nameof(MessagingSettings.ConnectionString)}'.", null);
+            return ("No connection string named 'service-bus'.", null);
         }
 
         if (!connectionString.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase))
