@@ -10,6 +10,7 @@ namespace Messaging;
 public sealed class InboxWorker(
     ILogger<InboxWorker> logger,
     IConfiguration configuration,
+    IFloodReportService floodReportService,
     IServiceProvider serviceProvider,
     ServiceBusClient serviceBusClient
 ) : BackgroundService
@@ -67,8 +68,6 @@ public sealed class InboxWorker(
                 logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
                 return;
             }
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
             await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
 
             await args.CompleteMessageAsync(args.Message, args.CancellationToken);

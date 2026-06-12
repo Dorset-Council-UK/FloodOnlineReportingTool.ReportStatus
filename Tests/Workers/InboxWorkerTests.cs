@@ -1,5 +1,5 @@
 using Azure.Messaging.ServiceBus;
-using Inbox;
+using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,10 +15,11 @@ public class InboxWorkerTests
     {
         var logger = Substitute.For<ILogger<InboxWorker>>();
         var configuration = new ConfigurationBuilder().AddInMemoryCollection([]).Build();
+        var floodReportService = Substitute.For<IFloodReportService>();
         var serviceProvider = Substitute.For<IServiceProvider>();
         await using var serviceBusClient = new ServiceBusClient("Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
 
-        var worker = new InboxWorker(logger, configuration, serviceProvider, serviceBusClient);
+        var worker = new InboxWorker(logger, configuration, floodReportService, serviceProvider, serviceBusClient);
         var executeAsyncMethod = typeof(InboxWorker).GetMethod("ExecuteAsync", BindingFlags.Instance | BindingFlags.NonPublic);
         ArgumentNullException.ThrowIfNull(executeAsyncMethod);
 

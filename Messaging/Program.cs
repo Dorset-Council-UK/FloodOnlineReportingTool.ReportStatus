@@ -7,14 +7,13 @@ using Microsoft.Extensions.Azure;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services
+    .AddScoped<IFloodReportRepository, FloodReportRepository>();
+//.AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
+//.AddScoped<IFloodReportService, FloodReportService>();
+
 builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHostedService<InboxWorker>();
-builder.Services
-    .AddScoped<IFloodReportRepository, FloodReportRepository>()
-    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
-    .AddScoped<IFloodReportService, FloodReportService>();
-
-
 
 // add database
 string? databaseConnectionString = builder.Configuration.GetConnectionString("FloodReportingReportStatus");
@@ -30,7 +29,6 @@ if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
 {
     throw new InvalidOperationException("Missing configuration setting: The service bus connection string 'service-bus' is missing.");
 }
-string? serviceBusConnectionString = builder.Configuration.GetConnectionString(ConnectionStringNames.ServiceBus);
 builder.Services.AddAzureClients(clientBuilder =>
 {
     clientBuilder
