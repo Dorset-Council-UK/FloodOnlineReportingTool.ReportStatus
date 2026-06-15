@@ -93,12 +93,13 @@ public sealed class InboxWorker(
             // TODO what do we want to do here?
             // Consider whether to abandon or dead-letter the message here depending on the retry strategy
             //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
+            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
-            // Consider whether to abandon or dead-letter the message here depending on the exception type and retry strategy
-            //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
+            // Dead-letter the message here
+            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
     }
 
