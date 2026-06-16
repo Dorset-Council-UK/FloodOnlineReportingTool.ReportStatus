@@ -57,7 +57,7 @@ To run this project with minimal modification, you will need the following:
    ```
    or if using the Package Manager Console in Visual Studio, run:
    ```shell
-   Add-Migration MigrationName -Context ApplicationDbContext -StartupProject FloodOnlineReportingTool.ReportStatus
+   Update-Database -Context ApplicationDbContext -StartupProject FloodOnlineReportingTool.ReportStatus
    ```
 
 ## Database Setup

@@ -57,9 +57,7 @@ public sealed class InboxWorker(
             processor.ProcessMessageAsync -= HandleMessageAsync;
             processor.ProcessErrorAsync -= HandleErrorAsync;
 
-            // Dispose of the processor
-            await processor.DisposeAsync();
-        }
+            // Processor is disposed by the 'await using' declaration above.
 
         logger.LogInformation("Service bus processor stopped");
     }
@@ -73,8 +71,10 @@ public sealed class InboxWorker(
         try
         {
             var message = JsonSerializer.Deserialize<FloodReportSourceCreated>(args.Message.Body, _jsonOptions);
-            if (message is null) {
+            if (message is null)
+            {
                 logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
+                await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
                 return;
             }
 

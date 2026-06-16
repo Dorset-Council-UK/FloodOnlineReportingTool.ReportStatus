@@ -14,7 +14,7 @@ namespace Tests.Integration;
 /// smoke tests to verify topic/subscription topology after infrastructure changes.
 ///
 /// They are skipped by default.
-/// Set "Messaging:RunServiceBusTests" to "true" to run them.
+/// Add a connection string named "service-bus" in user secrets to run them.
 /// </summary>
 public class ServiceBusPublishTests
 {

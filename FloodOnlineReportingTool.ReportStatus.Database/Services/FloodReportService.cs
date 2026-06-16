@@ -250,7 +250,7 @@ public class FloodReportService(
                 context.OutboxMessages.Add(outboxMessage);
             }
 
-            // Persist MassTransit EF/Bus outbox records created by Publish calls.
+            // Persist outbox records created above.
             await context.SaveChangesAsync(ct);
         }
 
