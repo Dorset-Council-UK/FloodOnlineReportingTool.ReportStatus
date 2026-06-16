@@ -56,8 +56,7 @@ public sealed class InboxWorker(
             // Detach event handlers to prevent them from being called after disposal
             processor.ProcessMessageAsync -= HandleMessageAsync;
             processor.ProcessErrorAsync -= HandleErrorAsync;
-
-            // Processor is disposed by the 'await using' declaration above.
+        }
 
         logger.LogInformation("Service bus processor stopped");
     }
@@ -90,9 +89,9 @@ public sealed class InboxWorker(
         catch (JsonException ex)
         {
             logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
-            // TODO what do we want to do here?
-            // Consider whether to abandon or dead-letter the message here depending on the retry strategy
-            //await args.AbandonMessageAsync(args.Message, cancellationToken: args.CancellationToken);
+            // Decided to just dead-letter but we may want to consider doing additional steps here. 
+            // Could indicate a bad integration from a third party or something similar so we might want to 
+            // notify a user. 
             await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
         catch (Exception ex)

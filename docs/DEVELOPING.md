@@ -96,10 +96,6 @@ Example secrets file:
   "ConnectionStrings": {
     "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public"
   },
-  "Messaging": {
-    "Enabled": "true",
-    "ConnectionString": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
-  },
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",
     "Domain": "SomeDomain",
