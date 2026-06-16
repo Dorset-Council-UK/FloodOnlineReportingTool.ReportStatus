@@ -137,7 +137,7 @@ public class GazetteerSearchService : IGazetteerSearchService
             {
                 if (searchResult.Count > 0)
                 {
-                    resultString = searchResult[0].Street;
+                    resultString = searchResult[0].Street ?? "Street not found";
                 }
             }
         }
