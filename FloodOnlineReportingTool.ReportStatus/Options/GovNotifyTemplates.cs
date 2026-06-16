@@ -1,4 +1,4 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Settings;
+﻿namespace FloodOnlineReportingTool.ReportStatus.Options;
 
 public class GovNotifyTemplates
 {

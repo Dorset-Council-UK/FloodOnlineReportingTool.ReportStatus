@@ -1,4 +1,4 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Settings;
+﻿using FloodOnlineReportingTool.ReportStatus.Options;
 using Microsoft.Extensions.Options;
 using Notify.Client;
 using System.Globalization;
@@ -7,13 +7,13 @@ namespace FloodOnlineReportingTool.ReportStatus.Services;
 
 internal class GovNotifyEmailSender(
     ILogger<GovNotifyEmailSender> logger,
-    IOptions<GovNotifySettings> options,
+    IOptions<GovNotifyOptions> options,
     IWebHostEnvironment environment,
     ICurrentUserService currentUserService,
     NotificationClient notificationClient
 ) : IGovNotifyEmailSender
 {
-    private readonly GovNotifySettings _govNotifySettings = options.Value;
+    private readonly GovNotifyOptions _govNotifyOptions = options.Value;
 
     /// <summary>
     ///     <para>Send an email to the specified email address via GovNotify.</para>
@@ -79,6 +79,6 @@ internal class GovNotifyEmailSender(
         };
 
         var emailAddress = GetVulnerablemailAddress();
-        return await SendEmail(emailAddress, _govNotifySettings.Templates.Vulnerable, personalisation).ConfigureAwait(false);
+        return await SendEmail(emailAddress, _govNotifyOptions.Templates.Vulnerable, personalisation).ConfigureAwait(false);
     }
 }

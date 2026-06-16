@@ -55,6 +55,10 @@ To run this project with minimal modification, you will need the following:
    ```shell
    dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
+   or if using the Package Manager Console in Visual Studio, set the default project to FloodOnlineReportingTool.ReportStatus.Database and run:
+   ```shell
+   Update-Database -StartupProject FloodOnlineReportingTool.ReportStatus
+   ```
 
 ## Database Setup
 
@@ -76,7 +80,7 @@ The project requires a `ConnectionStrings` section in your user secrets. And a c
 You must set up user secrets for development. Run the following command in the terminal within the project folder:
 - Using Visual Studio:
 
-  Right click the project and select "Manage User Secrets".
+  Right click the ReportStatus and Messaging projects and select "Manage User Secrets".
 - Using .NET CLI:
   ```shell
   dotnet user-secrets init
@@ -90,11 +94,7 @@ Example secrets file:
 ```json
 {
   "ConnectionStrings": {
-    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus"
-  },
-  "Messaging": {
-    "Enabled": "true",
-    "ConnectionString": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
+    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public"
   },
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",
@@ -108,6 +108,18 @@ Example secrets file:
       "Vulnerable": "YourTemplateId"
     }
   }
+}
+```
+
+Example Messaging project secrets file:
+```json
+{
+  "ConnectionStrings": {
+    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public",
+    "service-bus": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
+  },
+  "Messaging:TopicSuffix": "-name",
+  "Inbox:SubscriptionName": "subscription-name"
 }
 ```
 
