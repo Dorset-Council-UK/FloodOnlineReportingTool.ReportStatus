@@ -15,56 +15,73 @@ public sealed class InboxWorker(
 ) : BackgroundService
 {
     public const string ActivitySourceName = "InboxWorker";
-    private static readonly ActivitySource _activitySource = new(ActivitySourceName);
     private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
+    var processors = new List<ServiceBusProcessor>();
+        var handlers = new Dictionary<ServiceBusProcessor, Func<ProcessMessageEventArgs, Task>>();
+
         string subscriptionName = configuration["Inbox:SubscriptionName"]
             ?? throw new InvalidOperationException("Missing configuration setting: 'Inbox:SubscriptionName' is required.");
 
-        string? suffix = configuration["Messaging:TopicSuffix"];
-        string topicName = string.IsNullOrWhiteSpace(suffix) ? TopicNames.FloodReportSourceCreated : $"{TopicNames.FloodReportSourceCreated}{suffix}";
-
-        logger.LogInformation("Service bus processor starting...");
-
-        await using var processor = serviceBusClient.CreateProcessor(topicName, subscriptionName, options: new ServiceBusProcessorOptions
-        {
-            AutoCompleteMessages = false,
-            MaxConcurrentCalls = 2,
-        });
-
-        processor.ProcessMessageAsync += HandleMessageAsync;
-        processor.ProcessErrorAsync += HandleErrorAsync;
-
-        await processor.StartProcessingAsync(cancellationToken);
-        logger.LogInformation("Service bus processor started");
-
         try
         {
-            // This is not an infinite loop. Wait until cancelled. Low CPU usage while waiting.
+            var serviceBusOptions = new ServiceBusProcessorOptions
+            {
+                AutoCompleteMessages = false,
+                MaxConcurrentCalls = 2,
+            };
+            // Start all processors FIRST
+            string reportSourceTopic = GetTopicName(nameof(FloodReportSourceCreated));
+            string investigationTriggerTopic = GetTopicName(nameof(InvestigationTriggered));
+
+            var reportStatustProcessor = serviceBusClient.CreateProcessor(reportSourceTopic, subscriptionName,
+                    options: serviceBusOptions);
+            reportStatustProcessor.ProcessMessageAsync += ProcessFloodReportSourceCreated;
+            reportStatustProcessor.ProcessErrorAsync += HandleErrorAsync;
+            await reportStatustProcessor.StartProcessingAsync(cancellationToken);
+            processors.Add(reportStatustProcessor);
+            logger.LogInformation("Started processor for topic: {Topic}", reportSourceTopic);
+
+            var investigationTriggerProcessor = serviceBusClient.CreateProcessor(investigationTriggerTopic, subscriptionName,
+                    options: serviceBusOptions);
+            investigationTriggerProcessor.ProcessMessageAsync += ProcessInvestigationTriggered;
+            investigationTriggerProcessor.ProcessErrorAsync += HandleErrorAsync;
+            await investigationTriggerProcessor.StartProcessingAsync(cancellationToken);
+            processors.Add(investigationTriggerProcessor);
+            logger.LogInformation("Started processor for topic: {Topic}", investigationTriggerTopic);
+
+            logger.LogInformation("All processors started, waiting for cancellation...");
+
+            // Wait for cancellation
             await Task.Delay(Timeout.Infinite, cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            // expected on shutdown
+            // Expected on shutdown
         }
         finally
         {
-            await processor.StopProcessingAsync(CancellationToken.None);
+            // Stop all processors
+            foreach (var processor in processors)
+            {
+                await processor.StopProcessingAsync(CancellationToken.None);
+                if (handlers.TryGetValue(processor, out var handler))
+                {
+                    processor.ProcessMessageAsync -= handler;
+                }
 
-            // Detach event handlers to prevent them from being called after disposal
-            processor.ProcessMessageAsync -= HandleMessageAsync;
-            processor.ProcessErrorAsync -= HandleErrorAsync;
+                processor.ProcessErrorAsync -= HandleErrorAsync;
+                await processor.DisposeAsync();
+            }
+
+            logger.LogInformation("Service bus processors stopped");
         }
-
-        logger.LogInformation("Service bus processor stopped");
     }
 
-    private async Task HandleMessageAsync(ProcessMessageEventArgs args)
+    private async Task ProcessFloodReportSourceCreated(ProcessMessageEventArgs args)
     {
-        using var activity = _activitySource.StartActivity("Processing inbox message", ActivityKind.Consumer);
-
         logger.LogInformation("Consuming contract: {Contract}", nameof(FloodReportSourceCreated));
 
         try
@@ -89,6 +106,40 @@ public sealed class InboxWorker(
         catch (JsonException ex)
         {
             logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
+            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
+            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
+        }
+    }
+
+    private async Task ProcessInvestigationTriggered(ProcessMessageEventArgs args)
+    {
+        logger.LogInformation("Consuming contract: {Contract}", nameof(InvestigationTriggered));
+
+        try
+        {
+            var message = JsonSerializer.Deserialize<InvestigationTriggered>(args.Message.Body, _jsonOptions);
+            if (message is null)
+            {
+                logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
+                await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
+                return;
+            }
+
+            // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
+            await using var scope = scopeFactory.CreateAsyncScope();
+            // TODO: Implement this
+
+            //await args.CompleteMessageAsync(args.Message, args.CancellationToken); // Don't complete yet until we implement the processing logic
+
+            logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
             // Decided to just dead-letter but we may want to consider doing additional steps here. 
             // Could indicate a bad integration from a third party or something similar so we might want to 
             // notify a user. 
@@ -107,5 +158,18 @@ public sealed class InboxWorker(
         logger.LogError(args.Exception, "Inbox worker error on Entity path: {EntityPath} Source: {ErrorSource}", args.EntityPath, args.ErrorSource);
         // Should this be dead lettering?
         return Task.CompletedTask;
+    }
+
+    private string GetTopicName(string messageType)
+    {
+        var topicName = messageType switch
+        {
+            nameof(FloodReportSourceCreated) => TopicNames.FloodReportSourceCreated,
+            nameof(InvestigationTriggered) => TopicNames.InvestigationTriggered,
+            _ => throw new NotSupportedException($"Message type {messageType} is not supported."),
+        };
+
+        string? suffix = configuration["Messaging:TopicSuffix"];
+        return string.IsNullOrWhiteSpace(suffix) ? topicName : $"{topicName}{suffix}";
     }
 }
