@@ -2,6 +2,7 @@
 using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Topics;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using Messaging.Consumers;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -34,18 +35,23 @@ public sealed class InboxWorker(
             };
             // Start all processors FIRST
             string reportSourceTopic = GetTopicName(nameof(FloodReportSourceCreated));
-            string investigationTriggerTopic = GetTopicName(nameof(InvestigationTriggered));
-
-            var reportStatustProcessor = serviceBusClient.CreateProcessor(reportSourceTopic, subscriptionName,
-                    options: serviceBusOptions);
-            reportStatustProcessor.ProcessMessageAsync += ProcessFloodReportSourceCreated;
-            reportStatustProcessor.ProcessErrorAsync += HandleErrorAsync;
-            await reportStatustProcessor.StartProcessingAsync(cancellationToken);
-            processors.Add(reportStatustProcessor);
+            
+            var reportStatusProcessor = serviceBusClient.CreateProcessor(
+                reportSourceTopic, 
+                subscriptionName,
+                options: serviceBusOptions);
+            reportStatusProcessor.ProcessMessageAsync += ProcessFloodReportSourceCreated;
+            reportStatusProcessor.ProcessErrorAsync += HandleErrorAsync;
+            await reportStatusProcessor.StartProcessingAsync(cancellationToken);
+            processors.Add(reportStatusProcessor);
             logger.LogInformation("Started processor for topic: {Topic}", reportSourceTopic);
 
-            var investigationTriggerProcessor = serviceBusClient.CreateProcessor(investigationTriggerTopic, subscriptionName,
-                    options: serviceBusOptions);
+            string investigationTriggerTopic = GetTopicName(nameof(InvestigationTriggered));
+            var investigationTriggerProcessor = serviceBusClient.CreateProcessor(
+                investigationTriggerTopic,
+                subscriptionName,
+                options: serviceBusOptions);
+
             investigationTriggerProcessor.ProcessMessageAsync += ProcessInvestigationTriggered;
             investigationTriggerProcessor.ProcessErrorAsync += HandleErrorAsync;
             await investigationTriggerProcessor.StartProcessingAsync(cancellationToken);
@@ -82,75 +88,16 @@ public sealed class InboxWorker(
 
     private async Task ProcessFloodReportSourceCreated(ProcessMessageEventArgs args)
     {
-        logger.LogInformation("Consuming contract: {Contract}", nameof(FloodReportSourceCreated));
-
-        try
-        {
-            var message = JsonSerializer.Deserialize<FloodReportSourceCreated>(args.Message.Body, _jsonOptions);
-            if (message is null)
-            {
-                logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
-                await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
-                return;
-            }
-
-            // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
-            await using var scope = scopeFactory.CreateAsyncScope();
-            IFloodReportService floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
-            await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
-
-            await args.CompleteMessageAsync(args.Message, args.CancellationToken);
-
-            logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
-        }
-        catch (JsonException ex)
-        {
-            logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
-        }
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var consumer = scope.ServiceProvider.GetRequiredService<FloodSourceCreatedConsumer>();
+        await consumer.HandleFloodSourceCreated(args);
     }
 
     private async Task ProcessInvestigationTriggered(ProcessMessageEventArgs args)
     {
-        logger.LogInformation("Consuming contract: {Contract}", nameof(InvestigationTriggered));
-
-        try
-        {
-            var message = JsonSerializer.Deserialize<InvestigationTriggered>(args.Message.Body, _jsonOptions);
-            if (message is null)
-            {
-                logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
-                await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
-                return;
-            }
-
-            // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
-            await using var scope = scopeFactory.CreateAsyncScope();
-            // TODO: Implement this
-
-            //await args.CompleteMessageAsync(args.Message, args.CancellationToken); // Don't complete yet until we implement the processing logic
-
-            logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
-        }
-        catch (JsonException ex)
-        {
-            logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
-            // Decided to just dead-letter but we may want to consider doing additional steps here. 
-            // Could indicate a bad integration from a third party or something similar so we might want to 
-            // notify a user. 
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
-            // Dead-letter the message here
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
-        }
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var consumer = scope.ServiceProvider.GetRequiredService<InvestigationTriggeredConsumer>();
+        await consumer.HandleInvestigationTriggered(args);
     }
 
     private Task HandleErrorAsync(ProcessErrorEventArgs args)
