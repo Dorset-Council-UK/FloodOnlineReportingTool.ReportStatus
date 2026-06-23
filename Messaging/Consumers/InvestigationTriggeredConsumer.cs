@@ -11,7 +11,7 @@ public sealed class InvestigationTriggeredConsumer(
     private readonly IServiceScopeFactory scopeFactory = scopeFactory;
     private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
-    public async Task HandleInvestigationTriggered(ProcessMessageEventArgs args)
+    public async Task HandleMessage(ProcessMessageEventArgs args)
     {
         logger.LogInformation("Consuming contract: {Contract}", nameof(InvestigationTriggered));
 
