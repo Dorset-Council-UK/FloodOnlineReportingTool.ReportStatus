@@ -15,7 +15,6 @@ public sealed class InboxWorker(
 ) : BackgroundService
 {
     public const string ActivitySourceName = "InboxWorker";
-    private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -40,24 +39,29 @@ public sealed class InboxWorker(
                 options: serviceBusOptions),
         };
 
-        // Start all processors
-        foreach( var processor in processors )
+        try
         {
-            processor.ProcessMessageAsync += HandleMessageAsync;
-            processor.ProcessErrorAsync += HandleErrorAsync;
-            await processor.StartProcessingAsync(cancellationToken);
+            // Start all processors
+            foreach (var processor in processors)
+            {
+                processor.ProcessMessageAsync += HandleMessageAsync;
+                processor.ProcessErrorAsync += HandleErrorAsync;
+                await processor.StartProcessingAsync(cancellationToken);
+            }
+            logger.LogInformation("All processors started, waiting for cancellation...");
+
+            // Wait for cancellation
+            await Task.Delay(Timeout.Infinite, cancellationToken);
         }
-        logger.LogInformation("All processors started, waiting for cancellation...");
-
-        // Wait for cancellation
-        await Task.Delay(Timeout.Infinite, cancellationToken);
-
-        // Graceful shutdown
-        foreach (var processor in processors)
+        finally
         {
-            await processor.StopProcessingAsync();
+            // Graceful shutdown
+            foreach (var processor in processors)
+            {
+                await processor.StopProcessingAsync();
+            }
+            logger.LogInformation("Service bus processors stopped");
         }
-        logger.LogInformation("Service bus processors stopped");
     }
     private Task HandleErrorAsync(ProcessErrorEventArgs args)
     {
@@ -87,9 +91,11 @@ public sealed class InboxWorker(
                 var investigationConsumer = scope.ServiceProvider.GetRequiredService<InvestigationTriggeredConsumer>();
                 await investigationConsumer.HandleMessage(args);
                 break;
-                
+
             default:
-                throw new InvalidOperationException($"No consumer configured for topic: {topicName}");
+                logger.LogError("No consumer configured for topic {TopicName} (EntityPath: {EntityPath}, MessageId: {MessageId})", topicName, args.EntityPath, args.Message.MessageId);
+                await args.DeadLetterMessageAsync(args.Message, "No consumer configured for topic", $"Missing topic name is {topicName}", cancellationToken: args.CancellationToken);
+                break;
         }
     }
 

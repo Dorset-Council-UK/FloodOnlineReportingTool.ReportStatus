@@ -10,7 +10,7 @@ public sealed class FloodSourceCreatedConsumer(
     IServiceScopeFactory scopeFactory)
 {
 
-    private readonly IServiceScopeFactory scopeFactory = scopeFactory;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     public async Task HandleMessage(ProcessMessageEventArgs args)
@@ -28,7 +28,7 @@ public sealed class FloodSourceCreatedConsumer(
             }
 
             // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
-            await using var scope = scopeFactory.CreateAsyncScope();
+            await using var scope = _scopeFactory.CreateAsyncScope();
             IFloodReportService floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
             await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
 

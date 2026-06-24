@@ -6,7 +6,6 @@ using Messaging;
 using Messaging.Consumers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
-using System.Text.Json;
 
 var builder = Host.CreateApplicationBuilder(args);
 

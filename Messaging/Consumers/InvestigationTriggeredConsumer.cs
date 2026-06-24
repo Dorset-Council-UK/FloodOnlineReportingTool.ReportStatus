@@ -8,7 +8,7 @@ public sealed class InvestigationTriggeredConsumer(
     ILogger<InvestigationTriggeredConsumer> logger,
     IServiceScopeFactory scopeFactory)
 {
-    private readonly IServiceScopeFactory scopeFactory = scopeFactory;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     public async Task HandleMessage(ProcessMessageEventArgs args)
@@ -26,7 +26,7 @@ public sealed class InvestigationTriggeredConsumer(
             }
 
             // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
-            await using var scope = scopeFactory.CreateAsyncScope();
+            await using var scope = _scopeFactory.CreateAsyncScope();
             // TODO: Implement this
 
             //await args.CompleteMessageAsync(args.Message, args.CancellationToken); // Don't complete yet until we implement the processing logic
