@@ -3,6 +3,7 @@ using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using Messaging;
+using Messaging.Consumers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 
@@ -11,7 +12,9 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services
     .AddScoped<IFloodReportService, FloodReportService>()
     .AddScoped<IFloodReportRepository, FloodReportRepository>()
-    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>();
+    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
+    .AddScoped<InvestigationTriggeredConsumer>()
+    .AddScoped<FloodSourceCreatedConsumer>();
 
 builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHostedService<InboxWorker>();

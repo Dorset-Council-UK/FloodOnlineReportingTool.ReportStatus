@@ -9,7 +9,7 @@ To run this project with minimal modification, you will need the following:
 
 - **PostgreSQL 13+ with PostGIS extension**: This is the default database provider. The project uses Entity Framework, making it adaptable to other providers with minimal effort.
 - **.NET 10**: Ensure you have the .NET 10 SDK installed.
-- **Message system (optional)**: The project includes a messaging system using Azure Service Bus. You can enable or disable this system through the `Messaging:Enabled` setting in your configuration.
+- **Message system**: The project includes a messaging system using Azure Service Bus. 
 
 ## Getting Started
 
@@ -56,7 +56,7 @@ To run this project with minimal modification, you will need the following:
    dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
    or if using the Package Manager Console in Visual Studio, set the default project to FloodOnlineReportingTool.ReportStatus.Database and run:
-   ```shell
+   ```powershell
    Update-Database -StartupProject FloodOnlineReportingTool.ReportStatus
    ```
 
@@ -87,7 +87,6 @@ You must set up user secrets for development. Run the following command in the t
   ```
 Then add your configuration:
 
-- **Messaging**: Used for the optional messaging system.
 - **ConnectionStrings**: Required for database access.
 
 Example secrets file:
@@ -110,6 +109,7 @@ Example secrets file:
   }
 }
 ```
+Then add your configuration for the Messaging project:
 
 Example Messaging project secrets file:
 ```json
@@ -127,9 +127,6 @@ Example Messaging project secrets file:
 
 Authentication is required to create a report or duplicate report. The project uses standard .NET Identity authentication.
 
-## Other Customizations
-
-For messaging, the `Messaging` section allows you to enable or disable the MassTransit messaging system. By default, messaging is disabled (`Messaging:Enabled = false`).
 
 ## Further Help
 
