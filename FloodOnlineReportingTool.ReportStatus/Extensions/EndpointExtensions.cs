@@ -188,7 +188,8 @@ internal static class EndpointExtensions
         group
             .MapPost(pattern: "/search", SearchFloodReportEndpoints.SearchFloodReports)
             .WithSummary("Search - Flood reports by criteria")
-            .WithDescription("Searches for flood reports using a combination of optional criteria including date range, flood sources, UPRN, USRN, and geometry. At least one criterion must be provided.");
+            .WithDescription("Searches for flood reports using a combination of optional criteria including date range, flood sources, UPRN, USRN, and geometry. At least one criterion must be provided.")
+            .RequireAuthorization(PolicyNames.Reader);
     }
     
     private static void MapTestEndpoints(WebApplication app)
