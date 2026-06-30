@@ -41,7 +41,7 @@ internal static class SearchFloodReportEndpoints
         return TypedResults.Ok(reports);
     }
 
-    internal static async Task<Results<Ok<SearchFloodReportPagedResult<SearchResultFloodReport>>, ValidationProblem>> SearchFloodReports(ISearchFloodReportService searchFloodReportService, [FromBody] SearchFloodReportRequest request, int pageNumber = 1, int pageSize = 2, CancellationToken ct = default)
+    internal static async Task<Results<Ok<SearchFloodReportPagedResult<SearchResultFloodReport>>, ValidationProblem>> SearchFloodReports(ISearchFloodReportService searchFloodReportService, [FromBody] SearchFloodReportRequest request, int pageNumber = 1, int pageSize = ISearchFloodReportService.DefaultPageSize, CancellationToken ct = default)
     {
         if (!request.HasSearchCriteria)
         {
@@ -51,7 +51,7 @@ internal static class SearchFloodReportEndpoints
             });
         }
 
-        var reports = await searchFloodReportService.SearchFloodReports(request.ResultsFrom, request.ResultsTo, request.FloodSources, request.Uprn, request.Usrn, request.Postcode, request.Geom, pageNumber, 2, ct);
+        var reports = await searchFloodReportService.SearchFloodReports(request.ResultsFrom, request.ResultsTo, request.FloodSources, request.Uprn, request.Usrn, request.Postcode, request.Geom, pageNumber, pageSize, ct);
         return TypedResults.Ok(reports);
     }
 }

@@ -26,7 +26,7 @@ internal static class SearchUtility
         var (take, skip) = Pagination(pageNumber, pageSize, defaultPageSize);
 
         var totalCount = await query.CountAsync(ct);
-        
+
         var results = await query
             .Skip(skip)
             .Take(take)
