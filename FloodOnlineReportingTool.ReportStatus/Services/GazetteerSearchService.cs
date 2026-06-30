@@ -1,9 +1,7 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Database.Exceptions;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Settings;
-using Microsoft.Extensions.Logging;
+using FloodOnlineReportingTool.ReportStatus.Options;
 using Microsoft.Extensions.Options;
-using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace FloodOnlineReportingTool.ReportStatus.Services;
@@ -11,14 +9,14 @@ namespace FloodOnlineReportingTool.ReportStatus.Services;
 public class GazetteerSearchService : IGazetteerSearchService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ReportStatusSettings _settings;
+    private readonly ReportStatusOptions _options;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ILogger<GazetteerSearchService> _logger;
 
-    public GazetteerSearchService(IHttpClientFactory httpClientFactory, IOptions<ReportStatusSettings> settings, ILogger<GazetteerSearchService> logger)
+    public GazetteerSearchService(IHttpClientFactory httpClientFactory, IOptions<ReportStatusOptions> options, ILogger<GazetteerSearchService> logger)
     {
         _httpClientFactory = httpClientFactory;
-        _settings = settings.Value;
+        _options = options.Value;
         _logger = logger;
 
         _jsonOptions = new JsonSerializerOptions
@@ -34,10 +32,10 @@ public class GazetteerSearchService : IGazetteerSearchService
     private Uri CreateAddressSearchUri(string uprn)
     {
         // Throw an error if the search URI or API key are not set
-        var searchUri = _settings.AddressNameUrl
+        var searchUri = _options.AddressNameUrl
             ?? throw new ConfigurationMissingException("Missing configuration setting: The search URL is not set in the settings. Under GIS > AddressNameUrl");
 
-        if (_settings.ApiKey is null)
+        if (_options.ApiKey is null)
         {
             throw new ConfigurationMissingException("Missing configuration setting: The GIS API key not set in the settings. Under GIS > ApiKey");
         }
@@ -60,10 +58,10 @@ public class GazetteerSearchService : IGazetteerSearchService
     private Uri CreateStreetSearchUri(string usrn)
     {
         // Throw an error if the search URI or API key are not set
-        var searchUri = _settings.StreetNameUrl
+        var searchUri = _options.StreetNameUrl
             ?? throw new ConfigurationMissingException("Missing configuration setting: The search URL is not set in the settings. Under GIS > AddressNameUrl");
 
-        if (_settings.ApiKey is null)
+        if (_options.ApiKey is null)
         {
             throw new ConfigurationMissingException("Missing configuration setting: The GIS API key not set in the settings. Under GIS > ApiKey");
         }
@@ -87,7 +85,7 @@ public class GazetteerSearchService : IGazetteerSearchService
         {
             client.DefaultRequestHeaders.Add("Referer", referer.ToString());
         }
-        client.DefaultRequestHeaders.Add("X-API-Key", _settings.ApiKey);
+        client.DefaultRequestHeaders.Add("X-API-Key", _options.ApiKey);
 
         var response = await client.GetAsync(uri, ct)
             .ConfigureAwait(false);
@@ -139,7 +137,7 @@ public class GazetteerSearchService : IGazetteerSearchService
             {
                 if (searchResult.Count > 0)
                 {
-                    resultString = searchResult[0].Street;
+                    resultString = searchResult[0].Street ?? "Street not found";
                 }
             }
         }

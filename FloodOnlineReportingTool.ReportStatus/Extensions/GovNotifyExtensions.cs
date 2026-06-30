@@ -1,11 +1,9 @@
 ﻿using FloodOnlineReportingTool.ReportStatus.Services;
-using FloodOnlineReportingTool.ReportStatus.Settings;
+using FloodOnlineReportingTool.ReportStatus.Options;
 using Notify.Client;
 using Notify.Interfaces;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.AspNetCore.Builder;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 internal static class GovNotifyExtensions
 {
@@ -13,24 +11,23 @@ internal static class GovNotifyExtensions
 
     public static TBuilder AddGovNotify<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var govNotifySettings = builder.AddGovNotifySettings();
+        var govNotifyOptions = builder.AddGovNotifyOptions();
         builder.Services
             .AddGovNotifyHttpClient()
             .AddGovNotifyHttpClientWrapper()
-            .AddGovNotifyNotificationClient(govNotifySettings.ApiKey)
+            .AddGovNotifyNotificationClient(govNotifyOptions.ApiKey)
             .AddScoped<IGovNotifyEmailSender, GovNotifyEmailSender>();
 
         return builder;
     }
 
-    private static GovNotifySettings AddGovNotifySettings<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    private static GovNotifyOptions AddGovNotifyOptions<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var section = builder.Configuration.GetRequiredSection(GovNotifySettings.SectionName);
-        builder.Services.Configure<GovNotifySettings>(section);
-        var settings = section.Get<GovNotifySettings>();
-        return settings is null
-            ? throw new InvalidOperationException($"There was a problem getting the settings from the {GovNotifySettings.SectionName} section")
-            : settings;
+        var section = builder.Configuration.GetRequiredSection(GovNotifyOptions.SectionName);
+        builder.Services.Configure<GovNotifyOptions>(section);
+        var options = section.Get<GovNotifyOptions>()
+            ?? throw new InvalidOperationException($"There was a problem getting the settings from the {GovNotifyOptions.SectionName} section");
+        return options;
     }
 
     /// <summary>

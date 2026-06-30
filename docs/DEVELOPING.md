@@ -9,7 +9,7 @@ To run this project with minimal modification, you will need the following:
 
 - **PostgreSQL 13+ with PostGIS extension**: This is the default database provider. The project uses Entity Framework, making it adaptable to other providers with minimal effort.
 - **.NET 10**: Ensure you have the .NET 10 SDK installed.
-- **Message system (optional)**: The project includes a messaging system using Azure Service Bus. You can enable or disable this system through the `Messaging:Enabled` setting in your configuration.
+- **Message system**: The project includes a messaging system using Azure Service Bus. 
 
 ## Getting Started
 
@@ -55,6 +55,10 @@ To run this project with minimal modification, you will need the following:
    ```shell
    dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
+   or if using the Package Manager Console in Visual Studio, set the default project to FloodOnlineReportingTool.ReportStatus.Database and run:
+   ```powershell
+   Update-Database -StartupProject FloodOnlineReportingTool.ReportStatus
+   ```
 
 ## Database Setup
 
@@ -76,25 +80,20 @@ The project requires a `ConnectionStrings` section in your user secrets. And a c
 You must set up user secrets for development. Run the following command in the terminal within the project folder:
 - Using Visual Studio:
 
-  Right click the project and select "Manage User Secrets".
+  Right click the ReportStatus and Messaging projects and select "Manage User Secrets".
 - Using .NET CLI:
   ```shell
   dotnet user-secrets init
   ```
 Then add your configuration:
 
-- **Messaging**: Used for the optional messaging system.
 - **ConnectionStrings**: Required for database access.
 
 Example secrets file:
 ```json
 {
   "ConnectionStrings": {
-    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus"
-  },
-  "Messaging": {
-    "Enabled": "true",
-    "ConnectionString": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
+    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public"
   },
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",
@@ -110,14 +109,24 @@ Example secrets file:
   }
 }
 ```
+Then add your configuration for the Messaging project:
+
+Example Messaging project secrets file:
+```json
+{
+  "ConnectionStrings": {
+    "FloodReportingReportStatus": "Host=localhost;Port=5432;Database=YourDatabaseName;Username=YourUserName;Password=YourPassword;SearchPath=fortreportstatus,public",
+    "service-bus": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key"
+  },
+  "Messaging:TopicSuffix": "-name",
+  "Inbox:SubscriptionName": "subscription-name"
+}
+```
 
 ## Authentication
 
 Authentication is required to create a report or duplicate report. The project uses standard .NET Identity authentication.
 
-## Other Customizations
-
-For messaging, the `Messaging` section allows you to enable or disable the MassTransit messaging system. By default, messaging is disabled (`Messaging:Enabled = false`).
 
 ## Further Help
 

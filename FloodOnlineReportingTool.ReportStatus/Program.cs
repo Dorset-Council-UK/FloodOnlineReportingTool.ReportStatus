@@ -6,15 +6,15 @@ using NetTopologySuite.IO.Converters;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure all the settings.
-var (identityOptions, messagingSettings) = builder.Services.AddReportStatusSettings(builder.Configuration);
+var identityOptions = builder.AddReportStatusIdentityOptions();
+builder.AddReportStatusOptions();
 
 builder.Services.AddReportStatusAuthentication(builder.Configuration);
 builder.Services.AddProblemDetails();
-builder.Services.AddReportStatusHealthChecks(messagingSettings);
+builder.Services.AddReportStatusHealthChecks();
 builder.Services.AddReportStatusVersioning();
 builder.Services.AddReportStatusOpenApi(identityOptions);
 builder.AddReportStatusDatabase();
-builder.Services.AddMessageSystem(messagingSettings);
 builder.AddGovNotify();
 
 // Add services to DI

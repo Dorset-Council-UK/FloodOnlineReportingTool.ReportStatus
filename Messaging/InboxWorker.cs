@@ -1,0 +1,114 @@
+﻿using Azure.Messaging.ServiceBus;
+using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Topics;
+using Messaging.Consumers;
+using System.Text.Json;
+
+namespace Messaging;
+
+// Using https://oneuptime.com/blog/post/2026-02-16-how-to-build-a-multi-tenant-background-job-processor-with-azure-service-bus-and-worker-roles/view as an example we are loosely following
+public sealed class InboxWorker(
+    ILogger<InboxWorker> logger,
+    IConfiguration configuration,
+    IServiceScopeFactory scopeFactory,
+    ServiceBusClient serviceBusClient
+) : BackgroundService
+{
+    public const string ActivitySourceName = "InboxWorker";
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        string subscriptionName = configuration["Inbox:SubscriptionName"]
+            ?? throw new InvalidOperationException("Missing configuration setting: 'Inbox:SubscriptionName' is required.");
+
+        var serviceBusOptions = new ServiceBusProcessorOptions
+        {
+            AutoCompleteMessages = false,
+            MaxConcurrentCalls = 2,
+        };
+        // Create all the processors for the topics we want to listen to
+        var processors = new[]
+        {
+            serviceBusClient.CreateProcessor(
+                GetTopicName(nameof(FloodReportSourceCreated)),
+                subscriptionName,
+                options: serviceBusOptions),
+            serviceBusClient.CreateProcessor(
+                GetTopicName(nameof(InvestigationTriggered)),
+                subscriptionName,
+                options: serviceBusOptions),
+        };
+
+        try
+        {
+            // Start all processors
+            foreach (var processor in processors)
+            {
+                processor.ProcessMessageAsync += HandleMessageAsync;
+                processor.ProcessErrorAsync += HandleErrorAsync;
+                await processor.StartProcessingAsync(cancellationToken);
+            }
+            logger.LogInformation("All processors started, waiting for cancellation...");
+
+            // Wait for cancellation
+            await Task.Delay(Timeout.Infinite, cancellationToken);
+        }
+        finally
+        {
+            // Graceful shutdown
+            foreach (var processor in processors)
+            {
+                await processor.StopProcessingAsync();
+            }
+            logger.LogInformation("Service bus processors stopped");
+        }
+    }
+    private Task HandleErrorAsync(ProcessErrorEventArgs args)
+    {
+        logger.LogError(args.Exception, "Inbox worker error on Entity path: {EntityPath} Source: {ErrorSource}", args.EntityPath, args.ErrorSource);
+        // Should this be dead lettering?
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleMessageAsync(ProcessMessageEventArgs args)
+    {
+        string floodSourceTopicName = GetTopicName(nameof(FloodReportSourceCreated));
+        string investigationTriggeredTopicName = GetTopicName(nameof(InvestigationTriggered));
+
+        // Determine the topic from the EntityPath and send to the handler
+        using var scope = scopeFactory.CreateScope();
+        // Expected is {topicName}/Subscriptions/{subscriptionName} or {queueName} for queue,
+        // so we split on the first '/' to get the topic name
+        string topicName = args.EntityPath.Split('/', 2, StringSplitOptions.TrimEntries)[0];
+        switch (topicName)
+        {
+            case var t when string.Equals(t, floodSourceTopicName, StringComparison.OrdinalIgnoreCase):
+                var floodSourceConsumer = scope.ServiceProvider.GetRequiredService<FloodSourceCreatedConsumer>();
+                await floodSourceConsumer.HandleMessage(args);
+                break;
+                
+            case var t when string.Equals(t, investigationTriggeredTopicName, StringComparison.OrdinalIgnoreCase):
+                var investigationConsumer = scope.ServiceProvider.GetRequiredService<InvestigationTriggeredConsumer>();
+                await investigationConsumer.HandleMessage(args);
+                break;
+
+            default:
+                logger.LogError("No consumer configured for topic {TopicName} (EntityPath: {EntityPath}, MessageId: {MessageId})", topicName, args.EntityPath, args.Message.MessageId);
+                await args.DeadLetterMessageAsync(args.Message, "No consumer configured for topic", $"Missing topic name is {topicName}", cancellationToken: args.CancellationToken);
+                break;
+        }
+    }
+
+    private string GetTopicName(string messageType)
+    {
+        var topicName = messageType switch
+        {
+            nameof(FloodReportSourceCreated) => TopicNames.FloodReportSourceCreated,
+            nameof(InvestigationTriggered) => TopicNames.InvestigationTriggered,
+            _ => throw new NotSupportedException($"Message type {messageType} is not supported."),
+        };
+
+        string? suffix = configuration["Messaging:TopicSuffix"];
+        return string.IsNullOrWhiteSpace(suffix) ? topicName : $"{topicName}{suffix}";
+    }
+}

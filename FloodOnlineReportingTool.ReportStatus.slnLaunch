@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "API + Messaging",
+    "Projects": [
+      {
+        "Path": "Messaging\\Messaging.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "FloodOnlineReportingTool.ReportStatus\\FloodOnlineReportingTool.ReportStatus.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
