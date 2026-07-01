@@ -13,7 +13,7 @@ builder.Services
     .AddScoped<IFloodReportService, FloodReportService>()
     .AddScoped<IFloodReportRepository, FloodReportRepository>()
     .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
-    .AddScoped<InvestigationTriggeredConsumer>()
+    .AddScoped<FloodEventS19TriggeredConsumer>()
     .AddScoped<FloodSourceCreatedConsumer>();
 
 builder.Services.AddHostedService<OutboxWorker>();
