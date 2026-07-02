@@ -33,6 +33,14 @@ public sealed class InboxWorker(
                 subscriptionName,
                 options: serviceBusOptions),
             serviceBusClient.CreateProcessor(
+                GetTopicName(nameof(FloodEventCreated)),
+                subscriptionName,
+                options: serviceBusOptions),
+            serviceBusClient.CreateProcessor(
+                GetTopicName(nameof(FloodEventUpdated)),
+                subscriptionName,
+                options: serviceBusOptions),
+            serviceBusClient.CreateProcessor(
                 GetTopicName(nameof(FloodEventS19Triggered)),
                 subscriptionName,
                 options: serviceBusOptions),
@@ -72,6 +80,8 @@ public sealed class InboxWorker(
     private async Task HandleMessageAsync(ProcessMessageEventArgs args)
     {
         string floodSourceTopicName = GetTopicName(nameof(FloodReportSourceCreated));
+        string floodEventCreatedTopicName = GetTopicName(nameof(FloodEventCreated));
+        string floodEventUpdatedTopicName = GetTopicName(nameof(FloodEventUpdated));
         string floodEventS19TriggeredTopicName = GetTopicName(nameof(FloodEventS19Triggered));
 
         // Determine the topic from the EntityPath and send to the handler
@@ -85,7 +95,17 @@ public sealed class InboxWorker(
                 var floodSourceConsumer = scope.ServiceProvider.GetRequiredService<FloodSourceCreatedConsumer>();
                 await floodSourceConsumer.HandleMessage(args);
                 break;
-                
+
+            case var t when string.Equals(t, floodEventCreatedTopicName, StringComparison.OrdinalIgnoreCase):
+                var floodEventCreatedConsumer = scope.ServiceProvider.GetRequiredService<FloodEventCreatedConsumer>();
+                await floodEventCreatedConsumer.HandleMessage(args);
+                break;
+
+            case var t when string.Equals(t, floodEventUpdatedTopicName, StringComparison.OrdinalIgnoreCase):
+                var floodEventUpdatedConsumer = scope.ServiceProvider.GetRequiredService<FloodEventUpdatedConsumer>();
+                await floodEventUpdatedConsumer.HandleMessage(args);
+                break;
+
             case var t when string.Equals(t, floodEventS19TriggeredTopicName, StringComparison.OrdinalIgnoreCase):
                 var investigationConsumer = scope.ServiceProvider.GetRequiredService<FloodEventS19TriggeredConsumer>();
                 await investigationConsumer.HandleMessage(args);
@@ -104,6 +124,8 @@ public sealed class InboxWorker(
         {
             nameof(FloodReportSourceCreated) => TopicNames.FloodReportSourceCreated,
             nameof(FloodEventS19Triggered) => TopicNames.FloodEventS19Triggered,
+            nameof(FloodEventCreated) => TopicNames.FloodEventCreated,
+            nameof(FloodEventUpdated) => TopicNames.FloodEventUpdated,
             _ => throw new NotSupportedException($"Message type {messageType} is not supported."),
         };
 
