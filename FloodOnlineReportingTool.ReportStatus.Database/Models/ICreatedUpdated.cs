@@ -3,5 +3,5 @@
 public interface ICreatedUpdated
 {
     public DateTimeOffset CreatedUtc { get; init; }
-    public DateTimeOffset? UpdatedUtc { get; init; }
+    public DateTimeOffset? UpdatedUtc { get; set; }
 }
