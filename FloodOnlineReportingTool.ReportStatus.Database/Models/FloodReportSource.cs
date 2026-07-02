@@ -11,7 +11,7 @@ public record FloodReportSource : ICreatedUpdated
 
     // ICreatedUpdated implementation
     public DateTimeOffset CreatedUtc { get; init; }
-    public DateTimeOffset? UpdatedUtc { get; init; }
+    public DateTimeOffset? UpdatedUtc { get; set; }
 
     // Other properties
     public required Guid EligibilityCheckId { get; init; } // This is the ID from the sending system
@@ -34,7 +34,7 @@ public record FloodReportSource : ICreatedUpdated
 
     // Navigation properties using wrapper models instead of contract types directly
     public Guid FloodReportId { get; init; }
-    public FloodReport FloodReport { get; init; }
+    public FloodReport? FloodReport { get; init; }
     public ICollection<FloodReportSourceFloodCause> FloodCauses { get; init; } = [];
     public ICollection<FloodReportSourceOrganisation> Organisations { get; init; } = [];
 }

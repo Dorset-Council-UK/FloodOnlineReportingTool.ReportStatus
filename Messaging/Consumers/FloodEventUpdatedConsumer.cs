@@ -1,5 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using System.Text.Json;
 
 namespace Messaging.Consumers;
@@ -27,9 +28,10 @@ public sealed class FloodEventUpdatedConsumer(
 
             // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
             await using var scope = _scopeFactory.CreateAsyncScope();
-            // TODO: Implement this
+            IFloodEventService floodEventService = scope.ServiceProvider.GetRequiredService<IFloodEventService>();
+            await floodEventService.UpdateFromFloodEventUpdated(message, args.CancellationToken);
 
-            //await args.CompleteMessageAsync(args.Message, args.CancellationToken); // Don't complete yet until we implement the processing logic
+            await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
             logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
         }
