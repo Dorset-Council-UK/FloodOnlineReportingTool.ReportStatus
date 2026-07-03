@@ -15,7 +15,7 @@ public record FloodEventUpdateDto
     public required Guid FloodStatus { get; init; }
     public required Guid InvestigationStatus { get; init; }
 
-    public IReadOnlyCollection<Guid>? LinkedFloodReports { get; init; }
+    public IReadOnlyCollection<string>? LinkedFloodReports { get; init; }
 
     // Optional in messages (if missing, keep existing value)
     public MultiPolygon? Geom { get; init; }

@@ -84,7 +84,7 @@ public class FloodEventService(
             FloodCauses = dto.FloodCauses.Distinct().ToList(),
             Organisations = dto.Organisations.Distinct().ToList(),
             StatusFilter = dto.StatusFilter.Distinct().ToList(),
-            LinkedFloodReports = [],
+            LinkedFloodReports = ProcessLinkedReports(dto.LinkedFloodReports, ct).Result,
             Geom = null,
         };
 
@@ -173,7 +173,7 @@ public class FloodEventService(
             RecordStatus = dto.RecordStatus,
             FloodStatus = dto.FloodStatus,
             InvestigationStatus = dto.InvestigationStatus,
-            LinkedFloodReports = dto.LinkedFloodReports?.Distinct().ToList() ?? existing.LinkedFloodReports,
+            LinkedFloodReports = ProcessLinkedReports(dto.LinkedFloodReports, ct).Result,
             // If geometry is missing from the message, keep existing geometry.
             Geom = dto.Geom ?? existing.Geom,
             FloodStartDate = dto.FloodStartDate,
@@ -191,5 +191,15 @@ public class FloodEventService(
         {
             logger.LogWarning("No database changes were saved when updating flood event {Reference}.", reference);
         }
+    }
+
+    private async Task<IReadOnlyCollection<Guid>> ProcessLinkedReports(IReadOnlyCollection<string>? ReferenceList, CancellationToken ct)
+    {
+        if (ReferenceList is null || ReferenceList.Count == 0)
+        {
+            return [];
+        }
+
+        return await context.FloodEvents.Where(x => ReferenceList.Contains(x.Reference)).Select(x => x.Id).ToListAsync();
     }
 }

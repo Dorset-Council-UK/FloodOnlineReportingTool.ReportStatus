@@ -8,6 +8,8 @@ public record FloodEventCreateDto
     public required Guid FloodStatus { get; init; }
     public required Guid InvestigationStatus { get; init; }
 
+    public IReadOnlyCollection<string>? LinkedFloodReports { get; init; }
+
     public required DateTimeOffset FloodStartDate { get; init; }
     public required DateTimeOffset FloodEndDate { get; init; }
 
