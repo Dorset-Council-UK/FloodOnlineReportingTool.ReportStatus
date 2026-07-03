@@ -10,4 +10,5 @@ public interface IFloodEventService
     Task UpdateFromFloodEventUpdated(FloodEventUpdated message, CancellationToken ct);
     Task<ICollection<FloodEvent>?> CreateFloodEvent(FloodEventCreateDto dto, CancellationToken ct);
     Task UpdateFloodEvent(FloodEventUpdateDto dto, CancellationToken ct);
+    Task TriggerFromFloodEventS19Triggered(FloodEventS19Triggered message, CancellationToken ct);
 }

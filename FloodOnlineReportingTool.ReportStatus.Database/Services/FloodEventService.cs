@@ -1,16 +1,19 @@
-﻿using System.Text.Json;
-using FloodOnlineReportingTool.Contracts;
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
 using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
 using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
 
 public class FloodEventService(
     ILogger<FloodEventService> logger,
     IFloodEventRepository floodEventRepository,
+    IFloodReportService floodReportService,
     ApplicationDbContext context
     ) : IFloodEventService
 {
@@ -84,7 +87,7 @@ public class FloodEventService(
             FloodCauses = dto.FloodCauses.Distinct().ToList(),
             Organisations = dto.Organisations.Distinct().ToList(),
             StatusFilter = dto.StatusFilter.Distinct().ToList(),
-            LinkedFloodReports = ProcessLinkedReports(dto.LinkedFloodReports, ct).Result,
+            LinkedFloodReports = dto.LinkedFloodReports ?? [],
             Geom = null,
         };
 
@@ -173,7 +176,7 @@ public class FloodEventService(
             RecordStatus = dto.RecordStatus,
             FloodStatus = dto.FloodStatus,
             InvestigationStatus = dto.InvestigationStatus,
-            LinkedFloodReports = ProcessLinkedReports(dto.LinkedFloodReports, ct).Result,
+            LinkedFloodReports = dto.LinkedFloodReports is null ? existing.LinkedFloodReports : dto.LinkedFloodReports ?? [],
             // If geometry is missing from the message, keep existing geometry.
             Geom = dto.Geom ?? existing.Geom,
             FloodStartDate = dto.FloodStartDate,
@@ -193,13 +196,71 @@ public class FloodEventService(
         }
     }
 
-    private async Task<IReadOnlyCollection<Guid>> ProcessLinkedReports(IReadOnlyCollection<string>? ReferenceList, CancellationToken ct)
+    public async Task TriggerFromFloodEventS19Triggered(FloodEventS19Triggered message, CancellationToken ct)
     {
-        if (ReferenceList is null || ReferenceList.Count == 0)
+        if (message is null)
         {
-            return [];
+            logger.LogWarning("Skipping because the incoming message is null.");
+            return;
         }
 
-        return await context.FloodEvents.Where(x => ReferenceList.Contains(x.Reference)).Select(x => x.Id).ToListAsync();
-    }
+        logger.LogDebug("Trigger from {MessageType}.", nameof(FloodEventS19Triggered));
+
+        var floodEvent = await context
+            .FloodEvents
+            .Include(e => e.LinkedFloodReports)
+            .Where(e => e.Reference == message.Reference)
+            .FirstOrDefaultAsync(ct);
+
+        if (floodEvent is null)
+        {
+            logger.LogWarning("Skipping because flood event is not found.");
+            return;
+        }
+
+        foreach(var reportReference in floodEvent.LinkedFloodReports)
+        {
+            var report = await context.FloodReports
+               .Include(r => r.SourceRecords)
+               .FirstOrDefaultAsync(r => r.Reference == reportReference, ct);
+
+            if (report is null)
+            {
+                logger.LogWarning("Skipping status update because flood report {ReportReference} was not found.", reportReference);
+                continue;
+            }
+
+            foreach(var sourceReport in report.SourceRecords)
+            {
+                FloodReportExtraInfoRequest messageBody = new FloodReportExtraInfoRequest(
+                sourceReport.Reference,
+                DateTimeOffset.UtcNow);
+
+                OutboxMessage outboxMessage = new()
+                {
+                    MessageType = nameof(FloodReportExtraInfoRequest),
+                    Message = JsonSerializer.Serialize(messageBody, _jsonOptions),
+                    Status = MessageStatus.Pending,
+                };
+            }
+            
+
+            // Start from current values, then override only what should change.
+            var dto = report.ToDto() with
+            {
+                RecordStatus = RecordStatusIds.ActionNeeded
+            };
+
+            var updatedReport = await floodReportService.UpdateFloodReport(report.Id, dto, ct);
+
+            if (updatedReport is null)
+            {
+                logger.LogWarning("Failed to update status for flood report {ReportReference}.", reportReference);
+            }
+
+            context.OutboxMessages.Add(outboxMessage);
+        }
+        await context.SaveChangesAsync(ct);
+
+    } 
 }

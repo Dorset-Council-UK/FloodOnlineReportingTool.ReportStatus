@@ -126,6 +126,7 @@ public sealed class OutboxWorker(
         {
             nameof(FloodReportCreated) => TopicNames.FloodReportCreated,
             nameof(FloodReportUpdated) => TopicNames.FloodReportUpdated,
+            nameof(FloodReportExtraInfoRequest) => TopicNames.FloodReportExtraInfoRequest,
             _ => throw new NotSupportedException($"Message type {messageType} is not supported."),
         };
 

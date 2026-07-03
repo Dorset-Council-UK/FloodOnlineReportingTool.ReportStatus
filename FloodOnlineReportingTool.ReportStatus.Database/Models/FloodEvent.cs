@@ -16,7 +16,7 @@ public record FloodEvent : ICreatedUpdated
     public DateTimeOffset CreatedUtc { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedUtc { get; set; }
 
-    public IReadOnlyCollection<Guid> LinkedFloodReports { get; set; } = [];
+    public IReadOnlyCollection<string> LinkedFloodReports { get; set; } = [];
 
     // Search parameters
     public MultiPolygon? Geom { get; set; } // Optional because it can't be sent via service bus
