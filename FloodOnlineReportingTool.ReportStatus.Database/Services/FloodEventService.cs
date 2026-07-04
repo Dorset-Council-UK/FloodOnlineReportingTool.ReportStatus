@@ -242,6 +242,8 @@ public class FloodEventService(
                     Message = JsonSerializer.Serialize(messageBody, _jsonOptions),
                     Status = MessageStatus.Pending,
                 };
+
+                context.OutboxMessages.Add(outboxMessage);
             }
             
 
@@ -257,8 +259,6 @@ public class FloodEventService(
             {
                 logger.LogWarning("Failed to update status for flood report {ReportReference}.", reportReference);
             }
-
-            context.OutboxMessages.Add(outboxMessage);
         }
         await context.SaveChangesAsync(ct);
 

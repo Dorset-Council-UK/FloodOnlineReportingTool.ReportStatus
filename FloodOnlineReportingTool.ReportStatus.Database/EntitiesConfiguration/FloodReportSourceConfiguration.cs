@@ -9,6 +9,7 @@ internal class FloodReportSourceConfiguration : IEntityTypeConfiguration<FloodRe
     public void Configure(EntityTypeBuilder<FloodReportSource> builder)
     {
         builder.HasKey(o => o.Id);
+        builder.HasAlternateKey(o => o.Reference);
 
         builder.HasIndex(o => o.EligibilityCheckId);
         builder.HasIndex(o => o.Reference).IsUnique();
@@ -33,5 +34,6 @@ internal class FloodReportSourceConfiguration : IEntityTypeConfiguration<FloodRe
         builder
             .Property(o => o.Longitude)
             .HasComputedColumnSql("ST_X(ST_Transform(\"Geom\", 4326))", stored: true);
+        
     }
 }

@@ -53,9 +53,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid>("InvestigationStatus")
                         .HasColumnType("uuid");
 
-                    b.PrimitiveCollection<Guid[]>("LinkedFloodReports")
+                    b.PrimitiveCollection<string[]>("LinkedFloodReports")
                         .IsRequired()
-                        .HasColumnType("uuid[]");
+                        .HasColumnType("text[]");
 
                     b.PrimitiveCollection<Guid[]>("Organisations")
                         .IsRequired()
@@ -361,8 +361,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid?>("FloodReportSourceDuplicateId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("FloodReportSourceId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("FloodReportSourceRef")
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -375,9 +375,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .IsUnique()
                         .HasFilter("\"FloodReportSourceDuplicateId\" IS NOT NULL");
 
-                    b.HasIndex("FloodReportSourceId", "CauseId")
+                    b.HasIndex("FloodReportSourceRef", "CauseId")
                         .IsUnique()
-                        .HasFilter("\"FloodReportSourceId\" IS NOT NULL");
+                        .HasFilter("\"FloodReportSourceRef\" IS NOT NULL");
 
                     b.ToTable("FloodReportSourceFloodCause", "fortreportstatus");
                 });
@@ -399,8 +399,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                     b.Property<Guid?>("FloodReportSourceDuplicateId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("FloodReportSourceId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("FloodReportSourceRef")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("OrganisationId")
                         .HasColumnType("uuid");
@@ -416,9 +416,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
                         .IsUnique()
                         .HasFilter("\"FloodReportSourceDuplicateId\" IS NOT NULL");
 
-                    b.HasIndex("FloodReportSourceId", "OrganisationId", "FloodAuthorityId")
+                    b.HasIndex("FloodReportSourceRef", "OrganisationId", "FloodAuthorityId")
                         .IsUnique()
-                        .HasFilter("\"FloodReportSourceId\" IS NOT NULL");
+                        .HasFilter("\"FloodReportSourceRef\" IS NOT NULL");
 
                     b.ToTable("FloodReportSourceOrganisation", "fortreportstatus");
                 });
@@ -497,7 +497,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", "FloodReportSource")
                         .WithMany("FloodCauses")
-                        .HasForeignKey("FloodReportSourceId");
+                        .HasForeignKey("FloodReportSourceRef")
+                        .HasPrincipalKey("Reference");
 
                     b.Navigation("FloodReportSource");
 
@@ -512,7 +513,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasOne("FloodOnlineReportingTool.ReportStatus.Database.Models.FloodReportSource", "FloodReportSource")
                         .WithMany("Organisations")
-                        .HasForeignKey("FloodReportSourceId");
+                        .HasForeignKey("FloodReportSourceRef")
+                        .HasPrincipalKey("Reference");
 
                     b.Navigation("FloodReportSource");
 

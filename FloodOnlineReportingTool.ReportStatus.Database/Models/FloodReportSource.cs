@@ -5,12 +5,12 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
 
 public record FloodReportSource : ICreatedUpdated
 {
-    public required Guid Id { get; init; } // This is the primary key for this table
-    public required string Reference { get; init; }
+    public Guid Id { get; init; } = Guid.CreateVersion7(); // Primary key and not the same as in calling apps
+    public required string Reference { get; init; } // This is the common reference key
     public required Uri ViewUri { get; init; }
 
     // ICreatedUpdated implementation
-    public DateTimeOffset CreatedUtc { get; init; }
+    public DateTimeOffset CreatedUtc { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedUtc { get; set; }
 
     // Other properties

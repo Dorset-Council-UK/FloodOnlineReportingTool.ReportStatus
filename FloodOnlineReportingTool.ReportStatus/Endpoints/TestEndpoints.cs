@@ -54,11 +54,9 @@ internal static class TestEndpoints
                 ] 
             );
             var prsc = new FloodReportSourceCreated(
-                Guid.CreateVersion7(),
                 25,
                 "Test1234",
                 new Uri("https://example.com"),
-                now,
                 ecc,
                 false,
                 false,
