@@ -31,8 +31,7 @@ public class FloodReportService(
 
     public async Task CreateFromFloodReportCreated(FloodReportSourceCreated message, CancellationToken ct)
     {
-        var floodReportId = Guid.CreateVersion7();
-        var floodSourceId = Guid.CreateVersion7();  
+        var floodReportId = Guid.CreateVersion7(); 
         var (floodCauses, organisations) = message.ToSourceCollections(message.Reference);
 
         FloodReportSource messageSource = new FloodReportSource()
