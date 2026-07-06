@@ -1,51 +1,62 @@
 ﻿using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Topics;
 using System.Text.Json;
 
 namespace Messaging.Consumers;
 
-public sealed class InvestigationTriggeredConsumer(
+internal sealed class InvestigationTriggeredConsumer(
     ILogger<InvestigationTriggeredConsumer> logger,
-    IServiceScopeFactory scopeFactory)
+    IConfiguration configuration
+) : IInboxConsumer
 {
-    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    public string ContractName => nameof(InvestigationTriggered);
+
+    public string TopicName => $"{TopicNames.InvestigationTriggered}{configuration["Messaging:TopicSuffix"]}";
+
+    public ServiceBusProcessorOptions ProcessorOptions => new()
+    {
+        AutoCompleteMessages = false,
+        MaxConcurrentCalls = 2,
+    };
+
     private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     public async Task HandleMessage(ProcessMessageEventArgs args)
     {
-        logger.LogInformation("Consuming contract: {Contract}", nameof(InvestigationTriggered));
+        logger.LogInformation("Consuming contract: {Contract}", ContractName);
 
         try
         {
             var message = JsonSerializer.Deserialize<InvestigationTriggered>(args.Message.Body, _jsonOptions);
             if (message is null)
             {
-                logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
+                logger.LogError("Reading {Contract} {MessageId} failed", ContractName, args.Message.MessageId);
                 await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
                 return;
             }
 
-            // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
-            await using var scope = _scopeFactory.CreateAsyncScope();
-            // TODO: Implement this
+            // TODO: Implement the processing logic for InvestigationTriggered messages
+            // await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
+            // await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
-            //await args.CompleteMessageAsync(args.Message, args.CancellationToken); // Don't complete yet until we implement the processing logic
-
-            logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
+            logger.LogInformation("Processed {Contract} {MessageId}", ContractName, args.Message.MessageId);
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
-            // Decided to just dead-letter but we may want to consider doing additional steps here. 
-            // Could indicate a bad integration from a third party or something similar so we might want to 
-            // notify a user. 
+            logger.LogError(ex, "Deserialization error for {Contract} {MessageId}", ContractName, args.Message.MessageId);
             await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
-            // Dead-letter the message here
+            logger.LogError(ex, "Error processing {Contract} {MessageId}", ContractName, args.Message.MessageId);
             await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
+    }
+
+    public Task HandleError(ProcessErrorEventArgs args)
+    {
+        logger.LogError(args.Exception, "{Contract} error on Entity path: {EntityPath} Source: {ErrorSource}", ContractName, args.EntityPath, args.ErrorSource);
+        return Task.CompletedTask;
     }
 }
