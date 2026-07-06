@@ -2,8 +2,8 @@ using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Topics;
 using Messaging;
+using Messaging.Consumers;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Reflection;
@@ -37,10 +37,10 @@ public class InboxWorkerTests
     {
         var logger = Substitute.For<ILogger<InboxWorker>>();
         var configuration = CreateConfiguration(subscriptionName: null);
-        var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
+        IEnumerable<IInboxConsumer> consumers = Substitute.For<IEnumerable<IInboxConsumer>>();
         await using var serviceBusClient = CreateServiceBusClient();
 
-        var worker = new InboxWorker(logger, configuration, serviceScopeFactory, serviceBusClient);
+        var worker = new InboxWorker(logger, configuration, consumers, serviceBusClient);
         var executeAsyncMethod = typeof(InboxWorker).GetMethod("ExecuteAsync", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new InvalidOperationException("ExecuteAsync method not found");
 
@@ -57,10 +57,10 @@ public class InboxWorkerTests
     {
         var logger = Substitute.For<ILogger<InboxWorker>>();
         var configuration = CreateConfiguration(topicSuffix: "-test");
-        var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
+        IEnumerable<IInboxConsumer> consumers = Substitute.For<IEnumerable<IInboxConsumer>>();
         await using var serviceBusClient = CreateServiceBusClient();
 
-        var worker = new InboxWorker(logger, configuration, serviceScopeFactory, serviceBusClient);
+        var worker = new InboxWorker(logger, configuration, consumers, serviceBusClient);
         var getTopicNameMethod = typeof(InboxWorker).GetMethod("GetTopicName", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new InvalidOperationException("GetTopicName method not found");
 
@@ -76,10 +76,10 @@ public class InboxWorkerTests
     {
         var logger = Substitute.For<ILogger<InboxWorker>>();
         var configuration = CreateConfiguration();
-        var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
+        IEnumerable<IInboxConsumer> consumers = Substitute.For<IEnumerable<IInboxConsumer>>();
         await using var serviceBusClient = CreateServiceBusClient();
 
-        var worker = new InboxWorker(logger, configuration, serviceScopeFactory, serviceBusClient);
+        var worker = new InboxWorker(logger, configuration, consumers, serviceBusClient);
         var getTopicNameMethod = typeof(InboxWorker).GetMethod("GetTopicName", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new InvalidOperationException("GetTopicName method not found");
 
