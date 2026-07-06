@@ -9,12 +9,16 @@ using Microsoft.Extensions.Azure;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Services
 builder.Services
     .AddScoped<IFloodReportService, FloodReportService>()
     .AddScoped<IFloodReportRepository, FloodReportRepository>()
-    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
-    .AddScoped<InvestigationTriggeredConsumer>()
-    .AddScoped<FloodSourceCreatedConsumer>();
+    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>();
+
+// Consumers
+builder.Services
+    .AddSingleton<IInboxConsumer, InvestigationTriggeredConsumer>()
+    .AddSingleton<IInboxConsumer, FloodSourceCreatedConsumer>();
 
 builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHostedService<InboxWorker>();
