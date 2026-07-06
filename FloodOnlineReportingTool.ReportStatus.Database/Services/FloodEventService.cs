@@ -111,7 +111,7 @@ public class FloodEventService(
             return;
         }
 
-        logger.LogDebug("Creating flood event from {MessageType}.", nameof(FloodEventUpdated));
+        logger.LogDebug("Updating flood event from {MessageType}.", nameof(FloodEventUpdated));
 
         // Design choice: keep this resilient to contract evolution by mapping via JSON shape.
         var dto = JsonSerializer.Deserialize<FloodEventUpdateDto>(
@@ -208,8 +208,7 @@ public class FloodEventService(
 
         var floodEvent = await context
             .FloodEvents
-            .Include(e => e.LinkedFloodReports)
-            .Where(e => e.Reference == message.Reference)
+            .Where(e => e.Reference == message.Reference.Trim())
             .FirstOrDefaultAsync(ct);
 
         if (floodEvent is null)
