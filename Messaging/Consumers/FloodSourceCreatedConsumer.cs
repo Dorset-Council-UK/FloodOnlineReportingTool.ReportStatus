@@ -1,50 +1,63 @@
 ﻿using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Contracts.Topics;
 using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using System.Text.Json;
 
 namespace Messaging.Consumers;
 
-public sealed class FloodSourceCreatedConsumer(
+internal sealed class FloodSourceCreatedConsumer(
     ILogger<FloodSourceCreatedConsumer> logger,
-    IServiceScopeFactory scopeFactory)
+    IConfiguration configuration,
+    IFloodReportService floodReportService
+) : IInboxConsumer
 {
+    public string ContractName => nameof(FloodReportSourceCreated);
 
-    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    public string TopicName => $"{TopicNames.FloodReportSourceCreated}{configuration["Messaging:TopicSuffix"]}";
+
+    public ServiceBusProcessorOptions ProcessorOptions => new()
+    {
+        AutoCompleteMessages = false,
+        MaxConcurrentCalls = 2,
+    };
+
     private readonly JsonSerializerOptions _jsonOptions = JsonSerializerOptions.Web;
 
     public async Task HandleMessage(ProcessMessageEventArgs args)
     {
-        logger.LogInformation("Consuming contract: {Contract}", nameof(FloodReportSourceCreated));
+        logger.LogInformation("Consuming contract: {Contract}", ContractName);
 
         try
         {
             var message = JsonSerializer.Deserialize<FloodReportSourceCreated>(args.Message.Body, _jsonOptions);
             if (message is null)
             {
-                logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
+                logger.LogError("Reading {Contract} {MessageId} failed", ContractName, args.Message.MessageId);
                 await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
                 return;
             }
 
-            // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
-            await using var scope = _scopeFactory.CreateAsyncScope();
-            IFloodReportService floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
             await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
-
             await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
-            logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
+            logger.LogInformation("Processed {Contract} {MessageId}", ContractName, args.Message.MessageId);
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "Deserialization error for message {MessageId}", args.Message.MessageId);
+            logger.LogError(ex, "Deserialization error for {Contract} {MessageId}", ContractName, args.Message.MessageId);
             await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing message {MessageId}", args.Message.MessageId);
+            logger.LogError(ex, "Error processing {Contract} {MessageId}", ContractName, args.Message.MessageId);
             await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
+    }
+
+    public Task HandleError(ProcessErrorEventArgs args)
+    {
+        logger.LogError(args.Exception, "{Contract} error on Entity path: {EntityPath} Source: {ErrorSource}", ContractName, args.EntityPath, args.ErrorSource);
+        return Task.CompletedTask;
     }
 }
