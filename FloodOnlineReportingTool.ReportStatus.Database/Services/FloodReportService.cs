@@ -31,17 +31,14 @@ public class FloodReportService(
 
     public async Task CreateFromFloodReportCreated(FloodReportSourceCreated message, CancellationToken ct)
     {
-        var floodReportId = Guid.CreateVersion7();
-        var floodSourceId = Guid.CreateVersion7();  
-        var (floodCauses, organisations) = message.ToSourceCollections(message.Id);
+        var floodReportId = Guid.CreateVersion7(); 
+        var (floodCauses, organisations) = message.ToSourceCollections(message.Reference);
 
         FloodReportSource messageSource = new FloodReportSource()
         {
-            Id = floodSourceId,
             FloodReportId = floodReportId, 
             Reference = message.Reference,
             ViewUri = message.ViewUri,
-            CreatedUtc = message.CreatedUtc,
             UpdatedUtc = null,
             EligibilityCheckId = message.EligibilityCheckRecord.Id,
             Uprn = message.EligibilityCheckRecord.Uprn,

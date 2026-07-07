@@ -11,14 +11,13 @@ public static class FloodReportSourceData
 
     public static FloodReportSource Create(Guid? floodReportId = null, Guid? sourceId = null, string? name = null)
     {
-        var recordId = Guid.NewGuid();
+        var recordRef = "HKFGHDSDFCW";
         var reportId = floodReportId ?? Guid.NewGuid();
         var checkId = sourceId ?? Guid.NewGuid();
 
         return new FloodReportSource
         {
-            Id = recordId,
-            Reference = "HKFGHDSDFCW",
+            Reference = recordRef,
             ViewUri = new Uri($"https://example.com/floodreport/HKFGHDSDFCW"),
             CreatedUtc = TestCreatedDate,
             UpdatedUtc = null,
@@ -36,13 +35,13 @@ public static class FloodReportSourceData
             FloodCauses = [
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportSourceId = recordId,
+                    FloodReportSourceRef = recordRef,
                     CauseId = PrimaryCauseIds.River,
                     Name = "River",
                 },
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportSourceId = recordId,
+                    FloodReportSourceRef = recordRef,
                     CauseId = PrimaryCauseIds.RainwaterFlowingOverTheGround,
                     Name = "Rainwater flowing over the ground",
                 },

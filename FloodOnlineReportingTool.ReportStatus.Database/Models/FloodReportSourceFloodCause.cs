@@ -11,7 +11,7 @@ public record FloodReportSourceFloodCause
     public required Guid CauseId { get; init; }
     public required string Name { get; init; }
 
-    public Guid? FloodReportSourceId { get; init; }
+    public string? FloodReportSourceRef { get; init; }
     public FloodReportSource? FloodReportSource { get; init; }
 
     public Guid? FloodReportSourceDuplicateId { get; init; }

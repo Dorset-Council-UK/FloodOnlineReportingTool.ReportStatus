@@ -11,9 +11,9 @@ internal class FloodReportSourceFloodCauseConfiguration : IEntityTypeConfigurati
         builder.HasKey(o => o.Id);
 
         // Only enforces uniqueness for source-owned cause rows
-        builder.HasIndex(o => new { o.FloodReportSourceId, o.CauseId })
+        builder.HasIndex(o => new { o.FloodReportSourceRef, o.CauseId })
             .IsUnique()
-            .HasFilter("\"FloodReportSourceId\" IS NOT NULL");
+            .HasFilter("\"FloodReportSourceRef\" IS NOT NULL");
 
         // Only enforces uniqueness for duplicate-owned cause rows
         builder.HasIndex(o => new { o.FloodReportSourceDuplicateId, o.CauseId })
@@ -24,7 +24,8 @@ internal class FloodReportSourceFloodCauseConfiguration : IEntityTypeConfigurati
 
         builder.HasOne(x => x.FloodReportSource)
             .WithMany(x => x.FloodCauses)
-            .HasForeignKey(x => x.FloodReportSourceId)
+            .HasForeignKey(x => x.FloodReportSourceRef)
+            .HasPrincipalKey(x => x.Reference)
             .IsRequired(false);
 
         builder.HasOne(x => x.FloodReportSourceDuplicate)

@@ -7,11 +7,9 @@ namespace Tests.Data;
 public static class FloodReportSourceCreatedData
 {
     public static readonly FloodReportSourceCreated Property1 = new(
-        Guid.Parse("11111111-1111-0000-0000-000000000000"),
         0,
         "ABCDEFG0111",
         new Uri("https://test.com/floodreport/ABCDEFG0111"), 
-        new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
         new EligibilityCheckRecord(
             Guid.Parse("11111111-1111-1111-0000-000000000000"),
             10023242411,
@@ -36,11 +34,9 @@ public static class FloodReportSourceCreatedData
     );
 
     public static readonly FloodReportSourceCreated Property2 = new(
-        Guid.Parse("11111111-2222-0000-0000-000000000000"),
         0,
         "ABCDEFG0222",
         new Uri("https://test.com/floodreport/ABCDEFG0222"),
-        new DateTimeOffset(2025, 2, 2, 2, 2, 2, TimeSpan.Zero),
         new EligibilityCheckRecord(
             Guid.Parse("11111111-1111-2222-0000-000000000000"),
             10023242411,
@@ -64,11 +60,9 @@ public static class FloodReportSourceCreatedData
         []
     );
     public static readonly FloodReportSourceCreated Property3 = new(
-        Guid.Parse("11111111-3333-0000-0000-000000000000"),
         0,
         "ABCDEFG0333",
         new Uri("https://test.com/floodreport/ABCDEFG0333"),
-        new DateTimeOffset(2025, 3, 3, 3, 3, 3, TimeSpan.Zero),
         new EligibilityCheckRecord(
             Guid.Parse("11111111-1111-3333-0000-000000000000"),
             10023242411,
@@ -92,11 +86,9 @@ public static class FloodReportSourceCreatedData
         []
     );
     public static readonly FloodReportSourceCreated Property4 = new(
-        Guid.Parse("11111111-4444-0000-0000-000000000000"),
         0,
         "ABCDEFG0444",
         new Uri("https://test.com/floodreport/ABCDEFG0444"),
-        new DateTimeOffset(2025, 4, 4, 4, 4, 4, TimeSpan.Zero),
         new EligibilityCheckRecord(
             Guid.Parse("11111111-1111-4444-0000-000000000000"),
             10023242411,

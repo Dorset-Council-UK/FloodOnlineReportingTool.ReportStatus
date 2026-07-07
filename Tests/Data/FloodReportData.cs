@@ -24,15 +24,14 @@ public static class FloodReportData
 
     public static FloodReportSource Create(Guid? floodReportId = null, Guid? eligibilityCheckId = null, DateTimeOffset? createdUtc = null, long? uprn = null, long? usrn = null, double? easting = null, double? northing = null)
     {
-        var recordId = Guid.NewGuid();
+        var recordRef = "TestReference";
         var reportId = floodReportId ?? Guid.NewGuid();
         var checkId = eligibilityCheckId ?? Guid.NewGuid();
 
         return new()
         {
-            Id = recordId,
             FloodReportId = reportId,
-            Reference = "TestReference",
+            Reference = recordRef,
             ViewUri = new Uri("https://example.com/floodreport"),
             CreatedUtc = createdUtc ?? new DateTimeOffset(2025, 1, 1, 1, 1, 1, TimeSpan.Zero),
             EligibilityCheckId = checkId,
@@ -46,13 +45,13 @@ public static class FloodReportData
             [
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportSourceId = reportId,
+                    FloodReportSourceRef = recordRef,
                     CauseId = PrimaryCauseIds.River,
                     Name = "River",
                 },
                 new FloodReportSourceFloodCause
                 {
-                    FloodReportSourceId = reportId,
+                    FloodReportSourceRef = recordRef,
                     CauseId = PrimaryCauseIds.RainwaterFlowingOverTheGround,
                     Name = "Rainwater flowing over the ground",
                 },

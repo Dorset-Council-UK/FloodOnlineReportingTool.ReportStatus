@@ -22,9 +22,7 @@ public static class FloodReportExtensions
     public static FloodReportCreated ToMessageCreated(this FloodReport floodReport)
     {
         return new FloodReportCreated(
-            floodReport.Id,
             floodReport.Reference,
-            floodReport.CreatedUtc,
             floodReport.Geom.X,
             floodReport.Geom.Y,
             floodReport.SourceRecords.Any(sr => sr.HasContacts),
@@ -35,15 +33,14 @@ public static class FloodReportExtensions
     public static FloodReportUpdated ToMessageUpdated(this FloodReport floodReport)
     {
         return new FloodReportUpdated(
-            floodReport.Id,
             floodReport.Reference,
-            floodReport.UpdatedUtc ?? DateTimeOffset.UtcNow,
             floodReport.RecordStatus,
             floodReport.Geom.X,
             floodReport.Geom.Y,
             floodReport.SourceRecords.Any(sr => sr.HasInvestigation),
-            floodReport.SourceRecords.Any(s => s.HasContacts),
-            floodReport.SourceRecords.SelectMany(sr => sr.ContactRecordTypes).Distinct().ToList()
+            floodReport.SourceRecords.Any(sr => sr.HasContacts),
+            floodReport.SourceRecords.SelectMany(sr => sr.ContactRecordTypes).Distinct().ToList(),
+            null
         );
     }
 

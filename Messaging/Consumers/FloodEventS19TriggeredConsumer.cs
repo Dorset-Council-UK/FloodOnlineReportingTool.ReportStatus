@@ -1,11 +1,12 @@
 ﻿using Azure.Messaging.ServiceBus;
 using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.ReportStatus.Database.Services;
 using System.Text.Json;
 
 namespace Messaging.Consumers;
 
-public sealed class InvestigationTriggeredConsumer(
-    ILogger<InvestigationTriggeredConsumer> logger,
+public sealed class FloodEventS19TriggeredConsumer(
+    ILogger<FloodEventS19TriggeredConsumer> logger,
     IServiceScopeFactory scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
@@ -13,11 +14,11 @@ public sealed class InvestigationTriggeredConsumer(
 
     public async Task HandleMessage(ProcessMessageEventArgs args)
     {
-        logger.LogInformation("Consuming contract: {Contract}", nameof(InvestigationTriggered));
+        logger.LogInformation("Consuming contract: {Contract}", nameof(FloodEventS19Triggered));
 
         try
         {
-            var message = JsonSerializer.Deserialize<InvestigationTriggered>(args.Message.Body, _jsonOptions);
+            var message = JsonSerializer.Deserialize<FloodEventS19Triggered>(args.Message.Body, _jsonOptions);
             if (message is null)
             {
                 logger.LogError("Reading inbox message {MessageId} failed", args.Message.MessageId);
@@ -27,9 +28,10 @@ public sealed class InvestigationTriggeredConsumer(
 
             // InboxWorker / BackgroundService is a singleton, so we have to create a scope to our service
             await using var scope = _scopeFactory.CreateAsyncScope();
-            // TODO: Implement this
+            IFloodEventService floodEventService = scope.ServiceProvider.GetRequiredService<IFloodEventService>();
+            await floodEventService.TriggerFromFloodEventS19Triggered(message, args.CancellationToken);
 
-            //await args.CompleteMessageAsync(args.Message, args.CancellationToken); // Don't complete yet until we implement the processing logic
+            await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
             logger.LogInformation("Processed inbox message {MessageId}", args.Message.MessageId);
         }

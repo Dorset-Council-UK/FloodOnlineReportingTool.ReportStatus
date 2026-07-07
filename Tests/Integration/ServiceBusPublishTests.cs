@@ -90,9 +90,7 @@ public class ServiceBusPublishTests
         }
 
         var message = new FloodReportCreated(
-            Id: Guid.CreateVersion7(),
             Reference: "TEST-INTG-01",
-            CreatedUtc: DateTimeOffset.UtcNow,
             Easting: 368991.12,
             Northing: 90881.94,
             HasContacts: false,

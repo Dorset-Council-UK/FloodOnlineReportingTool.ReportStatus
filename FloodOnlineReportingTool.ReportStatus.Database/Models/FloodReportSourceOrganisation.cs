@@ -13,7 +13,7 @@ public record FloodReportSourceOrganisation
     public required Guid FloodAuthorityId { get; init; }
     public required string FloodAuthorityName { get; init; }
 
-    public Guid? FloodReportSourceId { get; init; }
+    public string? FloodReportSourceRef { get; init; }
     public FloodReportSource? FloodReportSource { get; init; }
 
     public Guid? FloodReportSourceDuplicateId { get; init; }

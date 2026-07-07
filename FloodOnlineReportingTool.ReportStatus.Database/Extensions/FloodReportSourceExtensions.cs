@@ -64,21 +64,21 @@ public static class FloodReportSourceExtensions
         return [.. floodSources.Select(fs => fs.ToSearchResult())];
     }
 
-    public static FloodReportSourceFloodCause ToFloodCause(this EligibilityCheckFloodSource source, Guid floodReportSourceId)
+    public static FloodReportSourceFloodCause ToFloodCause(this EligibilityCheckFloodSource source, string floodReportSourceRef)
     {
         return new FloodReportSourceFloodCause
         {
-            FloodReportSourceId = floodReportSourceId,
+            FloodReportSourceRef = floodReportSourceRef,
             CauseId = source.Id,
             Name = source.Name,
         };
     }
 
-    public static FloodReportSourceOrganisation ToOrganisation(this EligibilityCheckOrganisation source, Guid floodReportSourceId)
+    public static FloodReportSourceOrganisation ToOrganisation(this EligibilityCheckOrganisation source, string floodReportSourceRef)
     {
         return new FloodReportSourceOrganisation
         {
-            FloodReportSourceId = floodReportSourceId,
+            FloodReportSourceRef = floodReportSourceRef,
             OrganisationId = source.Id,
             OrganisationName = source.Name,
             FloodAuthorityId = source.FloodAuthorityId,
@@ -88,14 +88,14 @@ public static class FloodReportSourceExtensions
 
     public static (ICollection<FloodReportSourceFloodCause> FloodCauses, ICollection<FloodReportSourceOrganisation> Organisations) ToSourceCollections(
         this FloodReportSourceCreated message,
-        Guid floodReportSourceId)
+        string floodReportSourceRef)
     {
         var floodCauses = message.EligibilityCheckRecord.FloodSources
-            .Select(fs => fs.ToFloodCause(floodReportSourceId))
+            .Select(fs => fs.ToFloodCause(floodReportSourceRef))
             .ToList();
 
         var organisations = message.EligibilityCheckRecord.Organisations
-            .Select(org => org.ToOrganisation(floodReportSourceId))
+            .Select(org => org.ToOrganisation(floodReportSourceRef))
             .ToList();
 
         return (floodCauses, organisations);
