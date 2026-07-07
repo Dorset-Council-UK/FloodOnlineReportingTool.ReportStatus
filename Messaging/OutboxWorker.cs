@@ -106,7 +106,7 @@ public sealed class OutboxWorker(
             catch (Exception ex)
             {
                 activity?.AddException(ex);
-                logger.LogError(ex, "Error processing outbox messages");
+                logger.LogCritical(ex, "Error processing outbox messages");
             }
         }
 
