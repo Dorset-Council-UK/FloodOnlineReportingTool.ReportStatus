@@ -9,10 +9,10 @@ internal class FloodReportSourceConfiguration : IEntityTypeConfiguration<FloodRe
     public void Configure(EntityTypeBuilder<FloodReportSource> builder)
     {
         builder.HasKey(o => o.Id);
+        // Unique constraint ensures Reference is consistent across FORT modules
         builder.HasAlternateKey(o => o.Reference);
 
         builder.HasIndex(o => o.EligibilityCheckId);
-        builder.HasIndex(o => o.Reference).IsUnique();
         builder.HasIndex(o => new { o.FloodReportId, o.EligibilityCheckId });
 
         builder

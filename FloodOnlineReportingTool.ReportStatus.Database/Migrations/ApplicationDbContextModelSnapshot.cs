@@ -81,6 +81,8 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasAlternateKey("Reference");
+
                     b.ToTable("FloodEvents", "fortreportstatus");
                 });
 
@@ -132,8 +134,7 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Reference")
-                        .IsUnique();
+                    b.HasAlternateKey("Reference");
 
                     b.ToTable("FloodReports", "fortreportstatus");
                 });
@@ -250,9 +251,6 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasIndex("EligibilityCheckId");
 
-                    b.HasIndex("Reference")
-                        .IsUnique();
-
                     b.HasIndex("FloodReportId", "EligibilityCheckId");
 
                     b.ToTable("FloodReportSources", "fortreportstatus");
@@ -341,10 +339,9 @@ namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EligibilityCheckId");
+                    b.HasAlternateKey("Reference");
 
-                    b.HasIndex("Reference")
-                        .IsUnique();
+                    b.HasIndex("EligibilityCheckId");
 
                     b.ToTable("FloodReportSourceDuplicates", "fortreportstatus");
                 });
