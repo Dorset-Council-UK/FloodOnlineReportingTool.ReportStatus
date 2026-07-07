@@ -37,7 +37,11 @@ internal sealed class InvestigationTriggeredConsumer(
             }
 
             // TODO: Implement the processing logic for InvestigationTriggered messages
-            // await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
+            // InboxWorker and Consumers are singletons, so we have to create a scope to our service
+            // await using var scope = scopeFactory.CreateAsyncScope();
+            // IInvestigationService investigationService = scope.ServiceProvider.GetRequiredService<IInvestigationService>();
+            // await investigationService.CreateFromInvestigationTriggered(message, args.CancellationToken);
+
             // await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
             logger.LogInformation("Processed {Contract} {MessageId}", ContractName, args.Message.MessageId);
@@ -56,7 +60,7 @@ internal sealed class InvestigationTriggeredConsumer(
 
     public Task HandleError(ProcessErrorEventArgs args)
     {
-        logger.LogError(args.Exception, "{Contract} error on Entity path: {EntityPath} Source: {ErrorSource}", ContractName, args.EntityPath, args.ErrorSource);
+        logger.LogCritical(args.Exception, "{Contract} error on Entity path: {EntityPath} Source: {ErrorSource}", ContractName, args.EntityPath, args.ErrorSource);
         return Task.CompletedTask;
     }
 }

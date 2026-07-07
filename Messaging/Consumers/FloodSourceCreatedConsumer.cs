@@ -9,7 +9,7 @@ namespace Messaging.Consumers;
 internal sealed class FloodSourceCreatedConsumer(
     ILogger<FloodSourceCreatedConsumer> logger,
     IConfiguration configuration,
-    IFloodReportService floodReportService
+    IServiceScopeFactory scopeFactory
 ) : IInboxConsumer
 {
     public string ContractName => nameof(FloodReportSourceCreated);
@@ -38,7 +38,11 @@ internal sealed class FloodSourceCreatedConsumer(
                 return;
             }
 
+            // InboxWorker and Consumers are singletons, so we have to create a scope to our service
+            await using var scope = scopeFactory.CreateAsyncScope();
+            IFloodReportService floodReportService = scope.ServiceProvider.GetRequiredService<IFloodReportService>();
             await floodReportService.CreateFromFloodReportCreated(message, args.CancellationToken);
+
             await args.CompleteMessageAsync(args.Message, args.CancellationToken);
 
             logger.LogInformation("Processed {Contract} {MessageId}", ContractName, args.Message.MessageId);
@@ -57,7 +61,7 @@ internal sealed class FloodSourceCreatedConsumer(
 
     public Task HandleError(ProcessErrorEventArgs args)
     {
-        logger.LogError(args.Exception, "{Contract} error on Entity path: {EntityPath} Source: {ErrorSource}", ContractName, args.EntityPath, args.ErrorSource);
+        logger.LogCritical(args.Exception, "{Contract} error on Entity path: {EntityPath} Source: {ErrorSource}", ContractName, args.EntityPath, args.ErrorSource);
         return Task.CompletedTask;
     }
 }
