@@ -34,7 +34,7 @@ internal sealed class FloodSourceCreatedConsumer(
             if (message is null)
             {
                 logger.LogError("Reading {Contract} {MessageId} failed", ContractName, args.Message.MessageId);
-                await args.DeadLetterMessageAsync(args.Message, "Deserialization returned null", cancellationToken: args.CancellationToken);
+                await args.DeadLetterMessageAsync(args.Message, "Message could not be read", cancellationToken: args.CancellationToken);
                 return;
             }
 
@@ -49,7 +49,7 @@ internal sealed class FloodSourceCreatedConsumer(
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "Deserialization error for {Contract} {MessageId}", ContractName, args.Message.MessageId);
+            logger.LogError(ex, "Message could not be deserialized for {Contract} {MessageId}", ContractName, args.Message.MessageId);
             await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
         }
         catch (Exception ex)
