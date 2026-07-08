@@ -14,7 +14,7 @@ public sealed class FloodEventCreatedConsumer(
 {
     public string ContractName => nameof(FloodEventCreated);
 
-    public string TopicName => $"{TopicNames.FloodEventCreated}{configuration["Messaging:TopicSuffix"]}";
+    public string TopicName => $"{TopicNames.FloodEventCreated}{configuration["Messaging:TopicSuffix"]?.Trim()}";
 
     public ServiceBusProcessorOptions ProcessorOptions => new()
     {
@@ -52,12 +52,12 @@ public sealed class FloodEventCreatedConsumer(
             // Decided to just dead-letter but we may want to consider doing additional steps here. 
             // Could indicate a bad integration from a third party or something similar so we might want to notify a user. 
             logger.LogError(ex, "Message could not be deserialized for {Contract} {MessageId}", ContractName, args.Message.MessageId);
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
+            await args.DeadLetterMessageAsync(args.Message, "JSON exception", ex.Message, args.CancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing {Contract} {MessageId}", ContractName, args.Message.MessageId);
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
+            await args.DeadLetterMessageAsync(args.Message, "Unexpected exception", ex.Message, args.CancellationToken);
         }
     }
 

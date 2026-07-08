@@ -43,7 +43,7 @@ public sealed class InboxWorker(
             // Graceful shutdown
             foreach (var processor in processors)
             {
-                await processor.StopProcessingAsync(cancellationToken);
+                await processor.StopProcessingAsync();
                 await processor.DisposeAsync();
             }
             logger.LogInformation("Service bus processors stopped");

@@ -14,7 +14,7 @@ internal sealed class FloodSourceCreatedConsumer(
 {
     public string ContractName => nameof(FloodReportSourceCreated);
 
-    public string TopicName => $"{TopicNames.FloodReportSourceCreated}{configuration["Messaging:TopicSuffix"]}";
+    public string TopicName => $"{TopicNames.FloodReportSourceCreated}{configuration["Messaging:TopicSuffix"]?.Trim()}";
 
     public ServiceBusProcessorOptions ProcessorOptions => new()
     {
@@ -50,12 +50,12 @@ internal sealed class FloodSourceCreatedConsumer(
         catch (JsonException ex)
         {
             logger.LogError(ex, "Message could not be deserialized for {Contract} {MessageId}", ContractName, args.Message.MessageId);
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
+            await args.DeadLetterMessageAsync(args.Message, "JSON exception", ex.Message, args.CancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing {Contract} {MessageId}", ContractName, args.Message.MessageId);
-            await args.DeadLetterMessageAsync(args.Message, ex.Message, ex.InnerException?.Message ?? "", cancellationToken: args.CancellationToken);
+            await args.DeadLetterMessageAsync(args.Message, "Unexpected exception", ex.Message, args.CancellationToken);
         }
     }
 
