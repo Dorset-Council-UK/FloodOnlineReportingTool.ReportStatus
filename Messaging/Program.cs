@@ -11,20 +11,17 @@ var builder = Host.CreateApplicationBuilder(args);
 
 // Services
 builder.Services
-    .AddScoped<IFloodReportService, FloodReportService>()
-    .AddScoped<IFloodReportRepository, FloodReportRepository>()
     .AddScoped<IFloodEventService, FloodEventService>()
     .AddScoped<IFloodEventRepository, FloodEventRepository>()
-    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
-    .AddScoped<FloodEventS19TriggeredConsumer>()
-    .AddScoped<FloodSourceCreatedConsumer>()
-    .AddScoped<FloodEventCreatedConsumer>()
-    .AddScoped<FloodEventUpdatedConsumer>();
+    .AddScoped<IFloodReportService, FloodReportService>()
+    .AddScoped<IFloodReportRepository, FloodReportRepository>()
     .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>();
 
 // Consumers
 builder.Services
-    .AddSingleton<IInboxConsumer, InvestigationTriggeredConsumer>()
+    .AddSingleton<IInboxConsumer, FloodEventCreatedConsumer>()
+    .AddSingleton<IInboxConsumer, FloodEventS19TriggeredConsumer>()
+    .AddSingleton<IInboxConsumer, FloodEventUpdatedConsumer>()
     .AddSingleton<IInboxConsumer, FloodSourceCreatedConsumer>();
 
 builder.Services.AddHostedService<OutboxWorker>();
