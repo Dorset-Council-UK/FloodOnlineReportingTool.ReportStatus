@@ -12,7 +12,7 @@ public record FloodReport : ICreatedUpdated
 
     // ICreatedUpdated implementation
     public DateTimeOffset CreatedUtc { get; init; }
-    public DateTimeOffset? UpdatedUtc { get; init; }
+    public DateTimeOffset? UpdatedUtc { get; set; }
 
     // Source records might have a slightly different location if the UPRN/USRN has changed between reports or if the location match option has been used. This is the official location for the whole report so we have a separate Geom and coordinates here. This will be used for user range filtering. 
     public required Point Geom { get; init; }

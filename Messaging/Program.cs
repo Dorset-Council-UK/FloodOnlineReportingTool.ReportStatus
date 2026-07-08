@@ -13,6 +13,13 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services
     .AddScoped<IFloodReportService, FloodReportService>()
     .AddScoped<IFloodReportRepository, FloodReportRepository>()
+    .AddScoped<IFloodEventService, FloodEventService>()
+    .AddScoped<IFloodEventRepository, FloodEventRepository>()
+    .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>()
+    .AddScoped<FloodEventS19TriggeredConsumer>()
+    .AddScoped<FloodSourceCreatedConsumer>()
+    .AddScoped<FloodEventCreatedConsumer>()
+    .AddScoped<FloodEventUpdatedConsumer>();
     .AddScoped<IFloodReportSourceDuplicateRepository, FloodReportSourceDuplicateRepository>();
 
 // Consumers

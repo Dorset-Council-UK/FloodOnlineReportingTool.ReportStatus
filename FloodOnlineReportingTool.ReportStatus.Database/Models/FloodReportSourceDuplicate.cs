@@ -11,7 +11,7 @@ public record FloodReportSourceDuplicate : ICreatedUpdated
 
     // ICreatedUpdated implementation
     public DateTimeOffset CreatedUtc { get; init; }
-    public DateTimeOffset? UpdatedUtc { get; init; }
+    public DateTimeOffset? UpdatedUtc { get; set; }
 
     // Other properties
     public required Guid EligibilityCheckId { get; init; } // This is the ID from the sending system

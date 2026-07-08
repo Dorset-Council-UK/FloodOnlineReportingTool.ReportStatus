@@ -378,13 +378,13 @@ public static class FindPotentialDuplicatesData
         Guid? authorityId = null)
     {
         var reportId = id ?? Guid.NewGuid();
-        var sourceId = Guid.NewGuid();
+        var sourceRef = $"TEST-{reportId.ToString()[..8].ToUpperInvariant()}";
         var effectiveAuthorityId = authorityId ?? EnvironmentAgencyId;
 
         var causes = (causeIds ?? [PrimaryCauseIds.River])
             .Select(causeId => new FloodReportSourceFloodCause
             {
-                FloodReportSourceId = sourceId,
+                FloodReportSourceRef = sourceRef,
                 CauseId = causeId,
                 Name = causeId.ToString(),
             }).ToList();
@@ -398,13 +398,12 @@ public static class FindPotentialDuplicatesData
                 OrganisationName = "Test Organisation",
                 FloodAuthorityId = effectiveAuthorityId,
                 FloodAuthorityName = effectiveAuthorityId == EnvironmentAgencyId ? "Environment Agency" : "LLFA",
-                FloodReportSourceId = sourceId,
+                FloodReportSourceRef = sourceRef,
             }
         ];
 
         var source = new FloodReportSource
         {
-            Id = sourceId,
             FloodReportId = reportId,
             Reference = "TEST-REF",
             ViewUri = new Uri("https://example.com/test"),
