@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Reflection;
 
-namespace Tests.Workers;
+namespace Tests.Messaging;
 
 public class OutboxWorkerTests
 {
