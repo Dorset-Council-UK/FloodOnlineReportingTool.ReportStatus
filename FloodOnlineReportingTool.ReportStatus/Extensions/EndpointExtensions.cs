@@ -1,10 +1,9 @@
 using FloodOnlineReportingTool.ReportStatus.Authorization;
 using FloodOnlineReportingTool.ReportStatus.Endpoints;
+using FloodOnlineReportingTool.ReportStatus.Endpoints.Checking;
 using FloodOnlineReportingTool.ReportStatus.Models.OpenApi;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.AspNetCore.Builder;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 internal static class EndpointExtensions
 {
@@ -18,9 +17,12 @@ internal static class EndpointExtensions
 
         MapTestEndpoints(app);
 
+        MapImportValidationEndpoints(app);
+
         return app;
     }
 
+#pragma warning disable MA0051 // Method is too long
     private static void MapFloodReportEndpoints(WebApplication app)
     {
         var group = app
@@ -210,6 +212,26 @@ internal static class EndpointExtensions
             .MapGet(pattern: "/consumer/property", TestEndpoints.TestFloodReportMessage)
             .WithSummary("Test the consumer flood report message")
             .WithDescription("Test the consumer flood report message functionality in the flood report service")
+            .RequireAuthorization(PolicyNames.Admin);
+    }
+
+    private static void MapImportValidationEndpoints(WebApplication app)
+    {
+        if (app.Environment.IsProduction())
+        {
+            return;
+        }
+
+        var group = app
+            .NewVersionedApi()
+            .MapGroup("/api/import/validation")
+            .HasApiVersion(Versions.V1.Version)
+            .WithTags("Import Validation");
+
+        group
+            .MapGet(pattern: "/flood-events", ImportFloodEventValidation.ImportValidateFloodEvents)
+            .WithSummary("Flood events")
+            .WithDescription("Validates the imported flood events in the database. This endpoint is only available in non-production environments.")
             .RequireAuthorization(PolicyNames.Admin);
     }
 }
