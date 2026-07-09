@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Messaging.Consumers;
 
-internal sealed class FloodSourceCreatedConsumer(
+public sealed class FloodSourceCreatedConsumer(
     ILogger<FloodSourceCreatedConsumer> logger,
     IConfiguration configuration,
     IServiceScopeFactory scopeFactory
