@@ -1,6 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+namespace FloodOnlineReportingTool.Database.Models;
 
 public record FloodEventUpdateDto
 {

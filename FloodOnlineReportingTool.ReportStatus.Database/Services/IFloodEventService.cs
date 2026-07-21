@@ -1,8 +1,8 @@
 ﻿
 using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.Database.Models;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
+namespace FloodOnlineReportingTool.Database.Services;
 
 public interface IFloodEventService
 {

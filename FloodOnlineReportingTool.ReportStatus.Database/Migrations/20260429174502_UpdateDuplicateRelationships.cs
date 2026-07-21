@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
+namespace FloodOnlineReportingTool.Database.Migrations
 {
     /// <inheritdoc />
     public partial class UpdateDuplicateRelationships : Migration

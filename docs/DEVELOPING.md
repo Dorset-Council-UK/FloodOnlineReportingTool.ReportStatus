@@ -53,9 +53,9 @@ To run this project with minimal modification, you will need the following:
    The database schema and seed data are handled by the data project.
    Navigate to the solution folder and run the following command:
    ```shell
-   dotnet ef database update --project "FloodOnlineReportingTool.ReportStatus.Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
+   dotnet ef database update --project "Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
-   or if using the Package Manager Console in Visual Studio, set the default project to FloodOnlineReportingTool.ReportStatus.Database and run:
+   or if using the Package Manager Console in Visual Studio, set the default project to Database and run:
    ```powershell
    Update-Database -StartupProject FloodOnlineReportingTool.ReportStatus
    ```

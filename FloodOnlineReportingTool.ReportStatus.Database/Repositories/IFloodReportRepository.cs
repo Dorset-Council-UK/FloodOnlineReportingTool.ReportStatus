@@ -1,8 +1,8 @@
 ﻿using FloodOnlineReportingTool.Contracts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.Database.Models;
 using NetTopologySuite.Geometries;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+namespace FloodOnlineReportingTool.Database.Repositories;
 
 public interface IFloodReportRepository
 {

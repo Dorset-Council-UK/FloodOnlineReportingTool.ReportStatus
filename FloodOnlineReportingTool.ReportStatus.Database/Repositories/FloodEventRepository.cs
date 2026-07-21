@@ -1,8 +1,8 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Database.DbContexts;
+using FloodOnlineReportingTool.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+namespace FloodOnlineReportingTool.Database.Repositories;
 
 public class FloodEventRepository(ApplicationDbContext context) : IFloodEventRepository
 {

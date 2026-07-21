@@ -3,7 +3,7 @@ using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.Contracts.Shared.Search;
 
 #pragma warning disable IDE0130
-namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+namespace FloodOnlineReportingTool.Database.Models;
 #pragma warning restore IDE0130
 
 public static class FloodReportSourceExtensions

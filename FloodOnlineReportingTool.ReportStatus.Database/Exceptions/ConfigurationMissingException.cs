@@ -1,4 +1,4 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Exceptions;
+﻿namespace FloodOnlineReportingTool.Database.Exceptions;
 
 public class ConfigurationMissingException : Exception
 {

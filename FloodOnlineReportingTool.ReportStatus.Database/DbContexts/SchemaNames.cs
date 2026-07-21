@@ -1,4 +1,4 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
+﻿namespace FloodOnlineReportingTool.Database.DbContexts;
 
 public static class SchemaNames
 {

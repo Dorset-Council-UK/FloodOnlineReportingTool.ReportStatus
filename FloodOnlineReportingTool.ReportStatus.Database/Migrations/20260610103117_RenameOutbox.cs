@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Migrations
+namespace FloodOnlineReportingTool.Database.Migrations
 {
     /// <inheritdoc />
     public partial class RenameOutbox : Migration

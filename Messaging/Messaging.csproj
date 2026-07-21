@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus.Database\FloodOnlineReportingTool.ReportStatus.Database.csproj" />
+    <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus.Database\Database.csproj" />
   </ItemGroup>
 
 </Project>

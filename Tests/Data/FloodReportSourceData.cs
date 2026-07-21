@@ -1,5 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.Database.Models;
 using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
 

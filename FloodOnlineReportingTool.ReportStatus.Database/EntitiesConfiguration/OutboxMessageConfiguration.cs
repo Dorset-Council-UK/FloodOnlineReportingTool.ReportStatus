@@ -1,8 +1,8 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
+﻿using FloodOnlineReportingTool.Database.Models.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.EntitiesConfiguration;
+namespace FloodOnlineReportingTool.Database.EntitiesConfiguration;
 
 internal class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {

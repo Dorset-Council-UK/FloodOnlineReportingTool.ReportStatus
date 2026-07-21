@@ -36,12 +36,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus.Database\FloodOnlineReportingTool.ReportStatus.Database.csproj" />
+    <InternalsVisibleTo Include="Tests" />
+	<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Tests" />
-	<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <ProjectReference Include="..\FloodOnlineReportingTool.ReportStatus.Database\Database.csproj" />
   </ItemGroup>
 
 </Project>

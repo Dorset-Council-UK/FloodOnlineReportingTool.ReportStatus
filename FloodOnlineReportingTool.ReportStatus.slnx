@@ -5,7 +5,7 @@
   <Project Path="docs/docs.csproj">
     <Build Project="false" />
   </Project>
-  <Project Path="FloodOnlineReportingTool.ReportStatus.Database/FloodOnlineReportingTool.ReportStatus.Database.csproj" />
+  <Project Path="FloodOnlineReportingTool.ReportStatus.Database/Database.csproj" />
   <Project Path="FloodOnlineReportingTool.ReportStatus/FloodOnlineReportingTool.ReportStatus.csproj" />
   <Project Path="Messaging/Messaging.csproj" Id="fc775677-4b61-4cf0-add0-4b4d32d34988" />
   <Project Path="Tests/Tests.csproj" />

@@ -2,7 +2,7 @@
 using NetTopologySuite.Geometries;
 using System.Text.Json.Serialization;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Models;
+namespace FloodOnlineReportingTool.Database.Models;
 public record FloodReport : ICreatedUpdated
 {
     public required Guid Id { get; init; }

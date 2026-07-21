@@ -1,4 +1,4 @@
-﻿namespace FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
+﻿namespace FloodOnlineReportingTool.Database.Models.Messaging;
 
 public record OutboxMessage
 {

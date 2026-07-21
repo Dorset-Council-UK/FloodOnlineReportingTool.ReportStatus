@@ -1,10 +1,10 @@
-﻿using FloodOnlineReportingTool.Contracts;
+﻿using FloodOnlineReportingTool.Database.DbContexts;
+using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.Contracts.Shared.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+using FloodOnlineReportingTool.Database.Models;
+using FloodOnlineReportingTool.Database.Models.Messaging;
+using FloodOnlineReportingTool.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,7 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Services;
+namespace FloodOnlineReportingTool.Database.Services;
 
 public class FloodReportService(
     ILogger<FloodReportService> logger, 

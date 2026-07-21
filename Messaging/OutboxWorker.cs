@@ -1,8 +1,8 @@
 using Azure.Messaging.ServiceBus;
+using FloodOnlineReportingTool.Database.DbContexts;
 using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Topics;
-using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models.Messaging;
+using FloodOnlineReportingTool.Database.Models.Messaging;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Net.Mime;

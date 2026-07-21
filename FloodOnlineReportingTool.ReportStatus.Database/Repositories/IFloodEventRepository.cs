@@ -1,6 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Database.Models;
 
-namespace FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+namespace FloodOnlineReportingTool.Database.Repositories;
 
 public interface IFloodEventRepository
 {
