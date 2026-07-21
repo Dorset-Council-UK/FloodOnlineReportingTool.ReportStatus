@@ -55,7 +55,7 @@ To run this project with minimal modification, you will need the following:
    ```shell
    dotnet ef database update --project "Database" --startup-project "FloodOnlineReportingTool.ReportStatus"
    ```
-   or if using the Package Manager Console in Visual Studio and run:
+   or if using the Package Manager Console in Visual Studio, run:
     ```powershell
     Update-Database -Project Database -StartupProject FloodOnlineReportingTool.ReportStatus
    ```
