@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FloodOnlineReportingTool.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260716124915_AddImportTable")]
+    [Migration("20260721095525_AddImportTable")]
     partial class AddImportTable
     {
         /// <inheritdoc />
@@ -423,7 +423,7 @@ namespace FloodOnlineReportingTool.Database.Migrations
                     b.ToTable("FloodReportSourceOrganisation", "fortreportstatus");
                 });
 
-            modelBuilder.Entity("FloodOnlineReportingTool.Database.Models.Imports.FailedImports", b =>
+            modelBuilder.Entity("FloodOnlineReportingTool.Database.Models.Imports.FailedImport", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

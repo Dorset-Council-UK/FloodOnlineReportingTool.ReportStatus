@@ -14,7 +14,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public virtual DbSet<FloodReportSourceDuplicate> FloodReportSourceDuplicates { get; set; }
     public virtual DbSet<OutboxMessage> OutboxMessages { get; set; }
 
-    public DbSet<FailedImports> FailedImports { get; set; } // Table to track failed imports
+    public DbSet<FailedImport> FailedImports { get; set; } // Table to track failed imports
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

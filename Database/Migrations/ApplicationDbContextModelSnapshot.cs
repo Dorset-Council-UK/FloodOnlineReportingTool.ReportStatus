@@ -420,7 +420,7 @@ namespace FloodOnlineReportingTool.Database.Migrations
                     b.ToTable("FloodReportSourceOrganisation", "fortreportstatus");
                 });
 
-            modelBuilder.Entity("FloodOnlineReportingTool.Database.Models.Imports.FailedImports", b =>
+            modelBuilder.Entity("FloodOnlineReportingTool.Database.Models.Imports.FailedImport", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
