@@ -1,5 +1,4 @@
-﻿using FloodOnlineReportingTool.Database.DbContexts;
-using FloodOnlineReportingTool.Database.Models;
+﻿using FloodOnlineReportingTool.Database.Models;
 using FloodOnlineReportingTool.Database.Models.Imports;
 using FloodOnlineReportingTool.Database.Models.Messaging;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public virtual DbSet<FloodReportSourceDuplicate> FloodReportSourceDuplicates { get; set; }
     public virtual DbSet<OutboxMessage> OutboxMessages { get; set; }
 
-    public DbSet<FailedImport> FailedImports { get; set; } // Table to track failed imports
+    public virtual DbSet<FailedImport> FailedImports { get; set; } // Table to track failed imports
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
