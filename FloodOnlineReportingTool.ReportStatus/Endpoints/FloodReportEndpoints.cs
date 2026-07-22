@@ -1,6 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.Database.Models;
+using FloodOnlineReportingTool.Database.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Globalization;
 

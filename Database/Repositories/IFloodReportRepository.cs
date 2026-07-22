@@ -1,0 +1,17 @@
+﻿using FloodOnlineReportingTool.Contracts;
+using FloodOnlineReportingTool.Database.Models;
+using NetTopologySuite.Geometries;
+
+namespace FloodOnlineReportingTool.Database.Repositories;
+
+public interface IFloodReportRepository
+{
+    IQueryable<FloodReport> GetFloodReports();
+    IQueryable<FloodReport?> GetFloodReportByReference(string reference);
+    IQueryable<FloodReport?> GetFloodReportBySourceReference(string reference);
+    IQueryable<FloodReport?> GetFloodReportById(Guid id);
+    IQueryable<FloodReport> GetFloodReportsWithinMetres(double easting, double northing, double metres);
+    IQueryable<FloodReport> GetFloodReportsByUprn(long uprn);
+    IQueryable<FloodReport> GetFloodReportsByUsrn(long usrn);
+    IQueryable<FloodReport> SearchFloodReports(DateTimeOffset? resultsFrom, DateTimeOffset? resultsTo, ICollection<Guid> floodSources, long? uprn, long? usrn, string? postcode, MultiPolygon? geom);
+}

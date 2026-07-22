@@ -1,7 +1,7 @@
 ﻿using Azure.Messaging.ServiceBus;
-using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.Database.DbContexts;
+using FloodOnlineReportingTool.Database.Repositories;
+using FloodOnlineReportingTool.Database.Services;
 using Messaging;
 using Messaging.Consumers;
 using Microsoft.EntityFrameworkCore;

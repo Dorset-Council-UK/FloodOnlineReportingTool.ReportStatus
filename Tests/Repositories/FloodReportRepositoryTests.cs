@@ -1,6 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+﻿using FloodOnlineReportingTool.Database.DbContexts;
+using FloodOnlineReportingTool.Database.Models;
+using FloodOnlineReportingTool.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MockQueryable.NSubstitute;
 using NSubstitute;

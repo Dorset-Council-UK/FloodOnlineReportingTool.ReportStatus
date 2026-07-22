@@ -1,5 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
+﻿using FloodOnlineReportingTool.Database.Models;
+using FloodOnlineReportingTool.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Endpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using NSubstitute;

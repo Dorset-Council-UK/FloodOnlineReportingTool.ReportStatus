@@ -1,5 +1,5 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.Database.Models;
 
 namespace Tests.Data;
 

@@ -1,6 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared.Search;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
+using FloodOnlineReportingTool.Database.Models;
+using FloodOnlineReportingTool.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 

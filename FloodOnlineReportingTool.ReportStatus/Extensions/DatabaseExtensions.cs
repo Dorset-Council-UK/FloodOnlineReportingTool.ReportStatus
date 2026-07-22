@@ -1,6 +1,6 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.DbContexts;
-using FloodOnlineReportingTool.ReportStatus.Database.Repositories;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
+﻿using FloodOnlineReportingTool.Database.DbContexts;
+using FloodOnlineReportingTool.Database.Repositories;
+using FloodOnlineReportingTool.Database.Services;
 using FloodOnlineReportingTool.ReportStatus.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;

@@ -1,5 +1,5 @@
-﻿using FloodOnlineReportingTool.ReportStatus.Database.Exceptions;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+﻿using FloodOnlineReportingTool.Database.Exceptions;
+using FloodOnlineReportingTool.Database.Models;
 using FloodOnlineReportingTool.ReportStatus.Options;
 using Microsoft.Extensions.Options;
 using System.Text.Json;

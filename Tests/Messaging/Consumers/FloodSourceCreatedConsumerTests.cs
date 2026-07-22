@@ -3,7 +3,7 @@ using FloodOnlineReportingTool.Contracts;
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.Contracts.Shared.Models;
 using FloodOnlineReportingTool.Contracts.Topics;
-using FloodOnlineReportingTool.ReportStatus.Database.Services;
+using FloodOnlineReportingTool.Database.Services;
 using Messaging.Consumers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

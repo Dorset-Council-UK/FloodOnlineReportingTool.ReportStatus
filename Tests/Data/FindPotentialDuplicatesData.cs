@@ -1,6 +1,6 @@
 using FloodOnlineReportingTool.Contracts.Shared;
 using FloodOnlineReportingTool.Contracts.Shared.Models;
-using FloodOnlineReportingTool.ReportStatus.Database.Models;
+using FloodOnlineReportingTool.Database.Models;
 using NetTopologySuite.Geometries;
 
 namespace Tests.Data;
