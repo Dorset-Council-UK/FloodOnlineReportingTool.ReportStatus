@@ -118,4 +118,8 @@ public static class FloodReportSourceCreatedData
         new(Property3, "Test location description 3"),
         new(Property4, "Test location description 4"),
     ];
+
+    public static readonly FloodReportSourceVerifyContact Verify1 = new(
+        new Guid("019fc847-ad92-7083-aa4c-1d2e1bc2ee34")
+    );
 }
