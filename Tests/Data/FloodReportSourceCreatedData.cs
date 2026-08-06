@@ -120,6 +120,6 @@ public static class FloodReportSourceCreatedData
     ];
 
     public static readonly FloodReportSourceVerifyContact Verify1 = new(
-        new Guid("019fc847-ad92-7083-aa4c-1d2e1bc2ee34")
+        Guid.Parse("019fc847-ad92-7083-aa4c-1d2e1bc2ee34")
     );
 }
