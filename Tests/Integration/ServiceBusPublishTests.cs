@@ -12,9 +12,9 @@ namespace Tests.Integration;
 /// Real service bus integration tests.
 /// These tests publish actual messages to Azure Service Bus and are intended as on-demand
 /// smoke tests to verify topic/subscription topology after infrastructure changes.
-///
 /// They are skipped by default.
-/// Add a connection string named "service-bus" in user secrets to run them.
+/// Add a connection string named "ServiceBus" in user secrets to run them.
+/// Also add a "TopicSuffix" if you are creating personal topics for testing (e.g. "-aaron") to avoid interfering with other environments.
 /// </summary>
 public class ServiceBusPublishTests
 {
@@ -37,7 +37,7 @@ public class ServiceBusPublishTests
             return ("Service Bus integration tests currently require a full Service Bus connection string (with Endpoint=).", (null, null));
         }
 
-        string? topicSuffix = config.GetValue<string>("TopicSuffix");
+        string? topicSuffix = config.GetValue<string>("TopicSuffix")?.Trim();
         if (topicSuffix is null)
         {
             return ("No topic suffix configured. Add a 'TopicSuffix' value in user secrets.", (null, null));
@@ -119,7 +119,7 @@ public class ServiceBusPublishTests
     }
 
     /// <summary>
-    /// Publishes a real <see cref="FloodReportSourceCreated"/> message to Azure Service Bus.
+    /// Publishes a real <see cref="FloodReportSourceCreatedData"/> message to Azure Service Bus.
     /// Use this to verify the topic and subscription topology is correct after infrastructure changes.
     /// The receiving system (fort-report-status subscription) should pick this up and process it.
     /// </summary>
