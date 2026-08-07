@@ -119,7 +119,7 @@ public class ServiceBusPublishTests
     }
 
     /// <summary>
-    /// Publishes a real <see cref="FloodReportSourceCreatedData"/> message to Azure Service Bus.
+    /// Publishes a real <see cref="FloodReportSourceVerifyContact"/> message to Azure Service Bus.
     /// Use this to verify the topic and subscription topology is correct after infrastructure changes.
     /// The receiving system (fort-report-status subscription) should pick this up and process it.
     /// </summary>
