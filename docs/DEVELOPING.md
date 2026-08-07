@@ -123,6 +123,16 @@ Example Messaging project secrets file:
 }
 ```
 
+If you want to run integration tests in the testing project you will need to setup secrets for that project as well. 
+Here is an example of the secrets file for the testing project:
+```json
+{
+  "RunServiceBusTests": "true",
+  "ServiceBus": "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=your-shared-access-key-name;SharedAccessKey=your-shared-access-key",
+  "TopicSuffix": "-name"
+}
+```
+
 ## Authentication
 
 Authentication is required to create a report or duplicate report. The project uses standard .NET Identity authentication.
