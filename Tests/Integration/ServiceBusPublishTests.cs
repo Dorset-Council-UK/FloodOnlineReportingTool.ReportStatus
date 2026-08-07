@@ -74,7 +74,7 @@ public class ServiceBusPublishTests
     /// <summary>
     /// Publishes a real <see cref="FloodReportSourceCreated"/> message to Azure Service Bus.
     /// Use this to verify the topic and subscription topology is correct after infrastructure changes.
-    /// The receiving system (fort-report-status subscription) should pick this up and process it.
+    /// The receiving system (fort-status subscription) should pick this up and process it.
     /// </summary>
     [Fact]
     public async Task Publish_FloodReportSourceCreated_ToRealServiceBus()
@@ -119,12 +119,12 @@ public class ServiceBusPublishTests
     }
 
     /// <summary>
-    /// Publishes a real <see cref="FloodReportSourceCreatedData"/> message to Azure Service Bus.
+    /// Publishes a real <see cref="FloodReportSourceVerifyContact"/> message to Azure Service Bus.
     /// Use this to verify the topic and subscription topology is correct after infrastructure changes.
-    /// The receiving system (fort-report-status subscription) should pick this up and process it.
+    /// The receiving system (fort-public subscription) should pick this up and process it.
     /// </summary>
     [Fact]
-    public async Task Publish_FloodReportSourceVerifyContract_ToRealServiceBus()
+    public async Task Publish_FloodReportSourceVerifyContact_ToRealServiceBus()
     {
         var (skipReason, _) = _settings;
         if (skipReason is not null)
