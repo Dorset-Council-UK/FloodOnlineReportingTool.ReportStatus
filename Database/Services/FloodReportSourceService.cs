@@ -25,7 +25,8 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         logger.LogDebug("Retrieving flood report source with reference from the database.");
 
         var result = await context.FloodReportSources
-        .AsNoTracking()
+        .AsNoTrackingWithIdentityResolution()
+        .AsSplitQuery()
         .Where(frs => frs.FloodReportId == floodReportId && frs.Reference == sourceReference)
         .Include(sr => sr.FloodCauses)
         .Include(sr => sr.Organisations)
