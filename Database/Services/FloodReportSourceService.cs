@@ -13,8 +13,11 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         logger.LogDebug("Retrieving all flood report sources for {FloodReportId} from the database.", floodReportId);
 
         return await context.FloodReportSources
-            .AsNoTracking()
+            .AsNoTrackingWithIdentityResolution()
+            .AsSplitQuery()
             .Where(frs => frs.FloodReportId.Equals(floodReportId))
+            .Include(sr => sr.FloodCauses)
+            .Include(sr => sr.Organisations)
             .OrderBy(frs => frs.FloodReportId)
             .ThenBy(frs => frs.Id)
             .ToListAsync(ct);
@@ -40,8 +43,11 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
         logger.LogDebug("Retrieving flood report source with ID {FloodReportId}/{SourceId} from the database.", floodReportId, sourceId);
 
         return await context.FloodReportSources
-        .AsNoTracking()
+        .AsNoTrackingWithIdentityResolution()
+        .AsSplitQuery()
         .Where(frs => frs.FloodReportId == floodReportId && frs.EligibilityCheckId == sourceId)
+        .Include(sr => sr.FloodCauses)
+        .Include(sr => sr.Organisations)
         .FirstOrDefaultAsync(ct);
     }
 
