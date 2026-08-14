@@ -1,5 +1,6 @@
 ﻿using FloodOnlineReportingTool.Contracts.Shared;
 using NetTopologySuite.Geometries;
+using System.Text.Json.Serialization;
 
 namespace FloodOnlineReportingTool.Database.Models;
 
@@ -34,6 +35,7 @@ public record FloodReportSource : ICreatedUpdated
 
     // Navigation properties using wrapper models instead of contract types directly
     public Guid FloodReportId { get; init; }
+    [JsonIgnore]
     public FloodReport? FloodReport { get; init; }
     public ICollection<FloodReportSourceFloodCause> FloodCauses { get; init; } = [];
     public ICollection<FloodReportSourceOrganisation> Organisations { get; init; } = [];

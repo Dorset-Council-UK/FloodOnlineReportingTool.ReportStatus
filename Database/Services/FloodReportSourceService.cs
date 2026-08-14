@@ -24,10 +24,14 @@ public class FloodReportSourceService(ILogger<FloodReportSourceService> logger, 
     {
         logger.LogDebug("Retrieving flood report source with reference from the database.");
 
-        return await context.FloodReportSources
+        var result = await context.FloodReportSources
         .AsNoTracking()
         .Where(frs => frs.FloodReportId == floodReportId && frs.Reference == sourceReference)
+        .Include(sr => sr.FloodCauses)
+        .Include(sr => sr.Organisations)
         .SingleOrDefaultAsync(ct);
+
+        return result;
     }
 
     public async Task<FloodReportSource?> GetFloodReportSource(Guid floodReportId, Guid sourceId, CancellationToken ct)
