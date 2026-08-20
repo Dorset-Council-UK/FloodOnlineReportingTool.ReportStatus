@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace FloodOnlineReportingTool.Database.Models;
 
 /// <summary>
@@ -12,8 +14,10 @@ public record FloodReportSourceFloodCause
     public required string Name { get; init; }
 
     public string? FloodReportSourceRef { get; init; }
+    [JsonIgnore]
     public FloodReportSource? FloodReportSource { get; init; }
 
     public Guid? FloodReportSourceDuplicateId { get; init; }
+    [JsonIgnore]
     public FloodReportSourceDuplicate? FloodReportSourceDuplicate { get; init; }
 }
