@@ -9,6 +9,8 @@ using Microsoft.Extensions.Azure;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.AddKeyVaults();
+
 // Services
 builder.Services
     .AddScoped<IFloodEventService, FloodEventService>()

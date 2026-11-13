@@ -5,6 +5,8 @@ using NetTopologySuite.IO.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddKeyVaults();
+
 // Configure all the settings.
 var identityOptions = builder.AddReportStatusIdentityOptions();
 builder.AddReportStatusOptions();
