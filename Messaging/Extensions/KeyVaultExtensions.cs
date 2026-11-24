@@ -18,6 +18,7 @@ internal static class KeyVaultExtensions
                 return builder;
             }
 
+            // This KeyVault has options shared over multiple projects
             if (!string.IsNullOrWhiteSpace(keyVaultOptions.SharedVaultName))
             {
                 builder.Configuration.AddAzureKeyVault(
@@ -25,6 +26,7 @@ internal static class KeyVaultExtensions
                     new DefaultAzureCredential());
             }
 
+            // This KeyVault is specific to this project
             if (!string.IsNullOrWhiteSpace(keyVaultOptions.VaultName))
             {
                 builder.Configuration.AddAzureKeyVault(
