@@ -25,6 +25,11 @@ public interface IFloodReportService
     Task<FloodReport?> UpdateFloodReport(Guid id, FloodReportDto dto, CancellationToken ct);
 
     /// <summary>
+    /// Updates an existing flood report in the database by business reference.
+    /// </summary>
+    Task<FloodReport?> UpdateFloodReportByReference(string reference, FloodReportDto dto, CancellationToken ct);
+
+    /// <summary>
     /// Gets all flood reports from the database.
     /// </summary>
     /// <remarks>Flood report sources are included</remarks>

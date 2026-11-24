@@ -358,6 +358,42 @@ public class FloodReportService(
         };
     }
 
+    public async Task<FloodReport?> UpdateFloodReportByReference(string reference, FloodReportDto dto, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(reference))
+        {
+            logger.LogWarning("Cannot update flood report because reference is missing.");
+            return null;
+        }
+
+        var trimmedReference = reference.Trim();
+        logger.LogDebug("Updating flood report with reference {FloodReportReference} in the database.", trimmedReference);
+
+        var existing = await floodReportRepository
+            .GetFloodReportByReference(trimmedReference)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ct);
+
+        if (existing is null)
+        {
+            return null;
+        }
+
+        await context.FloodReports
+            .Where(fr => fr.Reference == trimmedReference)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(fr => fr.RecordStatus, dto.RecordStatus)
+                .SetProperty(fr => fr.SourceRecords, dto.SourceRecords)
+                .SetProperty(fr => fr.UpdatedUtc, DateTimeOffset.UtcNow), ct);
+
+        return existing with
+        {
+            UpdatedUtc = DateTimeOffset.UtcNow,
+            RecordStatus = dto.RecordStatus,
+            SourceRecords = dto.SourceRecords,
+        };
+    }
+
     public async Task<bool> DeleteFloodReport(Guid id, CancellationToken ct)
     {
         logger.LogDebug("Delete flood report with ID {FloodReportId} from the database.", id);
