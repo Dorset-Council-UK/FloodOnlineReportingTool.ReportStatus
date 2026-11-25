@@ -379,11 +379,10 @@ public class FloodReportService(
             return null;
         }
 
-        await context.FloodReports
+            await context.FloodReports
             .Where(fr => fr.Reference == trimmedReference)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(fr => fr.RecordStatus, dto.RecordStatus)
-                .SetProperty(fr => fr.SourceRecords, dto.SourceRecords)
                 .SetProperty(fr => fr.UpdatedUtc, DateTimeOffset.UtcNow), ct);
 
         return existing with
