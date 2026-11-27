@@ -217,19 +217,27 @@ public class FloodEventService(
             return;
         }
 
-        foreach(var reportReference in floodEvent.LinkedFloodReports)
+        foreach (var reportReference in floodEvent.LinkedFloodReports)
         {
-            var report = await context.FloodReports
-               .Include(r => r.SourceRecords)
-               .FirstOrDefaultAsync(r => r.Reference == reportReference, ct);
-
-            if (report is null)
+            if (string.IsNullOrWhiteSpace(reportReference))
             {
-                logger.LogWarning("Skipping status update because flood report {ReportReference} was not found.", reportReference);
+                logger.LogWarning("Skipping status update because linked flood report reference is missing.");
                 continue;
             }
 
-            foreach(var sourceReport in report.SourceRecords)
+            var trimmedReference = reportReference.Trim();
+
+            var report = await context.FloodReports
+               .Include(r => r.SourceRecords)
+               .FirstOrDefaultAsync(r => r.Reference == trimmedReference, ct);
+
+            if (report is null)
+            {
+                logger.LogWarning("Skipping status update because flood report {ReportReference} was not found.", trimmedReference);
+                continue;
+            }
+
+            foreach (var sourceReport in report.SourceRecords)
             {
                 FloodReportExtraInfoRequest messageBody = new FloodReportExtraInfoRequest(
                 sourceReport.Reference,
@@ -244,7 +252,7 @@ public class FloodEventService(
 
                 context.OutboxMessages.Add(outboxMessage);
             }
-            
+            await context.SaveChangesAsync(ct);
 
             // Start from current values, then override only what should change.
             var dto = report.ToDto() with
@@ -252,11 +260,11 @@ public class FloodEventService(
                 RecordStatus = RecordStatusIds.ActionNeeded
             };
 
-            var updatedReport = await floodReportService.UpdateFloodReport(report.Id, dto, ct);
+            var updatedReport = await floodReportService.UpdateFloodReportByReference(trimmedReference, dto, ct);
 
             if (updatedReport is null)
             {
-                logger.LogWarning("Failed to update status for flood report {ReportReference}.", reportReference);
+                logger.LogWarning("Failed to update status for flood report {ReportReference}.", trimmedReference);
             }
         }
         await context.SaveChangesAsync(ct);
